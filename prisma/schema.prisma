@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// USER MANAGEMENT & KYC
+// ============================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed with bcrypt
+  role      UserRole
+  phone     String   @unique
+  
+  // KYC Fields
+  kycStatus       KYCStatus @default(PENDING)
+  kycProviderId   String?
+  aadhaarHash     String?   @unique // Hashed for privacy
+  panHash         String?   @unique // Hashed for privacy
+  
+  // Ban Management
+  isBanned        Boolean   @default(false)
+  banReason       String?
+  bannedAt        DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  creatorProfile    CreatorProfile?
+  brandProfile      BrandProfile?
+  dealsAsCreator    Deal[]            @relation("CreatorDeals")
+  dealsAsBrand      Deal[]            @relation("BrandDeals")
+  chatMessages      ChatMessage[]
+  auditLogs         AuditLog[]
+  disputesRaised    Deal[]            @relation("DisputeRaiser")
+  mediatedDisputes  Deal[]            @relation("Mediator")
+  
+  @@index([email])
+  @@index([kycStatus])
+  @@index([isBanned])
+}
+
+enum UserRole {
+  CREATOR
+  BRAND
+  ADMIN
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model CreatorProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name                String
+  bio                 String?
+  avatar              String?
+  minFollowers        Int      @default(1000)
+  
+  // Social Platforms (JSON array)
+  socialPlatforms     Json     // [{platform, handle, followers, verified}]
+  
+  // Performance Metrics
+  reliabilityScore    Decimal  @default(5.0) @db.Decimal(3, 2)
+  totalDealsCompleted Int      @default(0)
+  totalEarnings       Decimal  @default(0) @db.Decimal(12, 2)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([reliabilityScore])
+}
+
+model BrandProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName     String
+  industry        String
+  description     String?
+  website         String?
+  logo            String?
+  companySize     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+// ============================================================================
+// DEAL & ESCROW SYSTEM
+// ============================================================================
+
+model Deal {
+  id          String     @id @default(uuid())
+  brandId     String
+  creatorId   String
+  brand       User       @relation("BrandDeals", fields: [brandId], references: [id])
+  creator     User       @relation("CreatorDeals", fields: [creatorId], references: [id])
+  
+  title       String
+  description String?
+  
+  // Financial
+  totalAmount     Decimal @db.Decimal(10, 2)
+  platformFee     Decimal @db.Decimal(10, 2) // Computed: totalAmount * 0.05
+  creatorPayout   Decimal @db.Decimal(10, 2) // Computed: totalAmount * 0.95
+  
+  // Status
+  status          DealStatus @default(DRAFT)
+  
+  // Script/Milestone Tracking
+  scriptChecklist Json?      // Array of checklist items
+  scriptApprovedAt DateTime?
+  scriptApprovedBy String?
+  
+  // Payment Tracking - Phase 1 (50%)
+  payment50Paid         Boolean   @default(false)
+  payment50PaidAt       DateTime?
+  payment50TransactionId String?
+  
+  // Payment Tracking - Phase 2 (100%)
+  payment100Paid         Boolean   @default(false)
+  payment100PaidAt       DateTime?
+  payment100TransactionId String?
+  
+  // Delivery Tracking
+  filesUploaded         Boolean   @default(false)
+  filesUploadedAt       DateTime?
+  downloadLinkGenerated Boolean   @default(false)
+  downloadLinkExpiresAt DateTime?
+  
+  // Dispute Management
+  disputeRaised       Boolean   @default(false)
+  disputeRaisedById   String?
+  disputeRaisedBy     User?     @relation("DisputeRaiser", fields: [disputeRaisedById], references: [id])
+  disputeReason       String?
+  assignedMediatorId  String?
+  assignedMediator    User?     @relation("Mediator", fields: [assignedMediatorId], references: [id])
+  mediationDecision   String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  escrowTransactions EscrowTransaction[]
+  deliverables       Deliverable[]
+  chatMessages       ChatMessage[]
+  
+  @@index([brandId])
+  @@index([creatorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum DealStatus {
+  DRAFT
+  SCRIPT_PENDING
+  SCRIPT_APPROVED
+  PAYMENT_50_PENDING
+  PRODUCTION
+  DELIVERY_PENDING
+  PAYMENT_100_PENDING
+  COMPLETED
+  DISPUTED
+  CANCELLED
+}
+
+model EscrowTransaction {
+  id              String            @id @default(uuid())
+  dealId          String
+  deal            Deal              @relation(fields: [dealId], references: [id])
+  
+  transactionType TransactionType
+  amount          Decimal           @db.Decimal(10, 2)
+  status          TransactionStatus @default(PENDING)
+  
+  // Razorpay Integration
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  
+  createdAt DateTime @default(now())
+  
+  @@index([dealId])
+  @@index([status])
+}
+
+enum TransactionType {
+  DEPOSIT_50
+  DEPOSIT_100
+  RELEASE_TO_CREATOR
+  REFUND_TO_BRAND
+  PLATFORM_FEE
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// ============================================================================
+// FILE MANAGEMENT
+// ============================================================================
+
+model Deliverable {
+  id            String    @id @default(uuid())
+  dealId        String
+  deal          Deal      @relation(fields: [dealId], references: [id])
+  
+  fileName      String
+  fileSize      BigInt
+  fileType      String?
+  
+  // S3 Storage
+  s3Key         String
+  s3Bucket      String
+  
+  uploadedBy    String
+  uploadedAt    DateTime  @default(now())
+  
+  // Download Tracking
+  downloadCount Int       @default(0)
+  
+  // Retention Policy (30 days)
+  expiresAt     DateTime  @default(dbgenerated("NOW() + INTERVAL '30 days'"))
+  deletedAt     DateTime?
+  
+  @@index([dealId])
+  @@index([expiresAt])
+}
+
+// ============================================================================
+// CHAT SYSTEM
+// ============================================================================
+
+model ChatMessage {
+  id          String      @id @default(uuid())
+  dealId      String
+  deal        Deal        @relation(fields: [dealId], references: [id])
+  
+  senderId    String
+  sender      User        @relation(fields: [senderId], references: [id])
+  
+  messageType MessageType @default(TEXT)
+  content     String
+  metadata    Json?       // For file attachments, system events
+  
+  // Platform Leakage Detection
+  flagged     Boolean     @default(false)
+  flagReason  String?
+  
+  createdAt   DateTime    @default(now())
+  
+  @@index([dealId])
+  @@index([createdAt])
+  @@index([flagged])
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  SYSTEM
+}
+
+// ============================================================================
+// AUDIT & COMPLIANCE
+// ============================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  
+  entityType String   // "deal", "user", "payment", etc.
+  entityId   String
+  action     String   // "created", "updated", "deleted", etc.
+  
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id])
+  
+  changes    Json?    // Before/after snapshot
+  ipAddress  String?
+  userAgent  String?
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
