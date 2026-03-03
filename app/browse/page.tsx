@@ -75,38 +75,38 @@ function BrowsePageContent() {
     };
 
     return (
-        <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+        <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+            <header className="border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm icon-hover-bounce">
+                        <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                             <Zap className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-1.5 py-0.5 rounded-full">AI</span>
+                        <span className="text-xl font-bold font-heading text-gray-900">QuickReach</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-full">AI</span>
                     </Link>
 
                     {/* Search Bar */}
                     <div className="hidden md:flex flex-1 max-w-2xl mx-8">
                         <div className="relative w-full">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                             <Input
                                 type="text"
                                 placeholder="Search for services..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-12 pr-4 input-glow"
+                                className="pl-12 pr-4"
                             />
                         </div>
                     </div>
 
                     <nav className="flex items-center gap-3">
                         <Link href="/auth/login">
-                            <Button variant="ghost" className="hidden sm:inline-flex animated-underline">Sign In</Button>
+                            <Button variant="ghost" className="hidden sm:inline-flex text-gray-900">Sign In</Button>
                         </Link>
                         <Link href="/auth/signup">
-                            <Button className="bg-[hsl(var(--coral))] text-white border-0 hover:opacity-90 btn-animate">Join</Button>
+                            <Button className="bg-[#0E61FF] text-white border-0 hover:bg-[#0E61FF]/90 btn-premium">Join</Button>
                         </Link>
                     </nav>
                 </div>
@@ -114,13 +114,13 @@ function BrowsePageContent() {
                 {/* Mobile Search */}
                 <div className="md:hidden px-4 pb-4">
                     <div className="relative">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <Input
                             type="text"
                             placeholder="Search for services..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-12 input-glow"
+                            className="pl-12"
                         />
                     </div>
                 </div>
@@ -130,10 +130,10 @@ function BrowsePageContent() {
                 <div className="flex gap-8">
                     {/* Filters Sidebar */}
                     <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-64 flex-shrink-0`}>
-                        <AnimatedSection animation="animate-slide-right">
-                        <div className="bg-white rounded-lg border border-border p-6 sticky top-24 shadow-sm">
+                        <AnimatedSection animation="animate-slide-up">
+                        <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-24 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
-                                <h3 className="font-semibold font-heading text-lg">Filters</h3>
+                                <h3 className="font-semibold font-heading text-lg text-gray-900">Filters</h3>
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -149,7 +149,7 @@ function BrowsePageContent() {
 
                             {/* Category Filter */}
                             <div className="mb-6">
-                                <h4 className="font-medium mb-3 text-foreground">Category</h4>
+                                <h4 className="font-medium mb-3 text-gray-900">Category</h4>
                                 <div className="space-y-2">
                                     {categories.map((category) => (
                                         <button
@@ -158,8 +158,8 @@ function BrowsePageContent() {
                                                 selectedCategory === category.id ? null : category.id
                                             )}
                                             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCategory === category.id
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'text-foreground hover:bg-muted'
+                                                    ? 'bg-[#0E61FF] text-white'
+                                                    : 'text-gray-900 hover:bg-gray-100'
                                                 }`}
                                         >
                                             {category.name}
@@ -170,7 +170,7 @@ function BrowsePageContent() {
 
                             {/* Price Range */}
                             <div className="mb-6">
-                                <h4 className="font-medium mb-3 text-foreground">Budget</h4>
+                                <h4 className="font-medium mb-3 text-gray-900">Budget</h4>
                                 <div className="space-y-2">
                                     {[
                                         { label: "Under $1,000", range: [0, 1000] },
@@ -182,8 +182,8 @@ function BrowsePageContent() {
                                             key={option.label}
                                             onClick={() => setPriceRange(option.range as [number, number])}
                                             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${priceRange[0] === option.range[0] && priceRange[1] === option.range[1]
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'text-foreground hover:bg-muted'
+                                                    ? 'bg-[#0E61FF] text-white'
+                                                    : 'text-gray-900 hover:bg-gray-100'
                                                 }`}
                                         >
                                             {option.label}
@@ -194,15 +194,15 @@ function BrowsePageContent() {
 
                             {/* Rating Filter */}
                             <div className="mb-6">
-                                <h4 className="font-medium mb-3 text-foreground">Seller Rating</h4>
+                                <h4 className="font-medium mb-3 text-gray-900">Seller Rating</h4>
                                 <div className="space-y-2">
                                     {[5, 4.5, 4, 3.5].map((rating) => (
                                         <button
                                             key={rating}
                                             onClick={() => setSelectedRating(selectedRating === rating ? null : rating)}
                                             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${selectedRating === rating
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'text-foreground hover:bg-muted'
+                                                    ? 'bg-[#0E61FF] text-white'
+                                                    : 'text-gray-900 hover:bg-gray-100'
                                                 }`}
                                         >
                                             <Star className="w-4 h-4 fill-current" />
@@ -219,30 +219,30 @@ function BrowsePageContent() {
                     <main className="flex-1">
                         {/* Results Header */}
                         <AnimatedSection animation="animate-fade-in">
-                        <div className="flex items-center justify-between mb-6 bg-white rounded-xl p-6 shadow-sm">
+                        <div className="flex items-center justify-between mb-6 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                             <div>
-                                <h1 className="text-2xl font-bold font-heading mb-1 text-[hsl(var(--navy))]">
+                                <h1 className="text-2xl font-bold font-heading mb-1 text-gray-900">
                                     {selectedCategory
                                         ? categories.find(c => c.id === selectedCategory)?.name
                                         : 'All Services'}
                                 </h1>
-                                <p className="text-[hsl(var(--navy))] opacity-70">
+                                <p className="text-gray-500">
                                     {filteredGigs.length} services available
                                 </p>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 {/* View Mode Toggle */}
-                                <div className="hidden sm:flex border border-border rounded-lg p-1">
+                                <div className="hidden sm:flex border border-gray-200 rounded-lg p-1">
                                     <button
                                         onClick={() => setViewMode("grid")}
-                                        className={`p-2 rounded ${viewMode === "grid" ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}
+                                        className={`p-2 rounded ${viewMode === "grid" ? 'bg-[#0E61FF] text-white' : 'text-gray-400 hover:bg-gray-100'}`}
                                     >
                                         <Grid3x3 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => setViewMode("list")}
-                                        className={`p-2 rounded ${viewMode === "list" ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}
+                                        className={`p-2 rounded ${viewMode === "list" ? 'bg-[#0E61FF] text-white' : 'text-gray-400 hover:bg-gray-100'}`}
                                     >
                                         <List className="w-4 h-4" />
                                     </button>
@@ -252,7 +252,7 @@ function BrowsePageContent() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="border border-border rounded-lg px-4 py-2 text-sm bg-card text-foreground"
+                                    className="border border-gray-200 rounded-lg px-4 py-2 text-sm bg-white text-gray-900"
                                 >
                                     <option value="relevance">Most Relevant</option>
                                     <option value="price_low">Price: Low to High</option>
@@ -288,31 +288,31 @@ function BrowsePageContent() {
                                 return (
                                     <AnimatedSection key={gig.id} animation="animate-slide-up" delay={index * 80}>
                                     <Link href={`/gig/${gig.slug}`}>
-                                        <Card className={`card-interactive hover-tilt group cursor-pointer h-full bg-white ${['border-l-primary', 'border-l-coral', 'border-l-teal', 'border-l-emerald'][index % 4]}`}>
+                                        <Card className="hover-lift group cursor-pointer h-full bg-white border border-gray-200">
                                             {/* Gig Image Placeholder */}
-                                            <div className="relative h-48 bg-[hsl(var(--bg-blue))] rounded-t-lg">
+                                            <div className="relative h-48 bg-gray-100 rounded-t-lg">
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <div className="text-center">
-                                                        <Sparkles className="w-12 h-12 text-[hsl(var(--primary))] mx-auto mb-2" />
-                                                        <p className="text-sm text-muted-foreground">Service Preview</p>
+                                                        <Sparkles className="w-12 h-12 text-[#0E61FF] mx-auto mb-2" />
+                                                        <p className="text-sm text-gray-500">Service Preview</p>
                                                     </div>
                                                 </div>
                                                 <button
-                                                    className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-muted/50 transition-colors icon-hover-bounce"
+                                                    className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
                                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); toast.info("Saved!"); }}
                                                 >
-                                                    <Heart className="w-4 h-4" />
+                                                    <Heart className="w-4 h-4 text-gray-600" />
                                                 </button>
                                             </div>
 
                                             <CardHeader className="pb-3">
                                                 {/* Seller Info */}
                                                 <div className="flex items-center gap-2 mb-3">
-                                                    <div className="w-8 h-8 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white text-sm font-semibold group-hover-scale">
+                                                    <div className="w-8 h-8 rounded-full bg-[#0E61FF] flex items-center justify-center text-white text-sm font-semibold">
                                                         {influencer?.name.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-foreground">{influencer?.name}</p>
+                                                        <p className="text-sm font-medium text-gray-900">{influencer?.name}</p>
                                                         {influencer?.level && (
                                                             <Badge variant="secondary" className="text-xs">
                                                                 {influencer.level.replace('_', ' ')}
@@ -321,17 +321,17 @@ function BrowsePageContent() {
                                                     </div>
                                                 </div>
 
-                                                <CardTitle className="text-lg line-clamp-2 mb-2">
+                                                <CardTitle className="text-lg line-clamp-2 mb-2 text-gray-900">
                                                     {gig.title}
                                                 </CardTitle>
 
                                                 {/* Rating */}
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 fill-[hsl(var(--warning))] text-[hsl(var(--warning))]" />
-                                                        <span className="font-semibold text-foreground">{gig.rating}</span>
+                                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                        <span className="font-semibold text-gray-900">{gig.rating}</span>
                                                     </div>
-                                                    <span className="text-muted-foreground">
+                                                    <span className="text-gray-500">
                                                         ({gig.reviewCount})
                                                     </span>
                                                 </div>
@@ -340,29 +340,22 @@ function BrowsePageContent() {
                                             <CardContent>
                                                 {/* Tags */}
                                                 <div className="flex flex-wrap gap-2 mb-4">
-                                                    {gig.tags.slice(0, 3).map((tag, tagIdx) => {
-                                                        const tagStyles = [
-                                                            'bg-[hsl(var(--bg-blue))] text-[hsl(var(--primary))] border-[hsl(var(--primary)/0.3)]',
-                                                            'bg-[hsl(var(--bg-coral))] text-[hsl(var(--coral))] border-[hsl(var(--coral)/0.3)]',
-                                                            'bg-[hsl(var(--bg-teal))] text-[hsl(var(--teal))] border-[hsl(var(--teal)/0.3)]',
-                                                        ];
-                                                        return (
-                                                            <Badge key={tag} variant="outline" className={`text-xs hover-pop ${tagStyles[tagIdx % tagStyles.length]}`}>
-                                                                {tag}
-                                                            </Badge>
-                                                        );
-                                                    })}
+                                                    {gig.tags.slice(0, 3).map((tag, tagIdx) => (
+                                                        <Badge key={tag} variant="outline" className={`text-xs ${tagIdx === 0 ? 'bg-blue-50 text-[#0E61FF] border-blue-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                                            {tag}
+                                                        </Badge>
+                                                    ))}
                                                 </div>
 
                                                 {/* Footer */}
-                                                <div className="flex items-center justify-between pt-4 border-t border-border">
-                                                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                                                    <div className="flex items-center gap-1 text-sm text-gray-500">
                                                         <Clock className="w-4 h-4" />
                                                         <span>{minDelivery} days</span>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="text-xs text-muted-foreground">Starting at</p>
-                                                        <p className="text-lg font-bold text-[hsl(var(--coral))]">
+                                                        <p className="text-xs text-gray-500">Starting at</p>
+                                                        <p className="text-lg font-bold text-[#0E61FF]">
                                                             ${minPrice.toLocaleString()}
                                                         </p>
                                                     </div>
@@ -379,19 +372,22 @@ function BrowsePageContent() {
                         {filteredGigs.length === 0 && (
                             <AnimatedSection animation="animate-fade-in">
                             <div className="text-center py-16">
-                                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Search className="w-8 h-8 text-muted-foreground" />
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Search className="w-8 h-8 text-gray-400" />
                                 </div>
-                                <h3 className="text-xl font-semibold font-heading mb-2 text-foreground">No services found</h3>
-                                <p className="text-muted-foreground mb-6">
+                                <h3 className="text-xl font-semibold font-heading mb-2 text-gray-900">No services found</h3>
+                                <p className="text-gray-500 mb-6">
                                     Try adjusting your filters or search query
                                 </p>
-                                <Button onClick={() => {
-                                    setSearchQuery("");
-                                    setSelectedCategory(null);
-                                    setPriceRange([0, 10000]);
-                                    setSelectedRating(null);
-                                }}>
+                                <Button
+                                    className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        setSelectedCategory(null);
+                                        setPriceRange([0, 10000]);
+                                        setSelectedRating(null);
+                                    }}
+                                >
                                     Clear All Filters
                                 </Button>
                             </div>
@@ -411,12 +407,12 @@ function BrowsePageContent() {
 
                                 {getPageNumbers().map((pageNum, idx) =>
                                     pageNum === "..." ? (
-                                        <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">...</span>
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">...</span>
                                     ) : (
                                         <Button
                                             key={pageNum}
                                             variant="outline"
-                                            className={page === pageNum ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
+                                            className={page === pageNum ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 border-[#0E61FF]" : ""}
                                             onClick={() => setPage(pageNum as number)}
                                         >
                                             {pageNum}
@@ -442,7 +438,7 @@ function BrowsePageContent() {
 
 export default function BrowsePage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--bg-blue))] flex items-center justify-center"><div className="skeleton h-8 w-32 rounded" /></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="skeleton h-8 w-32 rounded" /></div>}>
             <BrowsePageContent />
         </Suspense>
     );

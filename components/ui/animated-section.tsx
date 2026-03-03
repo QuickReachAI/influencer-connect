@@ -42,7 +42,7 @@ export function AnimatedSection({
   return (
     <div
       ref={ref}
-      className={`${className} ${isVisible ? animation : "opacity-0 translate-y-6"}`}
+      className={`${className} ${isVisible ? animation : "opacity-0 translate-y-4"}`}
       style={{
         transition: isVisible ? undefined : "none",
         animationDelay: isVisible && delay ? `${delay}ms` : undefined,

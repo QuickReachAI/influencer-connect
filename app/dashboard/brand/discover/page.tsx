@@ -33,13 +33,13 @@ export default function BrandDiscoverPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-blur-in" className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Discover Influencers</h1>
-          <p className="text-muted-foreground">Find the perfect creators for your brand campaigns</p>
+        <AnimatedSection animation="animate-fade-in" className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Influencers</h1>
+          <p className="text-gray-500">Find the perfect creators for your brand campaigns</p>
         </AnimatedSection>
 
         {/* Search and Filters */}
@@ -48,7 +48,7 @@ export default function BrandDiscoverPage() {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search by name, niche, or keywords..."
                     value={searchTerm}
@@ -58,13 +58,13 @@ export default function BrandDiscoverPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Filter by Niche</label>
+                  <label className="text-sm font-medium text-gray-900 mb-2 block">Filter by Niche</label>
                   <div className="flex gap-2 flex-wrap">
                     <Button
                       size="sm"
                       variant={selectedNiche === null ? "default" : "outline"}
                       onClick={() => setSelectedNiche(null)}
-                      className="btn-press"
+                      className={selectedNiche === null ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
                     >
                       All
                     </Button>
@@ -74,7 +74,7 @@ export default function BrandDiscoverPage() {
                         size="sm"
                         variant={selectedNiche === niche ? "default" : "outline"}
                         onClick={() => setSelectedNiche(niche)}
-                        className="btn-press"
+                        className={selectedNiche === niche ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
                       >
                         {niche}
                       </Button>
@@ -87,26 +87,26 @@ export default function BrandDiscoverPage() {
         </AnimatedSection>
 
         {/* Results */}
-        <div className="mb-4 text-sm text-muted-foreground">
+        <div className="mb-4 text-sm text-gray-500">
           Showing {filteredInfluencers.length} influencer{filteredInfluencers.length !== 1 ? "s" : ""}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInfluencers.map((influencer, index) => (
             <AnimatedSection key={influencer.id} animation="animate-slide-up" delay={index * 100}>
-              <Card className="shadow-md hover-tilt group">
+              <Card className="shadow-md card-interactive group">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
-                    <div className="w-16 h-16 bg-[hsl(var(--primary))] rounded-full flex items-center justify-center text-white text-2xl font-bold group-hover-scale">
+                    <div className="w-16 h-16 bg-[#0E61FF] rounded-full flex items-center justify-center text-white text-2xl font-bold">
                       {influencer.name.charAt(0)}
                     </div>
-                    <Badge className="gap-1 bg-[hsl(var(--coral))] text-white hover:bg-[hsl(var(--coral))] hover-pop">
-                      <TrendingUp className="w-3 h-3 group-hover-bounce" />
+                    <Badge variant="warning" className="gap-1">
+                      <TrendingUp className="w-3 h-3" />
                       {influencer.engagementRate}%
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl">{influencer.name}</CardTitle>
-                  <CardDescription className="line-clamp-2">{influencer.bio}</CardDescription>
+                  <CardTitle className="text-xl text-gray-900">{influencer.name}</CardTitle>
+                  <CardDescription className="line-clamp-2 text-gray-500">{influencer.bio}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
@@ -114,7 +114,7 @@ export default function BrandDiscoverPage() {
                   <div>
                     <div className="flex gap-2 flex-wrap">
                       {influencer.niches.map((niche) => (
-                        <Badge key={niche} className="bg-[hsl(var(--teal))]/15 text-[hsl(var(--teal))] hover:bg-[hsl(var(--teal))]/20 hover-pop">
+                        <Badge key={niche} variant="info">
                           {niche}
                         </Badge>
                       ))}
@@ -122,8 +122,8 @@ export default function BrandDiscoverPage() {
                   </div>
 
                   {/* Location */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4 icon-hover-bounce" />
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <MapPin className="w-4 h-4" />
                     {influencer.location}
                   </div>
 
@@ -132,31 +132,31 @@ export default function BrandDiscoverPage() {
                     {influencer.platforms.map((platform) => (
                       <div key={platform.platform} className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          {platform.platform === "Instagram" && <Instagram className="w-4 h-4 text-[hsl(var(--rose))] icon-hover-bounce" />}
-                          {platform.platform === "YouTube" && <Youtube className="w-4 h-4 text-[hsl(var(--coral))] icon-hover-bounce" />}
-                          <span>{platform.platform}</span>
+                          {platform.platform === "Instagram" && <Instagram className="w-4 h-4 text-pink-500" />}
+                          {platform.platform === "YouTube" && <Youtube className="w-4 h-4 text-red-500" />}
+                          <span className="text-gray-700">{platform.platform}</span>
                         </div>
-                        <span className="font-medium">{formatNumber(platform.followers)}</span>
+                        <span className="font-medium text-gray-900">{formatNumber(platform.followers)}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Pricing */}
                   <div className="border-t pt-4">
-                    <div className="text-sm text-muted-foreground mb-2">Starting from</div>
-                    <div className="text-2xl font-bold text-[hsl(var(--coral))]">
+                    <div className="text-sm text-gray-500 mb-2">Starting from</div>
+                    <div className="text-2xl font-bold text-[#0E61FF]">
                       {formatCurrency(influencer.rateCard.postPrice)}
                     </div>
-                    <div className="text-xs text-muted-foreground">per post</div>
+                    <div className="text-xs text-gray-500">per post</div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex gap-2">
                     <Link href={`/dashboard/brand/influencers/${influencer.id}`} className="flex-1">
-                      <Button className="w-full bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate group">View Profile <span className="group-hover-arrow ml-1">→</span></Button>
+                      <Button className="w-full bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">View Profile →</Button>
                     </Link>
                     <Link href={`/dashboard/brand/deals/new?influencer=${influencer.id}`}>
-                      <Button className="bg-[hsl(var(--coral))] text-white hover:bg-[hsl(var(--coral))]/90 btn-animate">Propose Deal</Button>
+                      <Button className="bg-emerald-600 text-white hover:bg-emerald-600/90 transition-smooth">Propose Deal</Button>
                     </Link>
                   </div>
                 </CardContent>
@@ -169,10 +169,10 @@ export default function BrandDiscoverPage() {
           <AnimatedSection animation="animate-fade-in">
             <Card className="shadow-md">
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No influencers found matching your criteria.</p>
+                <p className="text-gray-500">No influencers found matching your criteria.</p>
                 <Button
                   variant="outline"
-                  className="mt-4 btn-animate"
+                  className="mt-4 transition-smooth"
                   onClick={() => {
                     setSearchTerm("");
                     setSelectedNiche(null);

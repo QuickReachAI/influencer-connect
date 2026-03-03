@@ -72,7 +72,6 @@ export default function FlaggedMessagesPage() {
             });
 
             if (res.ok) {
-                // Remove from list on successful action
                 setMessages(messages.filter((m) => m.id !== messageId));
             } else {
                 const data = await res.json();
@@ -87,12 +86,12 @@ export default function FlaggedMessagesPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[hsl(var(--bg-blue))] p-8">
+            <div className="min-h-screen bg-gray-50 p-8">
                 <div className="animate-pulse">
-                    <div className="h-8 bg-muted rounded w-1/4 mb-8"></div>
+                    <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
                     <div className="space-y-4">
                         {[...Array(5)].map((_, i) => (
-                            <div key={i} className="h-32 bg-muted rounded-lg"></div>
+                            <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
                         ))}
                     </div>
                 </div>
@@ -101,29 +100,29 @@ export default function FlaggedMessagesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+        <div className="min-h-screen bg-gray-50">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
                 <div className="mb-8">
                     <Link
                         href="/dashboard/admin"
-                        className="text-primary hover:text-primary flex items-center gap-1 mb-4"
+                        className="text-[#0E61FF] hover:text-[#0B4FD9] flex items-center gap-1 mb-4"
                     >
                         <ChevronLeft className="h-4 w-4" />
                         Back to Dashboard
                     </Link>
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-[hsl(var(--rose))] flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center">
                             <MessageSquare className="h-6 w-6 text-white" />
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">Flagged Messages</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Flagged Messages</h1>
                     </div>
-                    <p className="text-muted-foreground mt-1">
+                    <p className="text-gray-500 mt-1">
                         {messages.length} message{messages.length !== 1 ? 's' : ''} flagged for platform leakage
                     </p>
                 </div>
 
                 {/* Info Banner */}
-                <AnimatedSection animation="animate-slide-right" className="bg-[hsl(var(--sunflower))] rounded-lg p-4 mb-6">
+                <AnimatedSection animation="animate-fade-in" className="bg-amber-500 rounded-lg p-4 mb-6">
                     <div className="flex items-start gap-3">
                         <AlertTriangle className="h-5 w-5 text-white mt-0.5" />
                         <div>
@@ -141,19 +140,19 @@ export default function FlaggedMessagesPage() {
                 <div className="space-y-4">
                     {messages.map((message, index) => (
                         <AnimatedSection key={message.id} animation="animate-slide-up" delay={index * 80}>
-                            <div className="bg-white rounded-lg shadow-md overflow-hidden hover-tilt group">
-                                <div className="p-4 border-b bg-[hsl(var(--navy))]">
+                            <div className="bg-white rounded-lg shadow-md overflow-hidden hover-lift group">
+                                <div className="p-4 border-b border-gray-100 bg-gray-900">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
                                                 message.sender.role === 'CREATOR'
-                                                    ? 'bg-[hsl(var(--coral))]'
-                                                    : 'bg-[hsl(var(--primary))]'
+                                                    ? 'bg-amber-500'
+                                                    : 'bg-[#0E61FF]'
                                             }`}>
                                                 {message.sender.role === 'CREATOR' ? (
-                                                    <User className="h-4 w-4 text-white group-hover-wiggle" />
+                                                    <User className="h-4 w-4 text-white" />
                                                 ) : (
-                                                    <Building2 className="h-4 w-4 text-white group-hover-wiggle" />
+                                                    <Building2 className="h-4 w-4 text-white" />
                                                 )}
                                             </div>
                                             <div>
@@ -170,17 +169,17 @@ export default function FlaggedMessagesPage() {
                                 </div>
 
                                 <div className="p-4">
-                                    <div className="bg-[hsl(var(--rose))]/10 border border-[hsl(var(--rose))]/30 rounded-lg p-3 mb-4">
-                                        <div className="text-sm text-[hsl(var(--rose))] font-medium mb-1">
+                                    <div className="bg-red-50 border border-red-100 rounded-lg p-3 mb-4">
+                                        <div className="text-sm text-red-600 font-medium mb-1">
                                             Flag Reason: {message.flagReason}
                                         </div>
-                                        <div className="text-foreground whitespace-pre-wrap">
+                                        <div className="text-gray-900 whitespace-pre-wrap">
                                             {message.content}
                                         </div>
                                     </div>
 
-                                    <div className="text-sm text-muted-foreground mb-4">
-                                        <span className="font-medium">Deal participants: </span>
+                                    <div className="text-sm text-gray-500 mb-4">
+                                        <span className="font-medium text-gray-700">Deal participants: </span>
                                         {message.deal.brand.brandProfile?.companyName || message.deal.brand.email}
                                         {' vs '}
                                         {message.deal.creator.creatorProfile?.name || message.deal.creator.email}
@@ -190,32 +189,32 @@ export default function FlaggedMessagesPage() {
                                         <button
                                             onClick={() => handleAction(message.id, 'dismiss')}
                                             disabled={processingId === message.id}
-                                            className="flex items-center gap-1 px-3 py-2 bg-[hsl(var(--emerald))] hover:bg-[hsl(var(--emerald))]/90 text-white rounded-lg text-sm transition-colors disabled:opacity-50 btn-animate"
+                                            className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
                                         >
-                                            <CheckCircle className="h-4 w-4 group-hover-wiggle" />
+                                            <CheckCircle className="h-4 w-4" />
                                             Dismiss
                                         </button>
                                         <button
                                             onClick={() => handleAction(message.id, 'warn')}
                                             disabled={processingId === message.id}
-                                            className="flex items-center gap-1 px-3 py-2 bg-[hsl(var(--sunflower))] hover:bg-[hsl(var(--sunflower))]/90 text-white rounded-lg text-sm transition-colors disabled:opacity-50 btn-animate"
+                                            className="flex items-center gap-1 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
                                         >
-                                            <AlertTriangle className="h-4 w-4 group-hover-wiggle" />
+                                            <AlertTriangle className="h-4 w-4" />
                                             Warn User
                                         </button>
                                         <button
                                             onClick={() => handleAction(message.id, 'ban')}
                                             disabled={processingId === message.id}
-                                            className="flex items-center gap-1 px-3 py-2 bg-[hsl(var(--rose))] hover:bg-[hsl(var(--rose))]/90 text-white rounded-lg text-sm transition-colors disabled:opacity-50 btn-animate"
+                                            className="flex items-center gap-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
                                         >
-                                            <Ban className="h-4 w-4 group-hover-wiggle" />
+                                            <Ban className="h-4 w-4" />
                                             Ban User
                                         </button>
                                         <Link
                                             href={`/dashboard/admin/disputes?dealId=${message.deal.id}`}
-                                            className="flex items-center gap-1 px-3 py-2 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white rounded-lg text-sm transition-colors ml-auto btn-animate"
+                                            className="flex items-center gap-1 px-3 py-2 bg-[#0E61FF] hover:bg-[#0B4FD9] text-white rounded-lg text-sm transition-colors ml-auto"
                                         >
-                                            <Eye className="h-4 w-4 group-hover-wiggle" />
+                                            <Eye className="h-4 w-4" />
                                             View Deal
                                         </Link>
                                     </div>
@@ -227,9 +226,9 @@ export default function FlaggedMessagesPage() {
                     {messages.length === 0 && (
                         <AnimatedSection animation="animate-slide-up">
                             <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                                <CheckCircle className="h-12 w-12 text-[hsl(var(--emerald))] mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold">All Clear!</h3>
-                                <p className="text-muted-foreground">No flagged messages to review.</p>
+                                <CheckCircle className="h-12 w-12 text-emerald-600 mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold text-gray-900">All Clear!</h3>
+                                <p className="text-gray-500">No flagged messages to review.</p>
                             </div>
                         </AnimatedSection>
                     )}

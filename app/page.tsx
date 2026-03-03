@@ -18,10 +18,10 @@ export default function HomePage() {
   };
 
   const trustStats = [
-    { label: "Verified Creators", value: 10000, suffix: "+", icon: Users, bg: "bg-[hsl(var(--primary))]" },
-    { label: "Brands Onboard", value: 5000, suffix: "+", icon: Target, bg: "bg-[hsl(var(--coral))]" },
-    { label: "Campaigns Delivered", value: 50000, suffix: "+", icon: TrendingUp, bg: "bg-[hsl(var(--emerald))]" },
-    { label: "Average Rating", value: 49, suffix: "/5", icon: Star, bg: "bg-[hsl(var(--sunflower))]", divisor: 10 },
+    { label: "Verified Creators", value: 10000, suffix: "+", icon: Users },
+    { label: "Brands Onboard", value: 5000, suffix: "+", icon: Target },
+    { label: "Campaigns Delivered", value: 50000, suffix: "+", icon: TrendingUp },
+    { label: "Average Rating", value: 49, suffix: "/5", icon: Star, divisor: 10 },
   ];
 
   const features = [
@@ -29,168 +29,161 @@ export default function HomePage() {
       icon: Shield,
       title: "KYC-Verified Creators",
       description: "Every creator is Aadhaar & PAN verified. Zero fake profiles, zero risk.",
-      iconBg: "bg-[hsl(var(--primary))]",
-      borderClass: "border-l-primary",
     },
     {
       icon: Lock,
       title: "Escrow Payments",
       description: "Money stays safe in escrow until you approve deliverables. 50/50 split model.",
-      iconBg: "bg-[hsl(var(--coral))]",
-      borderClass: "border-l-coral",
     },
     {
       icon: Sparkles,
       title: "AI-Powered Matching",
       description: "Our AI matches the perfect creator to your brand's niche, audience, and budget.",
-      iconBg: "bg-[hsl(var(--sunflower))]",
-      borderClass: "border-l-sunflower",
     },
     {
       icon: MessageSquare,
       title: "On-Platform Chat",
       description: "Negotiate, share briefs, and collaborate — all on-platform with full audit trails.",
-      iconBg: "bg-[hsl(var(--teal))]",
-      borderClass: "border-l-teal",
     },
     {
       icon: IndianRupee,
       title: "Built for India",
       description: "Razorpay payments, GST invoicing, TDS compliance — all automated.",
-      iconBg: "bg-[hsl(var(--emerald))]",
-      borderClass: "border-l-emerald",
     },
     {
       icon: BarChart3,
       title: "Reliability Scores",
       description: "Data-driven creator scores based on delivery speed, quality, and satisfaction.",
-      iconBg: "bg-[hsl(var(--rose))]",
-      borderClass: "border-l-rose",
     },
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#0E61FF]">
       {/* Header */}
-      <header className="bg-white sticky top-0 z-50 border-b shadow-sm animate-slide-down">
+      <header className="sticky top-0 z-50 bg-white border-b-2 border-gray-100 shadow-sm animate-slide-down">
         <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 bg-[hsl(var(--primary))] rounded-xl flex items-center justify-center shadow-md transition-transform group-hover:scale-110 group-hover:rotate-[-3deg]">
-              <Zap className="w-6 h-6 text-white group-hover-wiggle" />
+            <div className="w-9 h-9 bg-[#0E61FF] rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105">
+              <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-2 py-0.5 rounded-full">AI</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="/browse" className="text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] animated-underline transition-colors">Explore Creators</Link>
-            <Link href="#how-it-works" className="text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] animated-underline transition-colors">How It Works</Link>
-            <Link href="#features" className="text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] animated-underline transition-colors">Features</Link>
+            <Link href="/browse" className="text-sm font-medium text-gray-500 hover:text-[#0E61FF] transition-colors">Explore Creators</Link>
+            <Link href="#how-it-works" className="text-sm font-medium text-gray-500 hover:text-[#0E61FF] transition-colors">How It Works</Link>
+            <Link href="#features" className="text-sm font-medium text-gray-500 hover:text-[#0E61FF] transition-colors">Features</Link>
           </nav>
 
           <div className="flex items-center gap-3">
             <Link href="/auth/login">
-              <Button variant="ghost" className="hidden sm:inline-flex font-medium btn-press">Sign In</Button>
+              <Button variant="ghost" className="hidden sm:inline-flex font-medium text-gray-600">Sign In</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-[hsl(var(--coral))] text-white border-0 btn-animate shadow-md font-medium hover:opacity-90">
+              <Button className="font-medium">
                 Get Started Free
-                <ArrowRight className="w-4 h-4 ml-1 group-hover-arrow" />
+                <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[hsl(var(--bg-blue))] py-20 md:py-32">
-        <div className="absolute top-10 -left-20 w-72 h-72 bg-[hsl(var(--primary))]/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-10 -right-20 w-72 h-72 bg-[hsl(var(--coral))]/10 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute top-1/3 right-1/4 w-6 h-6 bg-[hsl(var(--sunflower))] rounded-full opacity-40 animate-float-slow"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-4 h-4 bg-[hsl(var(--teal))] rounded-full opacity-40 animate-float"></div>
-        <div className="absolute top-1/2 right-1/6 w-3 h-3 bg-[hsl(var(--rose))] rounded-full opacity-30 animate-pulse-soft"></div>
+      {/* Hero — bold #0E61FF */}
+      <section className="relative overflow-hidden bg-[#0E61FF] py-24 md:py-36">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-20 w-80 h-80 bg-white rounded-full blur-3xl"></div>
+        </div>
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-[hsl(var(--primary))] text-white px-5 py-2.5 rounded-full text-sm font-semibold mb-8 shadow-md animate-bounce-in hover-pop cursor-default">
-              <Sparkles className="w-4 h-4 animate-wiggle" />
-              Powered by QuickReach AI
-            </div>
+            <AnimatedSection animation="animate-fade-in">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-5 py-2.5 rounded-full text-sm font-semibold mb-8 border border-white/20">
+                <Sparkles className="w-4 h-4" />
+                Powered by QuickReach AI
+              </div>
+            </AnimatedSection>
 
-            <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 leading-[1.1] text-[hsl(var(--navy))] animate-blur-in">
-              Where Brands Meet
-              <span className="text-[hsl(var(--primary))] block mt-2 animate-slide-right stagger-2">Verified Creators</span>
-            </h1>
+            <AnimatedSection animation="animate-slide-up" delay={100}>
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-[1.05] text-white">
+                Where Brands Meet
+                <span className="block mt-2 text-white/90">Verified Creators</span>
+              </h1>
+            </AnimatedSection>
 
-            <p className="text-lg md:text-xl text-[hsl(var(--muted-foreground))] mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in stagger-3">
-              India&apos;s most trusted creator-brand collaboration platform.
-              KYC-verified profiles, escrow-protected deals, AI-powered matching.
-            </p>
+            <AnimatedSection animation="animate-fade-in" delay={200}>
+              <p className="text-lg md:text-xl text-white/75 mb-12 max-w-2xl mx-auto leading-relaxed">
+                India&apos;s most trusted creator-brand collaboration platform.
+                KYC-verified profiles, escrow-protected deals, AI-powered matching.
+              </p>
+            </AnimatedSection>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14 animate-fade-in stagger-4">
-              <Link href="/auth/signup?role=brand">
-                <Button size="lg" className="bg-[hsl(var(--primary))] text-white border-0 text-lg px-10 py-7 btn-animate shadow-lg font-semibold hover:opacity-90 group">
-                  <Target className="w-5 h-5 mr-2 group-hover-bounce" />
-                  I&apos;m a Brand
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover-arrow" />
-                </Button>
-              </Link>
-              <Link href="/auth/signup?role=influencer">
-                <Button size="lg" className="bg-[hsl(var(--coral))] text-white border-0 text-lg px-10 py-7 btn-animate shadow-lg font-semibold hover:opacity-90 group">
-                  <Play className="w-5 h-5 mr-2 group-hover-bounce" />
-                  I&apos;m a Creator
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover-arrow" />
-                </Button>
-              </Link>
-            </div>
+            <AnimatedSection animation="animate-slide-up" delay={300}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
+                <Link href="/auth/signup?role=brand">
+                  <Button size="lg" className="bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-10 py-7 shadow-xl font-semibold">
+                    <Target className="w-5 h-5 mr-2" />
+                    I&apos;m a Brand
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/auth/signup?role=influencer">
+                  <Button size="lg" className="bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-10 py-7 shadow-xl font-semibold backdrop-blur-sm">
+                    <Play className="w-5 h-5 mr-2" />
+                    I&apos;m a Creator
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+            </AnimatedSection>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm animate-fade-in stagger-5">
-              {["No upfront cost", "Escrow protection", "KYC verified", "24/7 support"].map((item, i) => (
-                <span key={item} className="flex items-center gap-2 text-[hsl(var(--foreground))] animate-pop" style={{ animationDelay: `${600 + i * 100}ms` }}>
-                  <CheckCircle2 className="w-4 h-4 text-[hsl(var(--emerald))]" />
-                  <span className="font-medium">{item}</span>
-                </span>
-              ))}
-            </div>
+            <AnimatedSection animation="animate-fade-in" delay={400}>
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm">
+                {["No upfront cost", "Escrow protection", "KYC verified", "24/7 support"].map((item) => (
+                  <span key={item} className="flex items-center gap-2 text-white/80">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                    <span className="font-medium">{item}</span>
+                  </span>
+                ))}
+              </div>
+            </AnimatedSection>
           </div>
         </div>
       </section>
 
-      {/* Trust Stats — animated counters */}
-      <AnimatedSection as="section" className="py-16 bg-[hsl(var(--bg-blue-soft))]" animation="animate-fade-in">
+      {/* Trust Stats */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {trustStats.map((stat, index) => (
               <AnimatedSection
                 key={index}
-                className={`${stat.bg} rounded-2xl p-6 text-center shadow-lg hover-tilt cursor-default`}
-                animation="animate-pop"
-                delay={index * 120}
+                className="bg-[#0E61FF] rounded-2xl p-6 text-center shadow-lg hover-lift cursor-default"
+                animation="animate-slide-up"
+                delay={index * 80}
               >
-                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center icon-hover-bounce">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
                   <stat.icon className="w-7 h-7 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1 font-heading">
-                  {stat.divisor ? (
-                    <AnimatedCounter target={stat.value} suffix={stat.suffix} duration={2000} />
-                  ) : (
-                    <AnimatedCounter target={stat.value} suffix={stat.suffix} duration={2500} />
-                  )}
+                <div className="text-3xl font-bold text-white mb-1">
+                  <AnimatedCounter target={stat.value} suffix={stat.suffix} duration={2500} />
                 </div>
-                <div className="text-sm text-white/80 font-medium">{stat.label}</div>
+                <div className="text-sm text-white/70 font-medium">{stat.label}</div>
               </AnimatedSection>
             ))}
           </div>
         </div>
-      </AnimatedSection>
+      </section>
 
-      {/* Features — scroll-triggered cards */}
-      <section id="features" className="py-24 bg-[hsl(var(--bg-blue))]">
+      {/* Features */}
+      <section id="features" className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-16" animation="animate-blur-in">
-            <span className="inline-block text-sm font-bold text-white bg-[hsl(var(--teal))] px-4 py-1.5 rounded-full uppercase tracking-wider mb-4 hover-pop cursor-default">Platform Features</span>
-            <h2 className="text-4xl font-bold font-heading text-[hsl(var(--navy))]">Why Brands & Creators Choose Us</h2>
-            <p className="text-lg text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto mt-4">
+          <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
+            <span className="inline-block text-sm font-bold text-[#0E61FF] bg-blue-100 px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Platform Features</span>
+            <h2 className="text-4xl font-bold text-gray-900">Why Brands & Creators Choose Us</h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto mt-4">
               Built from the ground up for the Indian creator economy
             </p>
           </AnimatedSection>
@@ -199,28 +192,28 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <AnimatedSection
                 key={index}
-                className={`bg-white rounded-2xl p-7 ${feature.borderClass} hover-tilt group shadow-md cursor-default`}
-                animation="animate-flip-in"
-                delay={index * 100}
+                className="bg-white rounded-2xl p-7 border-2 border-gray-100 card-interactive group shadow-md cursor-default"
+                animation="animate-slide-up"
+                delay={index * 80}
               >
-                <div className={`w-14 h-14 rounded-xl icon-box mb-5 shadow-md ${feature.iconBg}`}>
-                  <feature.icon className="w-7 h-7 text-white group-hover-wiggle" />
+                <div className="w-14 h-14 rounded-xl bg-[#0E61FF] flex items-center justify-center mb-5 shadow-md">
+                  <feature.icon className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-[hsl(var(--navy))] group-hover:text-[hsl(var(--primary))] transition-colors">{feature.title}</h3>
-                <p className="text-[hsl(var(--muted-foreground))] leading-relaxed text-[15px]">{feature.description}</p>
+                <h3 className="text-lg font-bold mb-2 text-gray-900 group-hover:text-[#0E61FF] transition-colors">{feature.title}</h3>
+                <p className="text-gray-500 leading-relaxed text-[15px]">{feature.description}</p>
               </AnimatedSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works — scroll-triggered steps */}
-      <section id="how-it-works" className="py-24 bg-[hsl(var(--bg-blue-soft))]">
+      {/* How It Works */}
+      <section id="how-it-works" className="py-24 bg-white">
         <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-16" animation="animate-blur-in">
-            <span className="inline-block text-sm font-bold text-white bg-[hsl(var(--coral))] px-4 py-1.5 rounded-full uppercase tracking-wider mb-4 hover-pop cursor-default">Simple Process</span>
-            <h2 className="text-4xl font-bold font-heading text-[hsl(var(--navy))]">How It Works</h2>
-            <p className="text-lg text-[hsl(var(--muted-foreground))] mt-4">From discovery to delivery — three simple steps</p>
+          <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
+            <span className="inline-block text-sm font-bold text-white bg-[#0E61FF] px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Simple Process</span>
+            <h2 className="text-4xl font-bold text-gray-900">How It Works</h2>
+            <p className="text-lg text-gray-500 mt-4">From discovery to delivery — three simple steps</p>
           </AnimatedSection>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -230,130 +223,128 @@ export default function HomePage() {
                 title: "Discover & Match",
                 description: "Browse verified creators or let our AI match you with the perfect fit for your campaign.",
                 icon: Globe,
-                bg: "bg-[hsl(var(--primary))]",
               },
               {
                 step: "02",
                 title: "Collaborate Securely",
                 description: "Agree on deliverables, approve scripts, pay via escrow — everything stays on-platform.",
                 icon: Handshake,
-                bg: "bg-[hsl(var(--teal))]",
               },
               {
                 step: "03",
                 title: "Deliver & Grow",
                 description: "Receive content, approve deliverables, release payment. Watch your brand grow.",
                 icon: TrendingUp,
-                bg: "bg-[hsl(var(--emerald))]",
               },
             ].map((item, index) => (
-              <AnimatedSection key={index} className="relative text-center group" animation="animate-slide-up" delay={index * 180}>
+              <AnimatedSection key={index} className="relative text-center group" animation="animate-slide-up" delay={index * 120}>
                 {index < 2 && (
                   <div className="hidden md:block absolute top-20 -right-4 w-8">
-                    <ArrowRight className="w-6 h-6 text-[hsl(var(--coral))]/50 animate-pulse-soft" />
+                    <ArrowRight className="w-6 h-6 text-gray-300" />
                   </div>
                 )}
-                <div className={`w-24 h-24 ${item.bg} rounded-3xl flex flex-col items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-all group-hover:scale-110 icon-hover-bounce`}>
-                  <span className="text-xs font-bold text-white/70 uppercase tracking-widest">Step</span>
+                <div className="w-24 h-24 bg-[#0E61FF] rounded-3xl flex flex-col items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
+                  <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Step</span>
                   <span className="text-2xl font-bold text-white">{item.step}</span>
                 </div>
-                <div className="w-12 h-12 mx-auto mb-4 bg-white rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                  <item.icon className="w-6 h-6 text-[hsl(var(--primary))] group-hover-spin" />
+                <div className="w-12 h-12 mx-auto mb-4 bg-gray-50 rounded-xl flex items-center justify-center border-2 border-gray-100">
+                  <item.icon className="w-6 h-6 text-[#0E61FF]" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-[hsl(var(--navy))]">{item.title}</h3>
-                <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">{item.description}</p>
+                <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
+                <p className="text-gray-500 leading-relaxed">{item.description}</p>
               </AnimatedSection>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA — bold navy */}
-      <AnimatedSection as="section" className="py-24 bg-[hsl(var(--navy))] text-white relative overflow-hidden" animation="animate-fade-in">
-        <div className="absolute top-0 left-0 w-full h-2 bg-[hsl(var(--coral))]"></div>
-        <div className="absolute top-10 left-10 w-52 h-52 bg-white/5 rounded-full blur-3xl animate-float-slow"></div>
-        <div className="absolute bottom-10 right-10 w-72 h-72 bg-[hsl(var(--primary))]/5 rounded-full blur-3xl animate-float-delayed"></div>
+      {/* CTA */}
+      <section className="py-24 bg-[#0E61FF] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-52 h-52 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+        </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
-          <AnimatedSection animation="animate-blur-in">
-            <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6">
+          <AnimatedSection animation="animate-slide-up">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               Ready to Launch Your Next Campaign?
             </h2>
           </AnimatedSection>
           <AnimatedSection animation="animate-fade-in" delay={150}>
-            <p className="text-xl mb-10 max-w-2xl mx-auto text-white/80">
+            <p className="text-xl mb-10 max-w-2xl mx-auto text-white/75">
               Join thousands of brands and creators already collaborating on QuickReach AI.
             </p>
           </AnimatedSection>
           <AnimatedSection className="flex flex-col sm:flex-row gap-4 justify-center" animation="animate-slide-up" delay={300}>
             <Link href="/auth/signup?role=brand">
-              <Button size="lg" className="bg-[hsl(var(--primary))] text-white text-lg px-10 font-semibold btn-animate shadow-lg border-0 hover:opacity-90 group">
-                <Target className="w-5 h-5 mr-2 group-hover-bounce" />
+              <Button size="lg" className="bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-10 font-semibold shadow-xl">
+                <Target className="w-5 h-5 mr-2" />
                 Start as Brand
-                <ArrowRight className="w-4 h-4 ml-2 group-hover-arrow" />
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
             <Link href="/auth/signup?role=influencer">
-              <Button size="lg" className="bg-[hsl(var(--coral))] text-white text-lg px-10 font-semibold btn-animate shadow-lg border-0 hover:opacity-90 group">
-                <Users className="w-5 h-5 mr-2 group-hover-bounce" />
+              <Button size="lg" className="bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-10 font-semibold backdrop-blur-sm">
+                <Users className="w-5 h-5 mr-2" />
                 Join as Creator
-                <ArrowRight className="w-4 h-4 ml-2 group-hover-arrow" />
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </AnimatedSection>
         </div>
-      </AnimatedSection>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-[hsl(var(--navy))] border-t border-white/10 py-14 text-white">
+      <footer className="bg-gray-900 py-14 text-white">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-10">
-            <AnimatedSection animation="animate-slide-right">
+            <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm icon-hover-bounce">
+                <div className="w-9 h-9 bg-[#0E61FF] rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold font-heading text-white">QuickReach</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-white/15 px-1.5 py-0.5 rounded-full">AI</span>
+                <span className="text-lg font-bold text-white">QuickReach</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/10 px-1.5 py-0.5 rounded">AI</span>
               </div>
-              <p className="text-sm text-white/60 leading-relaxed">
+              <p className="text-sm text-gray-400 leading-relaxed">
                 India&apos;s most trusted creator-brand collaboration platform. Powered by AI.
               </p>
-            </AnimatedSection>
+            </div>
 
-            <AnimatedSection animation="animate-slide-up" delay={100}>
+            <div>
               <h4 className="font-semibold mb-4 text-sm text-white">For Brands</h4>
-              <ul className="space-y-2.5 text-sm text-white/60">
-                <li><Link href="/browse" className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Explore Creators</Link></li>
-                <li><Link href="#how-it-works" className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">How It Works</Link></li>
-                <li><Link href="#features" className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Features</Link></li>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link href="/browse" className="hover:text-white transition-colors">Explore Creators</Link></li>
+                <li><Link href="#how-it-works" className="hover:text-white transition-colors">How It Works</Link></li>
+                <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
               </ul>
-            </AnimatedSection>
+            </div>
 
-            <AnimatedSection animation="animate-slide-up" delay={200}>
+            <div>
               <h4 className="font-semibold mb-4 text-sm text-white">For Creators</h4>
-              <ul className="space-y-2.5 text-sm text-white/60">
-                <li><Link href="/auth/signup?role=influencer" className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Join as Creator</Link></li>
-                <li><Link href="#features" className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Platform Benefits</Link></li>
-                <li><Link href="#" onClick={comingSoon} className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Success Stories</Link></li>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link href="/auth/signup?role=influencer" className="hover:text-white transition-colors">Join as Creator</Link></li>
+                <li><Link href="#features" className="hover:text-white transition-colors">Platform Benefits</Link></li>
+                <li><Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Success Stories</Link></li>
               </ul>
-            </AnimatedSection>
+            </div>
 
-            <AnimatedSection animation="animate-slide-left" delay={300}>
+            <div>
               <h4 className="font-semibold mb-4 text-sm text-white">Company</h4>
-              <ul className="space-y-2.5 text-sm text-white/60">
-                <li><Link href="#" onClick={comingSoon} className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">About Us</Link></li>
-                <li><Link href="#" onClick={comingSoon} className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Contact</Link></li>
-                <li><Link href="#" onClick={comingSoon} className="hover:text-[hsl(var(--primary))] animated-underline transition-colors">Careers</Link></li>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Contact</Link></li>
+                <li><Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Careers</Link></li>
               </ul>
-            </AnimatedSection>
+            </div>
           </div>
 
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/50">
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
             <p>&copy; 2026 QuickReach AI. All rights reserved.</p>
             <div className="flex gap-6">
-              <Link href="#" onClick={comingSoon} className="hover:text-white animated-underline transition-colors">Privacy</Link>
-              <Link href="#" onClick={comingSoon} className="hover:text-white animated-underline transition-colors">Terms</Link>
-              <Link href="#" onClick={comingSoon} className="hover:text-white animated-underline transition-colors">Cookies</Link>
+              <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Privacy</Link>
+              <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Terms</Link>
+              <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Cookies</Link>
             </div>
           </div>
         </div>

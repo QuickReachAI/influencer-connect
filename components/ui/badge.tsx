@@ -3,23 +3,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-lg border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+          "border-transparent bg-[#0E61FF] text-white shadow-sm",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-[hsl(var(--muted))] text-[hsl(var(--card-foreground))]",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "text-foreground",
+          "border-transparent bg-red-600 text-white shadow-sm",
+        outline: "text-[hsl(var(--card-foreground))] border-[hsl(var(--border))]",
         success:
-          "border-transparent bg-[hsl(var(--success)/0.15)] text-[hsl(var(--success))] shadow-sm",
+          "border-transparent bg-emerald-100 text-emerald-700",
         warning:
-          "border-transparent bg-[hsl(var(--warning)/0.15)] text-[hsl(var(--warning))] shadow-sm",
+          "border-transparent bg-amber-100 text-amber-700",
         info:
-          "border-transparent bg-[hsl(var(--primary)/0.15)] text-primary shadow-sm",
+          "border-transparent bg-blue-100 text-[#0E61FF]",
       },
     },
     defaultVariants: {

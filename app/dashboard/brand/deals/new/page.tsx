@@ -137,18 +137,18 @@ function CreateDealPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <Link href="/dashboard/brand/deals" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors animated-underline">
+        <Link href="/dashboard/brand/deals" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Deals
         </Link>
 
-        <AnimatedSection animation="animate-blur-in">
+        <AnimatedSection animation="animate-fade-in">
           <h1 className="text-3xl font-bold mb-2">Create New Deal</h1>
-          <p className="text-muted-foreground mb-8">Propose a collaboration with a creator</p>
+          <p className="text-gray-500 mb-8">Propose a collaboration with a creator</p>
         </AnimatedSection>
 
         {error && (
@@ -165,26 +165,26 @@ function CreateDealPageContent() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Creator Selector */}
-          <AnimatedSection animation="animate-flip-in" delay={100}>
-          <Card className="hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={100}>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(var(--primary))]/15 flex items-center justify-center">
-                  <User className="w-5 h-5 text-[hsl(var(--primary))]" />
+                <div className="w-8 h-8 rounded-lg bg-[#0E61FF]/15 flex items-center justify-center">
+                  <User className="w-5 h-5 text-[#0E61FF]" />
                 </div>
                 Select Creator
               </CardTitle>
             </CardHeader>
             <CardContent>
               {selectedCreator ? (
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[hsl(var(--teal))] flex items-center justify-center text-white font-semibold">
+                    <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-semibold">
                       {selectedCreator.name.charAt(0)}
                     </div>
                     <div>
                       <p className="font-medium">{selectedCreator.name}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{selectedCreator.bio}</p>
+                      <p className="text-xs text-gray-500 line-clamp-1">{selectedCreator.bio}</p>
                     </div>
                   </div>
                   <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedCreator(null)}>
@@ -193,7 +193,7 @@ function CreateDealPageContent() {
                 </div>
               ) : (
                 <div className="relative">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
                   <Input
                     placeholder={loadingCreators ? "Loading creators..." : "Search creators by name..."}
                     value={creatorSearch}
@@ -203,7 +203,7 @@ function CreateDealPageContent() {
                     disabled={loadingCreators}
                   />
                   {showCreatorDropdown && !loadingCreators && (
-                    <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                       {filteredCreators.length > 0 ? (
                         filteredCreators.map((creator) => (
                           <button
@@ -216,17 +216,17 @@ function CreateDealPageContent() {
                               setCreatorSearch("");
                             }}
                           >
-                            <div className="w-8 h-8 rounded-full bg-[hsl(var(--teal))] flex items-center justify-center text-white font-semibold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white font-semibold text-sm">
                               {creator.name.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium">{creator.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">{creator.bio}</p>
+                              <p className="text-xs text-gray-500 truncate">{creator.bio}</p>
                             </div>
                           </button>
                         ))
                       ) : (
-                        <div className="p-3 text-sm text-muted-foreground text-center">No creators found</div>
+                        <div className="p-3 text-sm text-gray-500 text-center">No creators found</div>
                       )}
                     </div>
                   )}
@@ -238,12 +238,12 @@ function CreateDealPageContent() {
           </AnimatedSection>
 
           {/* Deal Details */}
-          <AnimatedSection animation="animate-flip-in" delay={200}>
-          <Card className="hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={200}>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(var(--coral))]/15 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-[hsl(var(--coral))]" />
+                <div className="w-8 h-8 rounded-lg bg-[#0E61FF]/15 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-[#0E61FF]" />
                 </div>
                 Deal Details
               </CardTitle>
@@ -261,7 +261,7 @@ function CreateDealPageContent() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Description</label>
                 <textarea
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[100px] resize-y"
+                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[100px] resize-y"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the campaign goals, requirements, and expectations..."
@@ -273,12 +273,12 @@ function CreateDealPageContent() {
           </AnimatedSection>
 
           {/* Amount & Fee Calculator */}
-          <AnimatedSection animation="animate-flip-in" delay={300}>
-          <Card className="hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={300}>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(var(--emerald))]/15 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-[hsl(var(--emerald))]" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-600" />
                 </div>
                 Compensation
               </CardTitle>
@@ -287,7 +287,7 @@ function CreateDealPageContent() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Amount (INR) *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-muted-foreground text-sm">₹</span>
+                  <span className="absolute left-3 top-2 text-gray-500 text-sm">₹</span>
                   <Input
                     type="number"
                     value={amount}
@@ -302,18 +302,18 @@ function CreateDealPageContent() {
               </div>
 
               {parsedAmount > 0 && (
-                <div className="rounded-lg bg-muted/50 p-4 space-y-2 text-sm">
+                <div className="rounded-lg bg-gray-100/50 p-4 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Amount</span>
+                    <span className="text-gray-500">Total Amount</span>
                     <span className="font-medium">₹{parsedAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform Fee (5%)</span>
+                    <span className="text-gray-500">Platform Fee (5%)</span>
                     <span>₹{platformFee.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border pt-2">
+                  <div className="flex justify-between border-t border-gray-200 pt-2">
                     <span className="font-medium">Creator Payout</span>
-                    <span className="font-semibold text-[hsl(var(--emerald))]">₹{creatorPayout.toLocaleString()}</span>
+                    <span className="font-semibold text-emerald-600">₹{creatorPayout.toLocaleString()}</span>
                   </div>
                 </div>
               )}
@@ -323,18 +323,18 @@ function CreateDealPageContent() {
           </AnimatedSection>
 
           {/* Script Checklist */}
-          <AnimatedSection animation="animate-flip-in" delay={400}>
-          <Card className="hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={400}>
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(var(--sunflower))]/15 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-[hsl(var(--sunflower))]" />
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-amber-500" />
                 </div>
                 Script Checklist
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500">
                 Add checklist items that the creator should follow in their script/content.
               </p>
               {checklistItems.map((item, idx) => (
@@ -365,7 +365,7 @@ function CreateDealPageContent() {
             <Link href="/dashboard/brand/deals">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={submitting || !selectedCreator || !title.trim() || parsedAmount <= 0} className="gap-2 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate">
+            <Button type="submit" disabled={submitting || !selectedCreator || !title.trim() || parsedAmount <= 0} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 btn-premium">
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -384,7 +384,7 @@ function CreateDealPageContent() {
 
 export default function CreateDealPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[hsl(var(--bg-blue))] flex items-center justify-center"><div className="skeleton h-8 w-32 rounded" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="skeleton h-8 w-32 rounded" /></div>}>
       <CreateDealPageContent />
     </Suspense>
   );

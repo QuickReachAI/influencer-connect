@@ -164,14 +164,14 @@ export default function InfluencerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in">
-          <div className="skeleton h-6 w-36 mb-6 rounded" />
-          <div className="skeleton h-12 w-64 mb-4 rounded" />
+          <div className="h-6 w-36 mb-6 rounded bg-gray-200 animate-pulse" />
+          <div className="h-12 w-64 mb-4 rounded bg-gray-200 animate-pulse" />
           <div className="space-y-6">
-            <div className="skeleton h-24 rounded-xl" />
-            <div className="skeleton h-96 rounded-xl" />
+            <div className="h-24 rounded-xl bg-gray-200 animate-pulse" />
+            <div className="h-96 rounded-xl bg-gray-200 animate-pulse" />
           </div>
         </div>
       </div>
@@ -180,14 +180,14 @@ export default function InfluencerProfilePage() {
 
   if (error && !profile) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8">
-          <Card>
+          <Card className="bg-white">
             <CardContent className="py-12 text-center">
-              <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2 text-gray-900">Error Loading Profile</h2>
+              <p className="text-gray-500 mb-4">{error}</p>
               <Button onClick={() => { setError(null); setLoading(true); fetchProfile(); }}>
                 Try Again
               </Button>
@@ -199,24 +199,24 @@ export default function InfluencerProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in">
-        <Link href="/dashboard/influencer" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link href="/dashboard/influencer" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
 
-        <AnimatedSection animation="animate-blur-in">
-          <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground mb-8">Manage your influencer profile</p>
+        <AnimatedSection animation="animate-fade-in">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">Profile Settings</h1>
+          <p className="text-gray-500 mb-8">Manage your influencer profile</p>
         </AnimatedSection>
 
         {/* KYC & Reliability */}
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          <AnimatedSection animation="animate-pop" delay={0}>
-          <Card className="bg-[hsl(var(--teal))] border-none hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={0}>
+          <Card className="bg-[#0E61FF] border-none hover-lift">
             <CardContent className="py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ export default function InfluencerProfilePage() {
                       profile?.kycStatus === "VERIFIED"
                         ? "bg-white/20 text-white border-none"
                         : profile?.kycStatus === "PENDING"
-                        ? "bg-[hsl(var(--sunflower))] text-white border-none"
+                        ? "bg-amber-500 text-white border-none"
                         : "bg-white/20 text-white border-none"
                     }
                   >
@@ -239,7 +239,7 @@ export default function InfluencerProfilePage() {
                     {profile?.kycStatus || "Not Started"}
                   </Badge>
                   {profile?.kycStatus !== "VERIFIED" && (
-                    <Button size="sm" onClick={handleStartKyc} className="bg-white text-[hsl(var(--teal))] hover:bg-white/90">
+                    <Button size="sm" onClick={handleStartKyc} className="bg-white text-[#0E61FF] hover:bg-white/90">
                       Start KYC
                     </Button>
                   )}
@@ -249,8 +249,8 @@ export default function InfluencerProfilePage() {
           </Card>
           </AnimatedSection>
 
-          <AnimatedSection animation="animate-pop" delay={100}>
-          <Card className="bg-[hsl(var(--sunflower))] border-none hover-glow">
+          <AnimatedSection animation="animate-fade-in" delay={100}>
+          <Card className="bg-amber-500 border-none hover-lift">
             <CardContent className="py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -270,8 +270,8 @@ export default function InfluencerProfilePage() {
         </div>
 
         {error && (
-          <Card className="mb-6 border-destructive/30">
-            <CardContent className="py-3 flex items-center gap-2 text-destructive">
+          <Card className="mb-6 border-red-200 bg-white">
+            <CardContent className="py-3 flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </CardContent>
@@ -279,7 +279,7 @@ export default function InfluencerProfilePage() {
         )}
 
         {success && (
-          <Card className="mb-6 bg-[hsl(var(--emerald))] border-none">
+          <Card className="mb-6 bg-emerald-600 border-none">
             <CardContent className="py-3 flex items-center gap-2 text-white">
               <CheckCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">Profile saved successfully!</span>
@@ -290,16 +290,16 @@ export default function InfluencerProfilePage() {
         <form onSubmit={handleSave}>
           {/* Basic Info */}
           <AnimatedSection animation="animate-slide-up" delay={200} className="mb-6">
-          <Card className="bg-white shadow-md hover-glow">
+          <Card className="bg-white shadow-md hover-lift">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-gray-900">
                 <User className="w-5 h-5" />
                 Basic Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Display Name</label>
+                <label className="text-sm font-medium mb-1.5 block text-gray-900">Display Name</label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -307,16 +307,16 @@ export default function InfluencerProfilePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Bio</label>
+                <label className="text-sm font-medium mb-1.5 block text-gray-900">Bio</label>
                 <textarea
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[100px] resize-y"
+                  className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0E61FF] min-h-[100px] resize-y"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell brands about yourself, your content style, and your audience..."
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block flex items-center gap-1">
+                <label className="text-sm font-medium mb-1.5 block flex items-center gap-1 text-gray-900">
                   <Image className="w-4 h-4" />
                   Avatar URL
                 </label>
@@ -327,7 +327,7 @@ export default function InfluencerProfilePage() {
                   placeholder="https://example.com/avatar.png"
                 />
                 {avatar && (
-                  <div className="mt-2 w-16 h-16 rounded-full border border-border overflow-hidden">
+                  <div className="mt-2 w-16 h-16 rounded-full border border-gray-200 overflow-hidden">
                     <img src={avatar} alt="Avatar preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   </div>
                 )}
@@ -337,21 +337,21 @@ export default function InfluencerProfilePage() {
           </AnimatedSection>
 
           {/* Social Platforms */}
-          <AnimatedSection animation="animate-slide-left" delay={300} className="mb-6">
-          <Card className="bg-white shadow-md hover-glow">
+          <AnimatedSection animation="animate-slide-up" delay={300} className="mb-6">
+          <Card className="bg-white shadow-md hover-lift">
             <CardHeader>
-              <CardTitle>Social Platforms</CardTitle>
+              <CardTitle className="text-gray-900">Social Platforms</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {platforms.map((p, idx) => (
-                <div key={idx} className="p-4 rounded-lg border border-border space-y-3">
+                <div key={idx} className="p-4 rounded-lg border border-gray-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {platformIcon(p.platform)}
                       <select
                         value={p.platform}
                         onChange={(e) => updatePlatform(idx, "platform", e.target.value)}
-                        className="rounded-md border border-input bg-transparent px-2 py-1 text-sm"
+                        className="rounded-md border border-gray-300 bg-transparent px-2 py-1 text-sm"
                       >
                         {platformOptions.map((opt) => (
                           <option key={opt} value={opt}>{opt}</option>
@@ -366,7 +366,7 @@ export default function InfluencerProfilePage() {
                   </div>
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-muted-foreground mb-1 block">Handle</label>
+                      <label className="text-xs text-gray-500 mb-1 block">Handle</label>
                       <Input
                         value={p.handle}
                         onChange={(e) => updatePlatform(idx, "handle", e.target.value)}
@@ -374,7 +374,7 @@ export default function InfluencerProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-muted-foreground mb-1 block">Followers</label>
+                      <label className="text-xs text-gray-500 mb-1 block">Followers</label>
                       <Input
                         type="number"
                         value={p.followers || ""}
@@ -399,7 +399,7 @@ export default function InfluencerProfilePage() {
             <Link href="/dashboard/influencer">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={saving} className="gap-2 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white btn-animate">
+            <Button type="submit" disabled={saving} className="gap-2 bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white btn-premium">
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />

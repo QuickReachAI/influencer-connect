@@ -51,74 +51,73 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8 animate-bounce-in">
-          <div className="w-10 h-10 bg-[hsl(var(--primary))] rounded-xl flex items-center justify-center shadow-md icon-hover-bounce">
+        <Link href="/" className="flex items-center justify-center gap-2.5 mb-8 animate-fade-in">
+          <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
             <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-2 py-0.5 rounded-full">AI</span>
+          <span className="text-2xl font-bold text-white">QuickReach</span>
+          <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/15 px-1.5 py-0.5 rounded-md">AI</span>
         </Link>
 
-        <AnimatedSection animation="animate-blur-in">
-          <div className="bg-[hsl(var(--primary))] h-1.5 rounded-t-xl" />
-          <Card className="bg-white shadow-xl shadow-foreground/[0.04] rounded-t-none">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Sign in to your account to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2 text-foreground">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 input-glow"
-                    required
-                  />
+        <AnimatedSection animation="animate-slide-up">
+          <Card className="shadow-2xl border-0">
+            <CardHeader className="text-center pb-2">
+              <CardTitle className="text-2xl text-gray-900">Welcome Back</CardTitle>
+              <CardDescription className="text-gray-500">Sign in to your account to continue</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-700">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium mb-2 text-foreground">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 input-glow"
-                    required
-                  />
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-700">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
-              <Button type="submit" className="w-full bg-[hsl(var(--primary))] text-white hover:opacity-90 border-0 btn-animate shadow-md" loading={loading}>
-                Sign In
-              </Button>
-            </form>
+                <Button type="submit" className="w-full" loading={loading}>
+                  Sign In
+                </Button>
+              </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link href="/auth/signup" className="text-[hsl(var(--primary))] font-medium animated-underline">
-                  Sign up
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/auth/signup" className="text-[#0E61FF] font-semibold hover:underline">
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </AnimatedSection>
       </div>
     </div>

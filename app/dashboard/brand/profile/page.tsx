@@ -114,12 +114,12 @@ export default function BrandProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in">
-          <div className="skeleton h-6 w-36 mb-6 rounded" />
-          <div className="skeleton h-12 w-64 mb-4 rounded" />
-          <div className="skeleton h-96 rounded-xl" />
+          <div className="h-6 w-36 mb-6 rounded bg-gray-200 animate-pulse" />
+          <div className="h-12 w-64 mb-4 rounded bg-gray-200 animate-pulse" />
+          <div className="h-96 rounded-xl bg-gray-200 animate-pulse" />
         </div>
       </div>
     );
@@ -127,14 +127,14 @@ export default function BrandProfilePage() {
 
   if (error && !profile) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <Card>
             <CardContent className="py-12 text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Error Loading Profile</h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Profile</h2>
+              <p className="text-gray-500 mb-4">{error}</p>
               <Button onClick={() => { setError(null); setLoading(true); fetchProfile(); }}>
                 Try Again
               </Button>
@@ -146,41 +146,41 @@ export default function BrandProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Link href="/dashboard/brand" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors animated-underline">
+        <Link href="/dashboard/brand" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-smooth">
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
 
-        <AnimatedSection animation="animate-blur-in">
-          <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground mb-8">Manage your brand profile information</p>
+        <AnimatedSection animation="animate-fade-in">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
+          <p className="text-gray-500 mb-8">Manage your brand profile information</p>
         </AnimatedSection>
 
         {/* KYC Status */}
         <AnimatedSection animation="animate-slide-up" delay={100} className="mb-6">
-        <Card className="hover-glow">
+        <Card>
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[hsl(var(--primary))]/15 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-[hsl(var(--primary))]" />
+                <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-[#0E61FF]" />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">KYC Verification</p>
-                  <p className="text-xs text-muted-foreground">Identity verification status</p>
+                  <p className="font-medium text-sm text-gray-900">KYC Verification</p>
+                  <p className="text-xs text-gray-500">Identity verification status</p>
                 </div>
               </div>
               <Badge
-                className={
+                variant={
                   profile?.kycStatus === "VERIFIED"
-                    ? "bg-[hsl(var(--emerald))] text-white hover:bg-[hsl(var(--emerald))]"
+                    ? "success"
                     : profile?.kycStatus === "PENDING"
-                      ? "bg-[hsl(var(--sunflower))] text-white hover:bg-[hsl(var(--sunflower))]"
-                      : "bg-[hsl(var(--rose))]/15 text-[hsl(var(--rose))]"
+                      ? "warning"
+                      : "destructive"
                 }
               >
                 {profile?.kycStatus === "VERIFIED" && <CheckCircle className="w-3 h-3 mr-1" />}
@@ -192,8 +192,8 @@ export default function BrandProfilePage() {
         </AnimatedSection>
 
         {error && (
-          <Card className="mb-6 border-destructive/30">
-            <CardContent className="py-3 flex items-center gap-2 text-destructive">
+          <Card className="mb-6 border-red-200">
+            <CardContent className="py-3 flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </CardContent>
@@ -201,8 +201,8 @@ export default function BrandProfilePage() {
         )}
 
         {success && (
-          <Card className="mb-6 border-[hsl(var(--emerald))]/30 bg-[hsl(var(--emerald))]/5">
-            <CardContent className="py-3 flex items-center gap-2 text-[hsl(var(--emerald))]">
+          <Card className="mb-6 border-emerald-200 bg-emerald-50">
+            <CardContent className="py-3 flex items-center gap-2 text-emerald-700">
               <CheckCircle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm font-medium">Profile saved successfully!</span>
             </CardContent>
@@ -211,18 +211,18 @@ export default function BrandProfilePage() {
 
         <form onSubmit={handleSave}>
           <AnimatedSection animation="animate-slide-up" delay={200}>
-          <Card className="hover-glow">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[hsl(var(--coral))]/15 flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-[hsl(var(--coral))]" />
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-[#0E61FF]" />
                 </div>
                 Company Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Company Name</label>
+                <label className="text-sm font-medium text-gray-900 mb-1.5 block">Company Name</label>
                 <Input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
@@ -230,7 +230,7 @@ export default function BrandProfilePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Industry</label>
+                <label className="text-sm font-medium text-gray-900 mb-1.5 block">Industry</label>
                 <Input
                   value={industry}
                   onChange={(e) => setIndustry(e.target.value)}
@@ -238,16 +238,16 @@ export default function BrandProfilePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block">Description</label>
+                <label className="text-sm font-medium text-gray-900 mb-1.5 block">Description</label>
                 <textarea
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[100px] resize-y"
+                  className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#0E61FF] min-h-[100px] resize-y"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe your company and what you're looking for..."
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block flex items-center gap-1">
+                <label className="text-sm font-medium text-gray-900 mb-1.5 block flex items-center gap-1">
                   <Globe className="w-4 h-4" />
                   Website
                 </label>
@@ -259,7 +259,7 @@ export default function BrandProfilePage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1.5 block flex items-center gap-1">
+                <label className="text-sm font-medium text-gray-900 mb-1.5 block flex items-center gap-1">
                   <Image className="w-4 h-4" />
                   Logo URL
                 </label>
@@ -270,7 +270,7 @@ export default function BrandProfilePage() {
                   placeholder="https://example.com/logo.png"
                 />
                 {logo && (
-                  <div className="mt-2 w-16 h-16 rounded-lg border border-border overflow-hidden">
+                  <div className="mt-2 w-16 h-16 rounded-lg border border-gray-200 overflow-hidden">
                     <img src={logo} alt="Logo preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   </div>
                 )}
@@ -280,7 +280,7 @@ export default function BrandProfilePage() {
               <Link href="/dashboard/brand">
                 <Button type="button" variant="outline">Cancel</Button>
               </Link>
-              <Button type="submit" disabled={saving} className="gap-2 bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate">
+              <Button type="submit" disabled={saving} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />

@@ -212,7 +212,7 @@ export default function BrandDealDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <div className="skeleton h-8 w-48 mb-6 rounded" />
@@ -235,14 +235,14 @@ export default function BrandDealDetailPage() {
 
   if (error || !deal) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <Card>
             <CardContent className="py-12 text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Error Loading Deal</h2>
-              <p className="text-muted-foreground mb-4">{error || "Deal not found"}</p>
+              <p className="text-gray-500 mb-4">{error || "Deal not found"}</p>
               <div className="flex gap-2 justify-center">
                 <Button onClick={() => { setError(null); setLoading(true); fetchDeal(); }}>
                   Try Again
@@ -262,24 +262,24 @@ export default function BrandDealDetailPage() {
   const messages = [...(deal.chatMessages || [])].reverse();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <Link href="/dashboard/brand/deals" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors animated-underline">
+        <Link href="/dashboard/brand/deals" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Deals
         </Link>
 
         {/* Deal Header */}
-        <AnimatedSection animation="animate-blur-in" className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+        <AnimatedSection animation="animate-fade-in" className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{deal.title}</h1>
-              <Badge variant={status.variant} className="hover-pop">{status.label}</Badge>
+              <Badge variant={status.variant}>{status.label}</Badge>
             </div>
-            <p className="text-muted-foreground mb-3">{deal.description}</p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <p className="text-gray-500 mb-3">{deal.description}</p>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <User className="w-4 h-4" />
                 Creator: {deal.creator?.creatorProfile?.name || deal.creator?.email || "Unknown"}
@@ -294,7 +294,7 @@ export default function BrandDealDetailPage() {
             <div className="text-2xl font-bold text-primary">
               ₹{Number(deal.totalAmount).toLocaleString()}
             </div>
-            <div className="text-sm text-muted-foreground">Total Amount</div>
+            <div className="text-sm text-gray-500">Total Amount</div>
           </div>
         </AnimatedSection>
 
@@ -303,7 +303,7 @@ export default function BrandDealDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Script Checklist */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
-            <Card className="hover-glow">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ListChecks className="w-5 h-5" />
@@ -315,13 +315,13 @@ export default function BrandDealDetailPage() {
                   <ul className="space-y-2">
                     {deal.scriptChecklist.map((item, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${deal.scriptApprovedAt ? "text-primary" : "text-muted-foreground"}`} />
+                        <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${deal.scriptApprovedAt ? "text-primary" : "text-gray-500"}`} />
                         <span className="text-sm">{item}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No script checklist items yet.</p>
+                  <p className="text-sm text-gray-500">No script checklist items yet.</p>
                 )}
               </CardContent>
               {(deal.status === "DRAFT" || deal.status === "SCRIPT_PENDING") && (
@@ -345,7 +345,7 @@ export default function BrandDealDetailPage() {
               )}
               {deal.scriptApprovedAt && (
                 <CardFooter>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500">
                     Approved on {new Date(deal.scriptApprovedAt).toLocaleDateString()}
                   </p>
                 </CardFooter>
@@ -355,7 +355,7 @@ export default function BrandDealDetailPage() {
 
             {/* Deliverables */}
             <AnimatedSection animation="animate-slide-up" delay={200}>
-            <Card className="hover-glow">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="w-5 h-5" />
@@ -366,12 +366,12 @@ export default function BrandDealDetailPage() {
                 {deal.deliverables && deal.deliverables.length > 0 ? (
                   <div className="space-y-3">
                     {deal.deliverables.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                      <div key={file.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-muted-foreground" />
+                          <FileText className="w-5 h-5 text-gray-500" />
                           <div>
                             <p className="text-sm font-medium">{file.fileName}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-gray-500">
                               {(file.fileSize / 1024 / 1024).toFixed(2)} MB &middot; {new Date(file.uploadedAt).toLocaleDateString()}
                             </p>
                           </div>
@@ -386,7 +386,7 @@ export default function BrandDealDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No deliverables uploaded yet.</p>
+                  <p className="text-sm text-gray-500">No deliverables uploaded yet.</p>
                 )}
               </CardContent>
             </Card>
@@ -394,7 +394,7 @@ export default function BrandDealDetailPage() {
 
             {/* Chat */}
             <AnimatedSection animation="animate-slide-up" delay={300}>
-            <Card className="hover-glow">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
@@ -412,10 +412,10 @@ export default function BrandDealDetailPage() {
                         <div
                           className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${
                             msg.senderRole === "SYSTEM"
-                              ? "bg-muted text-muted-foreground italic"
+                              ? "bg-gray-100 text-gray-500 italic"
                               : msg.senderId === deal.brand?.id
                               ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-secondary-foreground"
+                              : "bg-gray-100 text-secondary-foreground"
                           }`}
                         >
                           <p>{msg.content}</p>
@@ -426,7 +426,7 @@ export default function BrandDealDetailPage() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start the conversation.</p>
+                    <p className="text-sm text-gray-500 text-center py-8">No messages yet. Start the conversation.</p>
                   )}
                   <div ref={chatEndRef} />
                 </div>
@@ -449,8 +449,8 @@ export default function BrandDealDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Payment Section */}
-            <AnimatedSection animation="animate-slide-right" delay={100}>
-            <Card className="hover-glow">
+            <AnimatedSection animation="animate-slide-up" delay={100}>
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
@@ -460,15 +460,15 @@ export default function BrandDealDetailPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Amount</span>
+                    <span className="text-gray-500">Total Amount</span>
                     <span className="font-medium">₹{Number(deal.totalAmount).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform Fee (5%)</span>
+                    <span className="text-gray-500">Platform Fee (5%)</span>
                     <span>₹{Number(deal.platformFee).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border pt-2">
-                    <span className="text-muted-foreground">Creator Payout</span>
+                  <div className="flex justify-between border-t border-gray-200 pt-2">
+                    <span className="text-gray-500">Creator Payout</span>
                     <span className="font-medium">₹{Number(deal.creatorPayout).toLocaleString()}</span>
                   </div>
                 </div>
@@ -518,8 +518,8 @@ export default function BrandDealDetailPage() {
                 </div>
 
                 {deal.escrowTransactions && deal.escrowTransactions.length > 0 && (
-                  <div className="pt-3 border-t border-border">
-                    <p className="text-xs font-medium mb-2 text-muted-foreground">Transaction History</p>
+                  <div className="pt-3 border-t border-gray-200">
+                    <p className="text-xs font-medium mb-2 text-gray-500">Transaction History</p>
                     {deal.escrowTransactions.map((tx) => (
                       <div key={tx.id} className="flex justify-between text-xs py-1">
                         <span>{tx.type}</span>
@@ -534,8 +534,8 @@ export default function BrandDealDetailPage() {
             </AnimatedSection>
 
             {/* Creator Info */}
-            <AnimatedSection animation="animate-slide-right" delay={200}>
-            <Card className="hover-glow">
+            <AnimatedSection animation="animate-slide-up" delay={200}>
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <User className="w-5 h-5" />
@@ -549,12 +549,12 @@ export default function BrandDealDetailPage() {
                   </div>
                   <div>
                     <p className="font-medium">{deal.creator?.creatorProfile?.name || "Unknown"}</p>
-                    <p className="text-xs text-muted-foreground">{deal.creator?.email}</p>
+                    <p className="text-xs text-gray-500">{deal.creator?.email}</p>
                   </div>
                 </div>
                 {deal.creator?.creatorProfile?.reliabilityScore !== undefined && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Reliability</span>
+                    <span className="text-gray-500">Reliability</span>
                     <span className="font-medium">{deal.creator.creatorProfile.reliabilityScore}%</span>
                   </div>
                 )}
@@ -565,8 +565,8 @@ export default function BrandDealDetailPage() {
 
             {/* Dispute Section */}
             {deal.status !== "COMPLETED" && deal.status !== "CANCELLED" && (
-              <AnimatedSection animation="animate-slide-right" delay={300}>
-              <Card className="hover-glow border-destructive/20">
+              <AnimatedSection animation="animate-slide-up" delay={300}>
+              <Card className="border-destructive/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <ShieldAlert className="w-5 h-5" />
@@ -578,13 +578,13 @@ export default function BrandDealDetailPage() {
                     <div className="space-y-2">
                       <Badge variant="destructive">Dispute Active</Badge>
                       {deal.disputeReason && (
-                        <p className="text-sm text-muted-foreground">{deal.disputeReason}</p>
+                        <p className="text-sm text-gray-500">{deal.disputeReason}</p>
                       )}
                     </div>
                   ) : showDisputeForm ? (
                     <div className="space-y-3">
                       <textarea
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[80px] resize-none"
+                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[80px] resize-none"
                         placeholder="Describe the reason for your dispute..."
                         value={disputeReason}
                         onChange={(e) => setDisputeReason(e.target.value)}

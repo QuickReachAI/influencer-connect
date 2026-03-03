@@ -68,7 +68,7 @@ export default function ViewBrandProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8 max-w-3xl animate-fade-in">
           <div className="skeleton h-6 w-36 mb-6 rounded" />
@@ -81,14 +81,14 @@ export default function ViewBrandProfilePage() {
 
   if (error || !brand) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8">
           <Card className="bg-white shadow-md animate-slide-up">
             <CardContent className="py-12 text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Brand Not Found</h2>
-              <p className="text-muted-foreground mb-4">{error || "Brand not found"}</p>
+              <p className="text-gray-500 mb-4">{error || "Brand not found"}</p>
               <Link href="/dashboard/influencer/discover">
                 <Button>Back to Discover</Button>
               </Link>
@@ -100,18 +100,18 @@ export default function ViewBrandProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
 
       <div className="container mx-auto px-4 py-8 max-w-3xl animate-fade-in">
-        <Link href="/dashboard/influencer/discover" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link href="/dashboard/influencer/discover" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Discover
         </Link>
 
         {/* Brand Header */}
         <AnimatedSection animation="animate-slide-up" delay={0} className="mb-6">
-        <Card className="bg-white shadow-md hover-glow">
+        <Card className="bg-white shadow-md">
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row items-start gap-6">
               <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0 overflow-hidden">
@@ -136,9 +136,9 @@ export default function ViewBrandProfilePage() {
                   <Badge variant="outline" className="mb-3">{brand.industry}</Badge>
                 )}
 
-                <p className="text-muted-foreground mb-4">{brand.description}</p>
+                <p className="text-gray-500 mb-4">{brand.description}</p>
 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                   {brand.website && (
                     <a href={brand.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
                       <Globe className="w-4 h-4" />
@@ -165,8 +165,8 @@ export default function ViewBrandProfilePage() {
         </AnimatedSection>
 
         {/* Company Details */}
-        <AnimatedSection animation="animate-slide-left" delay={100} className="mb-6">
-        <Card className="bg-white shadow-md hover-glow">
+        <AnimatedSection animation="animate-slide-up" delay={100} className="mb-6">
+        <Card className="bg-white shadow-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="w-5 h-5" />
@@ -174,21 +174,21 @@ export default function ViewBrandProfilePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground leading-relaxed">{brand.description}</p>
+            <p className="text-gray-500 leading-relaxed">{brand.description}</p>
             <div className="grid sm:grid-cols-2 gap-4 mt-6">
-              <div className="p-4 rounded-lg border border-border">
-                <p className="text-sm text-muted-foreground mb-1">Industry</p>
+              <div className="p-4 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-500 mb-1">Industry</p>
                 <p className="font-medium">{brand.industry || "Not specified"}</p>
               </div>
               {brand.companySize && (
-                <div className="p-4 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground mb-1">Company Size</p>
+                <div className="p-4 rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-500 mb-1">Company Size</p>
                   <p className="font-medium">{brand.companySize}</p>
                 </div>
               )}
               {brand.createdAt && (
-                <div className="p-4 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground mb-1">Member Since</p>
+                <div className="p-4 rounded-lg border border-gray-200">
+                  <p className="text-sm text-gray-500 mb-1">Member Since</p>
                   <p className="font-medium">{new Date(brand.createdAt).toLocaleDateString()}</p>
                 </div>
               )}
@@ -198,16 +198,16 @@ export default function ViewBrandProfilePage() {
         </AnimatedSection>
 
         {/* Actions */}
-        <AnimatedSection animation="animate-bounce-in" delay={200}>
-        <Card className="bg-white shadow-md hover-glow">
+        <AnimatedSection animation="animate-fade-in" delay={200}>
+        <Card className="bg-white shadow-md">
           <CardContent className="py-6">
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button className="gap-2 flex-1 btn-animate group">
-                <MessageSquare className="w-4 h-4 group-hover-bounce" />
-                Send Message <span className="group-hover-arrow ml-1">→</span>
+              <Button className="gap-2 flex-1 btn-premium group">
+                <MessageSquare className="w-4 h-4" />
+                Send Message <span className="ml-1">→</span>
               </Button>
               <Link href="/dashboard/influencer/discover" className="flex-1">
-                <Button variant="outline" className="w-full btn-animate">Browse More Brands</Button>
+                <Button variant="outline" className="w-full btn-premium">Browse More Brands</Button>
               </Link>
             </div>
           </CardContent>

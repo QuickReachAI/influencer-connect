@@ -94,7 +94,7 @@ export default function ViewInfluencerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <div className="skeleton h-6 w-36 mb-6 rounded" />
@@ -114,14 +114,14 @@ export default function ViewInfluencerProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <Card>
             <CardContent className="py-12 text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
-              <p className="text-muted-foreground mb-4">{error || "Influencer not found"}</p>
+              <p className="text-gray-500 mb-4">{error || "Influencer not found"}</p>
               <Link href="/dashboard/brand/discover">
                 <Button>Back to Discover</Button>
               </Link>
@@ -135,11 +135,11 @@ export default function ViewInfluencerProfilePage() {
   const totalFollowers = profile.platforms.reduce((sum, p) => sum + p.followers, 0);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <Link href="/dashboard/brand/discover" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors animated-underline">
+        <Link href="/dashboard/brand/discover" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Discover
         </Link>
@@ -147,8 +147,8 @@ export default function ViewInfluencerProfilePage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Sidebar Profile Card */}
           <div className="lg:col-span-1 space-y-6">
-            <AnimatedSection animation="animate-blur-in">
-            <Card className="hover-glow">
+            <AnimatedSection animation="animate-fade-in">
+            <Card>
               <CardContent className="pt-6 text-center">
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold mx-auto mb-4">
                   {profile.avatar ? (
@@ -169,10 +169,10 @@ export default function ViewInfluencerProfilePage() {
                     {profile.level.replace("_", " ")}
                   </Badge>
                 )}
-                <p className="text-muted-foreground text-sm mb-4">{profile.bio}</p>
+                <p className="text-gray-500 text-sm mb-4">{profile.bio}</p>
 
                 {profile.location && (
-                  <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-500 mb-4">
                     <MapPin className="w-4 h-4" />
                     {profile.location}
                   </div>
@@ -185,7 +185,7 @@ export default function ViewInfluencerProfilePage() {
                 </div>
 
                 <Link href={`/dashboard/brand/deals/new?creatorId=${profile.id}`}>
-                  <Button className="w-full gap-2 btn-animate">
+                  <Button className="w-full gap-2 btn-premium">
                     <FileText className="w-4 h-4" />
                     Propose Deal
                   </Button>
@@ -196,36 +196,36 @@ export default function ViewInfluencerProfilePage() {
 
             {/* Stats */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
-            <Card className="hover-glow">
+            <Card>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold text-primary">{profile.engagementRate}%</div>
-                    <div className="text-xs text-muted-foreground">Engagement</div>
+                    <div className="text-xs text-gray-500">Engagement</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold">{totalFollowers >= 1000000 ? `${(totalFollowers / 1000000).toFixed(1)}M` : totalFollowers >= 1000 ? `${(totalFollowers / 1000).toFixed(0)}K` : totalFollowers}</div>
-                    <div className="text-xs text-muted-foreground">Total Followers</div>
+                    <div className="text-xs text-gray-500">Total Followers</div>
                   </div>
                   {profile.totalOrders !== undefined && (
                     <div>
                       <div className="text-2xl font-bold">{profile.totalOrders}</div>
-                      <div className="text-xs text-muted-foreground">Deals Done</div>
+                      <div className="text-xs text-gray-500">Deals Done</div>
                     </div>
                   )}
                   {profile.reliabilityScore !== undefined && (
                     <div>
                       <div className="text-2xl font-bold text-primary">{profile.reliabilityScore}%</div>
-                      <div className="text-xs text-muted-foreground">Reliability</div>
+                      <div className="text-xs text-gray-500">Reliability</div>
                     </div>
                   )}
                   {profile.rating !== undefined && (
                     <div>
                       <div className="flex items-center justify-center gap-1">
-                        <Star className="w-4 h-4 fill-[hsl(var(--warning))] text-[hsl(var(--warning))]" />
+                        <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
                         <span className="text-2xl font-bold">{profile.rating}</span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-gray-500">
                         Rating ({profile.reviewCount || 0})
                       </div>
                     </div>
@@ -233,7 +233,7 @@ export default function ViewInfluencerProfilePage() {
                   {profile.responseTime && (
                     <div>
                       <div className="text-lg font-bold">{profile.responseTime}</div>
-                      <div className="text-xs text-muted-foreground">Avg. Response</div>
+                      <div className="text-xs text-gray-500">Avg. Response</div>
                     </div>
                   )}
                 </div>
@@ -246,19 +246,19 @@ export default function ViewInfluencerProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Social Platforms */}
             <AnimatedSection animation="animate-slide-up" delay={200}>
-            <Card className="hover-glow">
+            <Card>
               <CardHeader>
                 <CardTitle>Social Platforms</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {profile.platforms.map((platform) => (
-                    <div key={platform.platform} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                    <div key={platform.platform} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-3">
                         {platformIcon(platform.platform)}
                         <div>
                           <p className="font-medium">{platform.platform}</p>
-                          <p className="text-sm text-muted-foreground">{platform.handle}</p>
+                          <p className="text-sm text-gray-500">{platform.handle}</p>
                         </div>
                         {platform.verified && (
                           <Badge variant="default" className="text-xs">Verified</Badge>
@@ -266,7 +266,7 @@ export default function ViewInfluencerProfilePage() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">{platform.followers.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">followers</p>
+                        <p className="text-xs text-gray-500">followers</p>
                       </div>
                     </div>
                   ))}
@@ -278,27 +278,27 @@ export default function ViewInfluencerProfilePage() {
 
             {/* Rate Card */}
             <AnimatedSection animation="animate-slide-up" delay={300}>
-            <Card className="hover-glow">
+            <Card>
               <CardHeader>
                 <CardTitle>Rate Card</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="rounded-lg border border-border p-4 text-center">
-                    <p className="text-sm text-muted-foreground mb-1">Post</p>
+                  <div className="rounded-lg border border-gray-200 p-4 text-center">
+                    <p className="text-sm text-gray-500 mb-1">Post</p>
                     <p className="text-2xl font-bold text-primary">${profile.rateCard.postPrice.toLocaleString()}</p>
                   </div>
-                  <div className="rounded-lg border border-border p-4 text-center">
-                    <p className="text-sm text-muted-foreground mb-1">Story</p>
+                  <div className="rounded-lg border border-gray-200 p-4 text-center">
+                    <p className="text-sm text-gray-500 mb-1">Story</p>
                     <p className="text-2xl font-bold text-primary">${profile.rateCard.storyPrice.toLocaleString()}</p>
                   </div>
-                  <div className="rounded-lg border border-border p-4 text-center">
-                    <p className="text-sm text-muted-foreground mb-1">Video</p>
+                  <div className="rounded-lg border border-gray-200 p-4 text-center">
+                    <p className="text-sm text-gray-500 mb-1">Video</p>
                     <p className="text-2xl font-bold text-primary">${profile.rateCard.videoPrice.toLocaleString()}</p>
                   </div>
                   {profile.rateCard.reelPrice && (
-                    <div className="rounded-lg border border-border p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Reel</p>
+                    <div className="rounded-lg border border-gray-200 p-4 text-center">
+                      <p className="text-sm text-gray-500 mb-1">Reel</p>
                       <p className="text-2xl font-bold text-primary">${profile.rateCard.reelPrice.toLocaleString()}</p>
                     </div>
                   )}
@@ -311,7 +311,7 @@ export default function ViewInfluencerProfilePage() {
             {/* Portfolio */}
             {profile.portfolio && profile.portfolio.length > 0 && (
               <AnimatedSection animation="animate-slide-up" delay={400}>
-              <Card className="hover-glow">
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Award className="w-5 h-5" />
@@ -321,14 +321,14 @@ export default function ViewInfluencerProfilePage() {
                 <CardContent>
                   <div className="space-y-3">
                     {profile.portfolio.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border border-border">
+                      <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200">
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                           <Award className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="font-medium">{item.brandName}</p>
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{item.date}</p>
+                          <p className="text-sm text-gray-500">{item.description}</p>
+                          <p className="text-xs text-gray-500 mt-1">{item.date}</p>
                         </div>
                       </div>
                     ))}

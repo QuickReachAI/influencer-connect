@@ -26,55 +26,55 @@ export default function BrandDashboard() {
   const pendingDeals = brandDeals.filter(deal => deal.status === "pending").length;
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-blur-in" className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, GlowSkin Beauty! 👋</h1>
-          <p className="text-muted-foreground">Here's what's happening with your influencer campaigns</p>
+        <AnimatedSection animation="animate-fade-in" className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, GlowSkin Beauty! 👋</h1>
+          <p className="text-gray-500">Here's what's happening with your influencer campaigns</p>
         </AnimatedSection>
 
         {/* Stats Overview */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <AnimatedSection animation="animate-pop" delay={0}>
-            <div className="rounded-xl bg-[hsl(var(--primary))] p-6 shadow-lg hover-lift">
+          <AnimatedSection animation="animate-slide-up" delay={0}>
+            <div className="rounded-xl bg-[#0E61FF] p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white/90">Active Deals</span>
-                <FileText className="h-5 w-5 text-white icon-hover-bounce" />
+                <FileText className="h-5 w-5 text-white" />
               </div>
               <div className="text-3xl font-bold text-white">{activeDeals}</div>
               <p className="text-xs text-white/70 mt-1">Currently running</p>
             </div>
           </AnimatedSection>
 
-          <AnimatedSection animation="animate-pop" delay={100}>
-            <div className="rounded-xl bg-[hsl(var(--coral))] p-6 shadow-lg hover-lift">
+          <AnimatedSection animation="animate-slide-up" delay={100}>
+            <div className="rounded-xl bg-amber-500 p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white/90">Pending Proposals</span>
-                <TrendingUp className="h-5 w-5 text-white icon-hover-bounce" />
+                <TrendingUp className="h-5 w-5 text-white" />
               </div>
               <div className="text-3xl font-bold text-white">{pendingDeals}</div>
               <p className="text-xs text-white/70 mt-1">Awaiting response</p>
             </div>
           </AnimatedSection>
 
-          <AnimatedSection animation="animate-pop" delay={200}>
-            <div className="rounded-xl bg-[hsl(var(--emerald))] p-6 shadow-lg hover-lift">
+          <AnimatedSection animation="animate-slide-up" delay={200}>
+            <div className="rounded-xl bg-emerald-600 p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white/90">Total Influencers</span>
-                <Users className="h-5 w-5 text-white icon-hover-bounce" />
+                <Users className="h-5 w-5 text-white" />
               </div>
               <div className="text-3xl font-bold text-white">{sampleInfluencers.length}</div>
               <p className="text-xs text-white/70 mt-1">Available to connect</p>
             </div>
           </AnimatedSection>
 
-          <AnimatedSection animation="animate-pop" delay={300}>
-            <div className="rounded-xl bg-[hsl(var(--sunflower))] p-6 shadow-lg hover-lift">
+          <AnimatedSection animation="animate-slide-up" delay={300}>
+            <div className="rounded-xl bg-gray-900 p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white/90">Messages</span>
-                <MessageSquare className="h-5 w-5 text-white icon-hover-bounce" />
+                <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <div className="text-3xl font-bold text-white">3</div>
               <p className="text-xs text-white/70 mt-1">New messages</p>
@@ -84,77 +84,77 @@ export default function BrandDashboard() {
 
         {/* Recent Deals */}
         <div className="grid md:grid-cols-2 gap-6">
-          <AnimatedSection animation="animate-slide-left" delay={100}>
+          <AnimatedSection animation="animate-slide-up" delay={100}>
             <Card className="shadow-md">
               <CardHeader>
-                <CardTitle>Recent Deals</CardTitle>
-                <CardDescription>Your latest collaborations</CardDescription>
+                <CardTitle className="text-gray-900">Recent Deals</CardTitle>
+                <CardDescription className="text-gray-500">Your latest collaborations</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {brandDeals.slice(0, 3).map((deal) => {
                     const influencer = sampleInfluencers.find(inf => inf.id === deal.influencerId);
                     return (
-                      <div key={deal.id} className="flex items-start justify-between border-b pb-4 last:border-0 hover-glow group rounded-lg p-2 -mx-2">
+                      <div key={deal.id} className="flex items-start justify-between border-b pb-4 last:border-0 group rounded-lg p-2 -mx-2 transition-smooth hover:bg-gray-50">
                         <div className="flex-1">
-                          <h4 className="font-medium mb-1">{deal.title}</h4>
-                          <p className="text-sm text-muted-foreground mb-2">with {influencer?.name}</p>
+                          <h4 className="font-medium text-gray-900 mb-1">{deal.title}</h4>
+                          <p className="text-sm text-gray-500 mb-2">with {influencer?.name}</p>
                           <Badge
-                            className={
+                            variant={
                               deal.status === "active"
-                                ? "bg-[hsl(var(--emerald))] text-white hover:bg-[hsl(var(--emerald))]"
+                                ? "success"
                                 : deal.status === "pending"
-                                  ? "bg-[hsl(var(--sunflower))] text-white hover:bg-[hsl(var(--sunflower))]"
-                                  : "bg-[hsl(var(--muted))] text-[hsl(var(--navy))]"
+                                  ? "warning"
+                                  : "secondary"
                             }
                           >
                             {deal.status}
                           </Badge>
                         </div>
                         <Link href={`/dashboard/brand/deals/${deal.id}`}>
-                          <Button size="sm" variant="ghost" className="group-hover-arrow">View</Button>
+                          <Button size="sm" variant="ghost">View</Button>
                         </Link>
                       </div>
                     );
                   })}
                 </div>
                 <Link href="/dashboard/brand/deals">
-                  <Button variant="outline" className="w-full mt-4 btn-animate">View All Deals</Button>
+                  <Button variant="outline" className="w-full mt-4 transition-smooth">View All Deals</Button>
                 </Link>
               </CardContent>
             </Card>
           </AnimatedSection>
 
           {/* Recommended Influencers */}
-          <AnimatedSection animation="animate-slide-right" delay={200}>
+          <AnimatedSection animation="animate-slide-up" delay={200}>
             <Card className="shadow-md">
               <CardHeader>
-                <CardTitle>Recommended Influencers</CardTitle>
-                <CardDescription>Perfect matches for your brand</CardDescription>
+                <CardTitle className="text-gray-900">Recommended Influencers</CardTitle>
+                <CardDescription className="text-gray-500">Perfect matches for your brand</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {sampleInfluencers.slice(0, 3).map((influencer) => (
-                    <div key={influencer.id} className="flex items-start justify-between border-b pb-4 last:border-0 hover-glow group rounded-lg p-2 -mx-2">
+                    <div key={influencer.id} className="flex items-start justify-between border-b pb-4 last:border-0 group rounded-lg p-2 -mx-2 transition-smooth hover:bg-gray-50">
                       <div className="flex-1">
-                        <h4 className="font-medium mb-1">{influencer.name}</h4>
+                        <h4 className="font-medium text-gray-900 mb-1">{influencer.name}</h4>
                         <div className="flex gap-2 flex-wrap mb-2">
                           {influencer.niches.slice(0, 2).map((niche) => (
-                            <Badge key={niche} className="bg-[hsl(var(--teal))]/15 text-[hsl(var(--teal))] hover:bg-[hsl(var(--teal))]/20">{niche}</Badge>
+                            <Badge key={niche} variant="info">{niche}</Badge>
                           ))}
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-gray-500">
                           {influencer.platforms[0].followers.toLocaleString()} followers
                         </p>
                       </div>
                       <Link href={`/dashboard/brand/discover?influencer=${influencer.id}`}>
-                        <Button size="sm" className="group-hover-arrow">View</Button>
+                        <Button size="sm" className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90">View</Button>
                       </Link>
                     </div>
                   ))}
                 </div>
                 <Link href="/dashboard/brand/discover">
-                  <Button variant="outline" className="w-full mt-4 btn-animate">Discover More</Button>
+                  <Button variant="outline" className="w-full mt-4 transition-smooth">Discover More</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -162,22 +162,22 @@ export default function BrandDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <AnimatedSection animation="animate-flip-in" delay={300} className="mt-6">
+        <AnimatedSection animation="animate-fade-in" delay={300} className="mt-6">
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Get started with your next campaign</CardDescription>
+              <CardTitle className="text-gray-900">Quick Actions</CardTitle>
+              <CardDescription className="text-gray-500">Get started with your next campaign</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-4 flex-wrap">
                 <Link href="/dashboard/brand/discover">
-                  <Button className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate group">Find Influencers <span className="group-hover-arrow ml-1">→</span></Button>
+                  <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Find Influencers →</Button>
                 </Link>
                 <Link href="/dashboard/brand/deals">
-                  <Button className="bg-[hsl(var(--coral))] text-white hover:bg-[hsl(var(--coral))]/90 btn-animate group">View Proposals <span className="group-hover-arrow ml-1">→</span></Button>
+                  <Button className="bg-emerald-600 text-white hover:bg-emerald-600/90 transition-smooth">View Proposals →</Button>
                 </Link>
                 <Link href="/dashboard/brand/messages">
-                  <Button variant="outline" className="btn-animate group">Check Messages <span className="group-hover-arrow ml-1">→</span></Button>
+                  <Button variant="outline" className="transition-smooth">Check Messages →</Button>
                 </Link>
               </div>
             </CardContent>

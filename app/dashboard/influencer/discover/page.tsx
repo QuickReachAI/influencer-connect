@@ -32,14 +32,14 @@ export default function InfluencerDiscoverPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
 
       <div className="container mx-auto px-4 py-8 animate-fade-in">
-        <AnimatedSection animation="animate-blur-in">
+        <AnimatedSection animation="animate-fade-in">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Discover Brands</h1>
-            <p className="text-muted-foreground">Find amazing brands to collaborate with</p>
+            <h1 className="text-3xl font-bold mb-2 text-gray-900">Discover Brands</h1>
+            <p className="text-gray-500">Find amazing brands to collaborate with</p>
           </div>
         </AnimatedSection>
 
@@ -49,7 +49,7 @@ export default function InfluencerDiscoverPage() {
           <CardContent className="pt-6">
             <div className="space-y-4">
               <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search brands by name or industry..."
                   value={searchTerm}
@@ -59,11 +59,11 @@ export default function InfluencerDiscoverPage() {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Filter by Industry</label>
+                <label className="text-sm font-medium mb-2 block text-gray-900">Filter by Industry</label>
                 <div className="flex gap-2 flex-wrap">
                   <Button
                     size="sm"
-                    className={selectedIndustry === null ? "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90" : ""}
+                    className={selectedIndustry === null ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
                     variant={selectedIndustry === null ? "default" : "outline"}
                     onClick={() => setSelectedIndustry(null)}
                   >
@@ -73,7 +73,7 @@ export default function InfluencerDiscoverPage() {
                     <Button
                       key={industry}
                       size="sm"
-                      className={selectedIndustry === industry ? "bg-[hsl(var(--coral))] text-white hover:bg-[hsl(var(--coral))]/90" : ""}
+                      className={selectedIndustry === industry ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
                       variant={selectedIndustry === industry ? "default" : "outline"}
                       onClick={() => setSelectedIndustry(industry)}
                     >
@@ -88,59 +88,59 @@ export default function InfluencerDiscoverPage() {
         </AnimatedSection>
 
         {/* Results */}
-        <div className="mb-4 text-sm text-muted-foreground">
+        <div className="mb-4 text-sm text-gray-500">
           Showing {filteredBrands.length} brand{filteredBrands.length !== 1 ? "s" : ""}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBrands.map((brand, index) => (
-            <AnimatedSection key={brand.id} animation="animate-flip-in" delay={index * 100}>
-              <Card className="shadow-md hover-tilt group bg-white">
+            <AnimatedSection key={brand.id} animation="animate-fade-in" delay={index * 100}>
+              <Card className="shadow-md hover-lift group bg-white">
                 <CardHeader>
-                  <div className="w-16 h-16 bg-[hsl(var(--coral))] rounded-lg flex items-center justify-center text-white text-2xl font-bold mb-4">
+                  <div className="w-16 h-16 bg-[#0E61FF] rounded-lg flex items-center justify-center text-white text-2xl font-bold mb-4">
                     {brand.companyName.charAt(0)}
                   </div>
-                  <CardTitle className="text-xl">{brand.companyName}</CardTitle>
-                  <CardDescription className="line-clamp-2">{brand.description}</CardDescription>
+                  <CardTitle className="text-xl text-gray-900">{brand.companyName}</CardTitle>
+                  <CardDescription className="line-clamp-2 text-gray-500">{brand.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
                   {/* Industry */}
                   <div>
-                    <Badge variant="secondary" className="gap-1 hover-pop">
-                      <Briefcase className="w-3 h-3 group-hover-bounce" />
+                    <Badge variant="secondary" className="gap-1">
+                      <Briefcase className="w-3 h-3" />
                       {brand.industry}
                     </Badge>
                   </div>
 
                   {/* Website */}
                   {brand.website && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Globe className="w-4 h-4 group-hover-bounce" />
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Globe className="w-4 h-4" />
                       <span className="truncate">{brand.website}</span>
                     </div>
                   )}
 
                   {/* Budget */}
                   <div className="border-t pt-4">
-                    <div className="text-sm text-muted-foreground mb-2">Budget Range</div>
-                    <div className="text-xl font-bold text-[hsl(var(--emerald))]">
+                    <div className="text-sm text-gray-500 mb-2">Budget Range</div>
+                    <div className="text-xl font-bold text-emerald-600">
                       {brand.budgetRange}
                     </div>
-                    <div className="text-xs text-muted-foreground">per campaign</div>
+                    <div className="text-xs text-gray-500">per campaign</div>
                   </div>
 
                   {/* Requirements */}
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">Looking for</div>
+                    <div className="text-sm text-gray-500 mb-2">Looking for</div>
                     <div className="flex gap-2 flex-wrap">
                       {brand.requirements.slice(0, 2).map((req) => (
-                        <Badge key={req} variant="outline" className="text-xs hover-pop">
+                        <Badge key={req} variant="outline" className="text-xs">
                           {req}
                         </Badge>
                       ))}
                       {brand.requirements.length > 2 && (
-                        <Badge variant="outline" className="text-xs hover-pop">
+                        <Badge variant="outline" className="text-xs">
                           +{brand.requirements.length - 2} more
                         </Badge>
                       )}
@@ -149,7 +149,7 @@ export default function InfluencerDiscoverPage() {
 
                   {/* Past Campaigns */}
                   {brand.pastCampaigns.length > 0 && (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-gray-500">
                       ✓ {brand.pastCampaigns.length} successful campaign{brand.pastCampaigns.length !== 1 ? "s" : ""}
                     </div>
                   )}
@@ -157,13 +157,13 @@ export default function InfluencerDiscoverPage() {
                   {/* Actions */}
                   <div className="flex gap-2">
                     <Link href={`/dashboard/influencer/brands/${brand.id}`} className="flex-1">
-                      <Button className="w-full bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white btn-animate group">
-                        View Profile <span className="group-hover-arrow ml-1">→</span>
+                      <Button className="w-full bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white btn-premium">
+                        View Profile →
                       </Button>
                     </Link>
                     <Link href={`/dashboard/influencer/messages?brand=${brand.id}`}>
-                      <Button className="bg-[hsl(var(--teal))] hover:bg-[hsl(var(--teal))]/90 text-white btn-animate group">
-                        Contact <span className="group-hover-arrow ml-1">→</span>
+                      <Button className="bg-gray-900 hover:bg-gray-900/90 text-white btn-premium">
+                        Contact →
                       </Button>
                     </Link>
                   </div>
@@ -177,7 +177,7 @@ export default function InfluencerDiscoverPage() {
           <AnimatedSection animation="animate-fade-in">
           <Card className="shadow-md bg-white">
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No brands found matching your criteria.</p>
+              <p className="text-gray-500">No brands found matching your criteria.</p>
               <Button
                 variant="outline"
                 className="mt-4"

@@ -68,15 +68,15 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
   };
 
   return (
-    <div className="border-b bg-white shadow-sm">
+    <div className="border-b-2 border-[hsl(var(--border))] bg-white shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-[hsl(var(--primary))] rounded-xl flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
-              <Zap className="w-6 h-6 text-white icon-hover-bounce" />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 bg-[#0E61FF] rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105">
+              <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-2 py-0.5 rounded-full">AI</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -85,21 +85,21 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                 <Button
                   variant="ghost"
                   className={cn(
-                    "gap-2 group",
+                    "gap-2 rounded-xl text-gray-600 hover:text-gray-900",
                     pathname === item.href
-                      ? "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 hover:text-white animate-pop"
+                      ? "bg-[#0E61FF] text-white hover:bg-[#0B4FD9] hover:text-white"
                       : ""
                   )}
                 >
-                  <span className="group-hover-bounce">{item.icon}</span>
-                  <span className="animated-underline">{item.label}</span>
+                  {item.icon}
+                  {item.label}
                 </Button>
               </Link>
             ))}
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={handleLogout} className="gap-2 btn-press">
+            <Button variant="ghost" onClick={handleLogout} className="gap-2 text-gray-500 hover:text-red-600">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Logout</span>
             </Button>
@@ -117,26 +117,24 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
         </div>
 
         {mobileOpen && (
-          <nav className="md:hidden pb-4 flex flex-col gap-1">
-            {navItems.map((item, index) => (
+          <nav className="md:hidden pb-4 flex flex-col gap-1 animate-slide-down">
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="animate-slide-up"
-                style={{ animationDelay: `${index * 60}ms` }}
               >
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start gap-2 group",
+                    "w-full justify-start gap-2",
                     pathname === item.href
-                      ? "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 hover:text-white animate-pop"
-                      : ""
+                      ? "bg-[#0E61FF] text-white hover:bg-[#0B4FD9] hover:text-white"
+                      : "text-gray-600"
                   )}
                 >
-                  <span className="group-hover-bounce">{item.icon}</span>
-                  <span className="animated-underline">{item.label}</span>
+                  {item.icon}
+                  {item.label}
                 </Button>
               </Link>
             ))}

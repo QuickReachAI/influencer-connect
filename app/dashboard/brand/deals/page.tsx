@@ -36,17 +36,17 @@ export default function BrandDealsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-blur-in" className="flex items-center justify-between mb-8">
+        <AnimatedSection animation="animate-fade-in" className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">My Deals</h1>
-            <p className="text-muted-foreground">Manage your influencer collaborations</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Deals</h1>
+            <p className="text-gray-500">Manage your influencer collaborations</p>
           </div>
           <Link href="/dashboard/brand/discover">
-            <Button className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate">Create New Deal</Button>
+            <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Create New Deal</Button>
           </Link>
         </AnimatedSection>
 
@@ -55,28 +55,28 @@ export default function BrandDealsPage() {
           <Button
             variant={filter === "all" ? "default" : "outline"}
             onClick={() => setFilter("all")}
-            className="btn-press"
+            className={filter === "all" ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
           >
             All ({brandDeals.length})
           </Button>
           <Button
             variant={filter === "pending" ? "default" : "outline"}
             onClick={() => setFilter("pending")}
-            className="btn-press"
+            className={filter === "pending" ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
           >
             Pending ({brandDeals.filter(d => d.status === "pending").length})
           </Button>
           <Button
             variant={filter === "active" ? "default" : "outline"}
             onClick={() => setFilter("active")}
-            className="btn-press"
+            className={filter === "active" ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
           >
             Active ({brandDeals.filter(d => d.status === "active").length})
           </Button>
           <Button
             variant={filter === "completed" ? "default" : "outline"}
             onClick={() => setFilter("completed")}
-            className="btn-press"
+            className={filter === "completed" ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}
           >
             Completed ({brandDeals.filter(d => d.status === "completed").length})
           </Button>
@@ -89,59 +89,60 @@ export default function BrandDealsPage() {
 
             return (
               <AnimatedSection key={deal.id} animation="animate-slide-up" delay={index * 100}>
-                <Card className="shadow-md hover-tilt group">
+                <Card className="shadow-md card-interactive group">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold">{deal.title}</h3>
+                          <h3 className="text-xl font-semibold text-gray-900">{deal.title}</h3>
                           <Badge
-                            className={`gap-1 hover-pop ${
+                            variant={
                               deal.status === "active"
-                                ? "bg-[hsl(var(--emerald))] text-white hover:bg-[hsl(var(--emerald))]"
+                                ? "success"
                                 : deal.status === "pending"
-                                  ? "bg-[hsl(var(--sunflower))] text-white hover:bg-[hsl(var(--sunflower))]"
+                                  ? "warning"
                                   : deal.status === "completed"
-                                    ? "bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]"
-                                    : "bg-[hsl(var(--rose))] text-white hover:bg-[hsl(var(--rose))]"
-                            }`}
+                                    ? "default"
+                                    : "destructive"
+                            }
+                            className="gap-1"
                           >
                             {getStatusIcon(deal.status)}
                             {deal.status}
                           </Badge>
                         </div>
 
-                        <p className="text-muted-foreground mb-4">{deal.description}</p>
+                        <p className="text-gray-500 mb-4">{deal.description}</p>
 
                         <div className="grid md:grid-cols-3 gap-4 mb-4">
                           <div>
-                            <div className="text-sm text-muted-foreground">Influencer</div>
-                            <div className="font-medium">{influencer?.name}</div>
+                            <div className="text-sm text-gray-500">Influencer</div>
+                            <div className="font-medium text-gray-900">{influencer?.name}</div>
                           </div>
                           <div>
-                            <div className="text-sm text-muted-foreground">Compensation</div>
-                            <div className="font-medium text-[hsl(var(--coral))]">
+                            <div className="text-sm text-gray-500">Compensation</div>
+                            <div className="font-medium text-[#0E61FF]">
                               {formatCurrency(deal.compensation)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-sm text-muted-foreground">Timeline</div>
-                            <div className="font-medium">{deal.timeline}</div>
+                            <div className="text-sm text-gray-500">Timeline</div>
+                            <div className="font-medium text-gray-900">{deal.timeline}</div>
                           </div>
                         </div>
 
                         <div className="mb-4">
-                          <div className="text-sm text-muted-foreground mb-2">Deliverables:</div>
+                          <div className="text-sm text-gray-500 mb-2">Deliverables:</div>
                           <div className="flex gap-2 flex-wrap">
                             {deal.deliverables.map((deliverable, idx) => (
-                              <Badge key={idx} className="bg-[hsl(var(--teal))]/15 text-[hsl(var(--teal))] hover:bg-[hsl(var(--teal))]/20 hover-pop">
+                              <Badge key={idx} variant="info">
                                 {deliverable}
                               </Badge>
                             ))}
                           </div>
                         </div>
 
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-gray-500">
                           Created: {new Date(deal.createdAt).toLocaleDateString()} •
                           Updated: {new Date(deal.updatedAt).toLocaleDateString()}
                         </div>
@@ -149,10 +150,10 @@ export default function BrandDealsPage() {
 
                       <div className="flex flex-col gap-2 ml-4">
                         <Link href={`/dashboard/brand/deals/${deal.id}`}>
-                          <Button variant="outline" size="sm" className="btn-animate">View Details</Button>
+                          <Button variant="outline" size="sm" className="transition-smooth">View Details</Button>
                         </Link>
                         <Link href={`/dashboard/brand/messages?deal=${deal.id}`}>
-                          <Button variant="ghost" size="sm" className="btn-animate">Message</Button>
+                          <Button variant="ghost" size="sm" className="transition-smooth">Message</Button>
                         </Link>
                       </div>
                     </div>
@@ -167,9 +168,9 @@ export default function BrandDealsPage() {
           <AnimatedSection animation="animate-fade-in">
             <Card className="shadow-md">
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">No {filter !== "all" ? filter : ""} deals found.</p>
+                <p className="text-gray-500 mb-4">No {filter !== "all" ? filter : ""} deals found.</p>
                 <Link href="/dashboard/brand/discover">
-                  <Button className="bg-[hsl(var(--primary))] text-white hover:bg-[hsl(var(--primary))]/90 btn-animate">Find Influencers</Button>
+                  <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Find Influencers</Button>
                 </Link>
               </CardContent>
             </Card>

@@ -84,15 +84,15 @@ export default function PublicInfluencerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
-        <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b-2 border-gray-100 bg-white sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-1.5 py-0.5 rounded-full">AI</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
             </Link>
           </div>
         </header>
@@ -112,24 +112,24 @@ export default function PublicInfluencerProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
-        <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b-2 border-gray-100 bg-white sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-1.5 py-0.5 rounded-full">AI</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
             </Link>
           </div>
         </header>
         <div className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="py-12 text-center">
-              <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
-              <p className="text-muted-foreground mb-4">{error || "This influencer profile doesn't exist."}</p>
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2 text-gray-900">Profile Not Found</h2>
+              <p className="text-gray-500 mb-4">{error || "This influencer profile doesn't exist."}</p>
               <Link href="/browse">
                 <Button>Browse Creators</Button>
               </Link>
@@ -143,52 +143,49 @@ export default function PublicInfluencerProfilePage() {
   const totalFollowers = profile.platforms.reduce((sum, p) => sum + p.followers, 0);
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
-      {/* Public Header */}
-      <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b-2 border-gray-100 bg-white sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm icon-hover-bounce">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-1.5 py-0.5 rounded-full">AI</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
           </Link>
           <nav className="flex items-center gap-3">
             <Link href="/auth/login">
-              <Button variant="ghost" className="hidden sm:inline-flex">Sign In</Button>
+              <Button variant="ghost" className="hidden sm:inline-flex text-gray-600">Sign In</Button>
             </Link>
             <Link href="/auth/signup">
-              <Button className="bg-[hsl(var(--coral))] text-white hover:opacity-90 btn-animate">Join Free</Button>
+              <Button>Join Free</Button>
             </Link>
           </nav>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-primary animated-underline">Home</Link>
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <Link href="/" className="hover:text-[#0E61FF] transition-colors">Home</Link>
           <span>/</span>
-          <Link href="/browse" className="hover:text-primary animated-underline">Browse</Link>
+          <Link href="/browse" className="hover:text-[#0E61FF] transition-colors">Browse</Link>
           <span>/</span>
-          <span className="text-foreground">{profile.name}</span>
+          <span className="text-gray-900">{profile.name}</span>
         </nav>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Sidebar */}
           <div className="space-y-6">
-            <AnimatedSection animation="animate-blur-in">
-            <Card className="bg-white">
+            <AnimatedSection animation="animate-slide-up">
+            <Card>
               <CardContent className="pt-6 text-center">
-                <div className="w-28 h-28 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white text-5xl font-bold mx-auto mb-4 overflow-hidden">
+                <div className="w-28 h-28 rounded-full bg-[#0E61FF] flex items-center justify-center text-white text-5xl font-bold mx-auto mb-4 overflow-hidden">
                   {profile.avatar ? (
                     <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
                   ) : (
                     profile.name.charAt(0)
                   )}
                 </div>
-                <h1 className="text-2xl font-bold mb-1">{profile.name}</h1>
+                <h1 className="text-2xl font-bold mb-1 text-gray-900">{profile.name}</h1>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   {profile.verified && (
                     <Badge variant="default" className="gap-1">
@@ -200,79 +197,62 @@ export default function PublicInfluencerProfilePage() {
                     <Badge variant="secondary">{profile.level.replace("_", " ")}</Badge>
                   )}
                 </div>
-                <p className="text-muted-foreground text-sm mb-4">{profile.bio}</p>
+                <p className="text-gray-500 text-sm mb-4">{profile.bio}</p>
 
                 {profile.location && (
-                  <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center justify-center gap-1 text-sm text-gray-500 mb-4">
                     <MapPin className="w-4 h-4" />
                     {profile.location}
                   </div>
                 )}
 
                 <div className="flex gap-2 flex-wrap justify-center mb-6">
-                  {profile.niches.map((niche, nicheIdx) => {
-                    const nicheStyles = [
-                      'bg-[hsl(var(--bg-coral))] text-[hsl(var(--coral))] border-[hsl(var(--coral)/0.3)]',
-                      'bg-[hsl(var(--bg-teal))] text-[hsl(var(--teal))] border-[hsl(var(--teal)/0.3)]',
-                      'bg-[hsl(var(--bg-sunflower))] text-[hsl(var(--sunflower))] border-[hsl(var(--sunflower)/0.3)]',
-                      'bg-[hsl(var(--bg-rose))] text-[hsl(var(--rose))] border-[hsl(var(--rose)/0.3)]',
-                    ];
-                    return (
-                      <Badge key={niche} variant="outline" className={`hover-pop ${nicheStyles[nicheIdx % nicheStyles.length]}`}>
-                        {niche}
-                      </Badge>
-                    );
-                  })}
+                  {profile.niches.map((niche) => (
+                    <Badge key={niche} variant="info">
+                      {niche}
+                    </Badge>
+                  ))}
                 </div>
 
                 <Link href="/auth/signup">
-                  <Button className="w-full gap-2 bg-[hsl(var(--coral))] text-white hover:opacity-90 btn-animate group">
+                  <Button className="w-full gap-2">
                     <Sparkles className="w-4 h-4" />
                     Sign Up to Collaborate
-                    <ArrowRight className="w-4 h-4 group-hover-arrow" />
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
             </AnimatedSection>
 
-            {/* Stats */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
-            <Card className="bg-white">
+            <Card>
               <CardContent className="pt-6">
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <AnimatedSection animation="animate-pop" delay={150}>
-                  <div className="bg-[hsl(var(--bg-blue))] rounded-xl p-4">
-                    <div className="text-2xl font-bold text-[hsl(var(--primary))]">{profile.engagementRate}%</div>
-                    <div className="text-xs text-[hsl(var(--navy))] opacity-70">Engagement</div>
+                  <div className="bg-blue-50 rounded-xl p-4">
+                    <div className="text-2xl font-bold text-[#0E61FF]">{profile.engagementRate}%</div>
+                    <div className="text-xs text-gray-500">Engagement</div>
                   </div>
-                  </AnimatedSection>
-                  <AnimatedSection animation="animate-pop" delay={250}>
-                  <div className="bg-[hsl(var(--bg-coral))] rounded-xl p-4">
-                    <div className="text-2xl font-bold text-[hsl(var(--coral))]">{totalFollowers >= 1000000 ? `${(totalFollowers / 1000000).toFixed(1)}M` : totalFollowers >= 1000 ? `${(totalFollowers / 1000).toFixed(0)}K` : totalFollowers}</div>
-                    <div className="text-xs text-[hsl(var(--navy))] opacity-70">Total Followers</div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <div className="text-2xl font-bold text-gray-900">{totalFollowers >= 1000000 ? `${(totalFollowers / 1000000).toFixed(1)}M` : totalFollowers >= 1000 ? `${(totalFollowers / 1000).toFixed(0)}K` : totalFollowers}</div>
+                    <div className="text-xs text-gray-500">Total Followers</div>
                   </div>
-                  </AnimatedSection>
                   {profile.totalOrders !== undefined && (
-                    <AnimatedSection animation="animate-pop" delay={350}>
-                    <div className="bg-[hsl(var(--bg-teal))] rounded-xl p-4">
-                      <div className="text-2xl font-bold text-[hsl(var(--teal))]">{profile.totalOrders}+</div>
-                      <div className="text-xs text-[hsl(var(--navy))] opacity-70">Deals Completed</div>
+                    <div className="bg-emerald-50 rounded-xl p-4">
+                      <div className="text-2xl font-bold text-emerald-600">{profile.totalOrders}+</div>
+                      <div className="text-xs text-gray-500">Deals Completed</div>
                     </div>
-                    </AnimatedSection>
                   )}
                   {profile.rating !== undefined && (
-                    <AnimatedSection animation="animate-pop" delay={450}>
-                    <div className="bg-[hsl(var(--bg-sunflower))] rounded-xl p-4">
+                    <div className="bg-amber-50 rounded-xl p-4">
                       <div className="flex items-center justify-center gap-1">
-                        <Star className="w-4 h-4 fill-[hsl(var(--sunflower))] text-[hsl(var(--sunflower))]" />
-                        <span className="text-2xl font-bold text-[hsl(var(--sunflower))]">{profile.rating}</span>
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-2xl font-bold text-amber-600">{profile.rating}</span>
                       </div>
-                      <div className="text-xs text-[hsl(var(--navy))] opacity-70">
+                      <div className="text-xs text-gray-500">
                         ({profile.reviewCount || 0} reviews)
                       </div>
                     </div>
-                    </AnimatedSection>
                   )}
                 </div>
               </CardContent>
@@ -280,28 +260,26 @@ export default function PublicInfluencerProfilePage() {
             </AnimatedSection>
           </div>
 
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Social Platforms */}
             <AnimatedSection animation="animate-slide-up" delay={200}>
-            <Card className="bg-white">
+            <Card>
               <CardHeader>
-                <CardTitle>Social Platforms</CardTitle>
+                <CardTitle className="text-gray-900">Social Platforms</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  {profile.platforms.map((platform, pIdx) => (
-                    <div key={platform.platform} className={`flex items-center justify-between p-4 rounded-lg border border-border hover-tilt ${['border-l-primary', 'border-l-coral', 'border-l-teal', 'border-l-rose'][pIdx % 4]}`}>
+                  {profile.platforms.map((platform) => (
+                    <div key={platform.platform} className="flex items-center justify-between p-4 rounded-xl border-2 border-gray-100 hover:border-[#0E61FF] transition-colors">
                       <div className="flex items-center gap-3">
-                        {platformIcon(platform.platform)}
+                        <div className="text-[#0E61FF]">{platformIcon(platform.platform)}</div>
                         <div>
-                          <p className="font-medium">{platform.platform}</p>
-                          <p className="text-sm text-muted-foreground">{platform.handle}</p>
+                          <p className="font-medium text-gray-900">{platform.platform}</p>
+                          <p className="text-sm text-gray-500">{platform.handle}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{platform.followers.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">followers</p>
+                        <p className="font-semibold text-gray-900">{platform.followers.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">followers</p>
                       </div>
                     </div>
                   ))}
@@ -310,31 +288,28 @@ export default function PublicInfluencerProfilePage() {
             </Card>
             </AnimatedSection>
 
-            {/* Portfolio */}
             {profile.portfolio && profile.portfolio.length > 0 && (
               <AnimatedSection animation="animate-slide-up" delay={300}>
-              <Card className="bg-white">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="w-5 h-5" />
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Award className="w-5 h-5 text-[#0E61FF]" />
                     Past Collaborations
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    {profile.portfolio.map((item, idx) => (
-                      <AnimatedSection key={item.id} animation="animate-flip-in" delay={350 + idx * 100}>
-                      <div className="p-4 rounded-lg border border-border border-l-emerald hover-lift">
+                    {profile.portfolio.map((item) => (
+                      <div key={item.id} className="p-4 rounded-xl border-2 border-gray-100 hover-lift">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-[hsl(var(--bg-teal))] flex items-center justify-center text-[hsl(var(--teal))]">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[#0E61FF]">
                             <Award className="w-4 h-4" />
                           </div>
-                          <p className="font-medium">{item.brandName}</p>
+                          <p className="font-medium text-gray-900">{item.brandName}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                        <p className="text-xs text-muted-foreground mt-2">{item.date}</p>
+                        <p className="text-sm text-gray-500">{item.description}</p>
+                        <p className="text-xs text-gray-400 mt-2">{item.date}</p>
                       </div>
-                      </AnimatedSection>
                     ))}
                   </div>
                 </CardContent>
@@ -342,24 +317,23 @@ export default function PublicInfluencerProfilePage() {
               </AnimatedSection>
             )}
 
-            {/* CTA */}
-            <AnimatedSection animation="animate-scale-in" delay={400}>
-            <Card className="bg-[hsl(var(--bg-coral))] border-none">
+            <AnimatedSection animation="animate-slide-up" delay={400}>
+            <Card className="bg-[#0E61FF] border-0">
               <CardContent className="py-8 text-center">
-                <Sparkles className="w-10 h-10 text-[hsl(var(--coral))] mx-auto mb-3 icon-hover-wiggle" />
-                <h2 className="text-xl font-bold mb-2 text-[hsl(var(--navy))]">Ready to Collaborate?</h2>
-                <p className="text-[hsl(var(--navy))] opacity-70 mb-4">
+                <Sparkles className="w-10 h-10 text-white/80 mx-auto mb-3" />
+                <h2 className="text-xl font-bold mb-2 text-white">Ready to Collaborate?</h2>
+                <p className="text-white/70 mb-4">
                   Join QuickReach AI to start working with {profile.name} and thousands of other creators.
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Link href="/auth/signup">
-                    <Button size="lg" className="gap-2 bg-[hsl(var(--coral))] text-white hover:opacity-90 btn-animate group">
+                    <Button size="lg" className="gap-2 bg-white text-[#0E61FF] hover:bg-gray-100">
                       Get Started
-                      <ArrowRight className="w-4 h-4 group-hover-arrow" />
+                      <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Link href="/browse">
-                    <Button variant="outline" size="lg" className="border-[hsl(var(--coral)/0.3)] text-[hsl(var(--coral))] hover:bg-[hsl(var(--coral)/0.1)] btn-animate">
+                    <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
                       Browse More
                     </Button>
                   </Link>

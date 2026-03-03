@@ -203,7 +203,7 @@ export default function InfluencerDealDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <div className="skeleton h-8 w-48 mb-6 rounded" />
@@ -226,14 +226,14 @@ export default function InfluencerDealDetailPage() {
 
   if (error && !deal) {
     return (
-      <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+      <div className="min-h-screen bg-gray-50">
         <DashboardNav role="influencer" />
         <div className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="py-12 text-center">
               <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">Error Loading Deal</h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-gray-500 mb-4">{error}</p>
               <div className="flex gap-2 justify-center">
                 <Button onClick={() => { setError(null); setLoading(true); fetchDeal(); }}>
                   Try Again
@@ -255,11 +255,11 @@ export default function InfluencerDealDetailPage() {
   const messages = [...(deal.chatMessages || [])].reverse();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
 
       <div className="container mx-auto px-4 py-8 animate-fade-in">
-        <Link href="/dashboard/influencer/deals" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link href="/dashboard/influencer/deals" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to Deals
         </Link>
@@ -283,8 +283,8 @@ export default function InfluencerDealDetailPage() {
               <h1 className="text-3xl font-bold">{deal.title}</h1>
               <Badge variant={status.variant}>{status.label}</Badge>
             </div>
-            <p className="text-muted-foreground mb-3">{deal.description}</p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <p className="text-gray-500 mb-3">{deal.description}</p>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <Building2 className="w-4 h-4" />
                 Brand: {deal.brand?.brandProfile?.companyName || deal.brand?.email || "Unknown"}
@@ -299,7 +299,7 @@ export default function InfluencerDealDetailPage() {
             <div className="text-2xl font-bold text-primary">
               ₹{Number(deal.creatorPayout).toLocaleString()}
             </div>
-            <div className="text-sm text-muted-foreground">Your Payout</div>
+            <div className="text-sm text-gray-500">Your Payout</div>
           </div>
         </div>
 
@@ -308,10 +308,10 @@ export default function InfluencerDealDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Script Checklist */}
             <AnimatedSection animation="animate-slide-up" delay={0}>
-              <Card className="bg-white shadow-md hover-glow">
+              <Card className="bg-white shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <ListChecks className="w-5 h-5 icon-hover-bounce" />
+                    <ListChecks className="w-5 h-5" />
                     Script / Checklist
                     {deal.scriptApprovedAt && (
                       <Badge variant="default" className="ml-2 gap-1">
@@ -326,13 +326,13 @@ export default function InfluencerDealDetailPage() {
                     <ul className="space-y-2">
                       {deal.scriptChecklist.map((item, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${deal.scriptApprovedAt ? "text-primary" : "text-muted-foreground"}`} />
+                          <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${deal.scriptApprovedAt ? "text-primary" : "text-gray-500"}`} />
                           <span className="text-sm">{item}</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No script checklist items.</p>
+                    <p className="text-sm text-gray-500">No script checklist items.</p>
                   )}
                 </CardContent>
               </Card>
@@ -340,10 +340,10 @@ export default function InfluencerDealDetailPage() {
 
             {/* File Upload */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
-            <Card className="bg-white shadow-md hover-glow">
+            <Card className="bg-white shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Upload className="w-5 h-5 icon-hover-bounce" />
+                  <Upload className="w-5 h-5" />
                   Deliverables
                 </CardTitle>
               </CardHeader>
@@ -351,7 +351,7 @@ export default function InfluencerDealDetailPage() {
                 {/* Upload area */}
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                    dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    dragOver ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"
                   }`}
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
@@ -368,13 +368,13 @@ export default function InfluencerDealDetailPage() {
                   {uploading ? (
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                      <p className="text-sm text-muted-foreground">Uploading...</p>
+                      <p className="text-sm text-gray-500">Uploading...</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-8 h-8 text-muted-foreground" />
+                      <Upload className="w-8 h-8 text-gray-500" />
                       <p className="text-sm font-medium">Drop files here or click to browse</p>
-                      <p className="text-xs text-muted-foreground">Upload your deliverables for this deal</p>
+                      <p className="text-xs text-gray-500">Upload your deliverables for this deal</p>
                     </div>
                   )}
                 </div>
@@ -383,12 +383,12 @@ export default function InfluencerDealDetailPage() {
                 {deal.deliverables && deal.deliverables.length > 0 && (
                   <div className="space-y-2">
                     {deal.deliverables.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                      <div key={file.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-muted-foreground" />
+                          <FileText className="w-5 h-5 text-gray-500" />
                           <div>
                             <p className="text-sm font-medium">{file.fileName}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-gray-500">
                               {(file.fileSize / 1024 / 1024).toFixed(2)} MB &middot; {new Date(file.uploadedAt).toLocaleDateString()}
                             </p>
                           </div>
@@ -407,7 +407,7 @@ export default function InfluencerDealDetailPage() {
 
             {/* Chat */}
             <AnimatedSection animation="animate-slide-up" delay={200}>
-            <Card className="bg-white shadow-md hover-glow">
+            <Card className="bg-white shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
@@ -425,10 +425,10 @@ export default function InfluencerDealDetailPage() {
                         <div
                           className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${
                             msg.senderRole === "SYSTEM"
-                              ? "bg-muted text-muted-foreground italic"
+                              ? "bg-gray-100 text-gray-500 italic"
                               : msg.senderId === deal.creator?.id
                               ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-secondary-foreground"
+                              : "bg-gray-100 text-secondary-foreground"
                           }`}
                         >
                           <p>{msg.content}</p>
@@ -439,7 +439,7 @@ export default function InfluencerDealDetailPage() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-8">No messages yet.</p>
+                    <p className="text-sm text-gray-500 text-center py-8">No messages yet.</p>
                   )}
                   <div ref={chatEndRef} />
                 </div>
@@ -462,8 +462,8 @@ export default function InfluencerDealDetailPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Payment Status */}
-            <AnimatedSection animation="animate-slide-right" delay={0}>
-            <Card className="bg-white shadow-md hover-glow">
+            <AnimatedSection animation="animate-slide-up" delay={0}>
+            <Card className="bg-white shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="w-5 h-5" />
@@ -473,24 +473,24 @@ export default function InfluencerDealDetailPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Deal Value</span>
+                    <span className="text-gray-500">Total Deal Value</span>
                     <span className="font-medium">₹{Number(deal.totalAmount).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform Fee (5%)</span>
+                    <span className="text-gray-500">Platform Fee (5%)</span>
                     <span>-₹{Number(deal.platformFee).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border pt-2">
+                  <div className="flex justify-between border-t border-gray-200 pt-2">
                     <span className="font-medium">Your Payout</span>
                     <span className="font-semibold text-primary">₹{Number(deal.creatorPayout).toLocaleString()}</span>
                   </div>
                 </div>
 
                 <div className="space-y-3 pt-2">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                     <div>
                       <p className="text-sm font-medium">First 50%</p>
-                      <p className="text-xs text-muted-foreground">₹{(Number(deal.creatorPayout) / 2).toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">₹{(Number(deal.creatorPayout) / 2).toLocaleString()}</p>
                     </div>
                     {deal.payment50Paid ? (
                       <Badge variant="default" className="gap-1">
@@ -501,10 +501,10 @@ export default function InfluencerDealDetailPage() {
                       <Badge variant="secondary">Pending</Badge>
                     )}
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
                     <div>
                       <p className="text-sm font-medium">Remaining 50%</p>
-                      <p className="text-xs text-muted-foreground">₹{(Number(deal.creatorPayout) / 2).toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">₹{(Number(deal.creatorPayout) / 2).toLocaleString()}</p>
                     </div>
                     {deal.payment100Paid ? (
                       <Badge variant="default" className="gap-1">
@@ -521,8 +521,8 @@ export default function InfluencerDealDetailPage() {
             </AnimatedSection>
 
             {/* Brand Info */}
-            <AnimatedSection animation="animate-slide-right" delay={100}>
-            <Card className="bg-white shadow-md hover-glow">
+            <AnimatedSection animation="animate-slide-up" delay={100}>
+            <Card className="bg-white shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Building2 className="w-5 h-5" />
@@ -536,7 +536,7 @@ export default function InfluencerDealDetailPage() {
                   </div>
                   <div>
                     <p className="font-medium">{deal.brand?.brandProfile?.companyName || "Unknown Brand"}</p>
-                    <p className="text-xs text-muted-foreground">{deal.brand?.email}</p>
+                    <p className="text-xs text-gray-500">{deal.brand?.email}</p>
                   </div>
                 </div>
               </CardContent>
@@ -545,8 +545,8 @@ export default function InfluencerDealDetailPage() {
 
             {/* Dispute Section */}
             {deal.status !== "COMPLETED" && deal.status !== "CANCELLED" && (
-              <AnimatedSection animation="animate-slide-right" delay={200}>
-              <Card className="border-destructive/20 bg-white shadow-md hover-glow">
+              <AnimatedSection animation="animate-slide-up" delay={200}>
+              <Card className="border-destructive/20 bg-white shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
                     <ShieldAlert className="w-5 h-5" />
@@ -558,13 +558,13 @@ export default function InfluencerDealDetailPage() {
                     <div className="space-y-2">
                       <Badge variant="destructive">Dispute Active</Badge>
                       {deal.disputeReason && (
-                        <p className="text-sm text-muted-foreground">{deal.disputeReason}</p>
+                        <p className="text-sm text-gray-500">{deal.disputeReason}</p>
                       )}
                     </div>
                   ) : showDisputeForm ? (
                     <div className="space-y-3">
                       <textarea
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[80px] resize-none"
+                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[80px] resize-none"
                         placeholder="Describe the reason for your dispute..."
                         value={disputeReason}
                         onChange={(e) => setDisputeReason(e.target.value)}

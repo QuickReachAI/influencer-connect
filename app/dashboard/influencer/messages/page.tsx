@@ -143,23 +143,23 @@ export default function InfluencerMessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
+    <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
 
       <div className="container mx-auto px-4 py-8 animate-fade-in">
-        <AnimatedSection animation="animate-blur-in">
-          <h1 className="text-3xl font-bold text-foreground mb-6">Messages</h1>
+        <AnimatedSection animation="animate-fade-in">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Messages</h1>
         </AnimatedSection>
 
-        <div className="grid md:grid-cols-12 gap-0 md:gap-0 h-[calc(100vh-200px)] rounded-xl border border-border overflow-hidden bg-white shadow-md">
+        <div className="grid md:grid-cols-12 gap-0 md:gap-0 h-[calc(100vh-200px)] rounded-xl border border-gray-200 overflow-hidden bg-white shadow-md">
           {/* Sidebar - Conversation List */}
           <div
-            className={`md:col-span-4 border-r border-border flex flex-col ${
+            className={`md:col-span-4 border-r border-gray-200 flex flex-col ${
               mobileShowChat ? "hidden md:flex" : "flex"
             }`}
           >
-            <div className="p-4 border-b border-border">
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                 Conversations
               </h2>
             </div>
@@ -169,17 +169,17 @@ export default function InfluencerMessagesPage() {
                 <div className="p-4 space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="animate-pulse space-y-2 p-3 rounded-lg">
-                      <div className="h-4 bg-muted rounded w-3/4" />
-                      <div className="h-3 bg-muted rounded w-1/2" />
-                      <div className="h-3 bg-muted rounded w-full" />
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-3 bg-gray-200 rounded w-full" />
                     </div>
                   ))}
                 </div>
               ) : deals.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                  <MessageSquare className="h-12 w-12 text-muted-foreground/40 mb-3" />
-                  <p className="text-sm font-medium text-muted-foreground">No conversations yet</p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
+                  <MessageSquare className="h-12 w-12 text-gray-300 mb-3" />
+                  <p className="text-sm font-medium text-gray-500">No conversations yet</p>
+                  <p className="text-xs text-gray-400 mt-1">
                     Conversations appear when brands create deals with you
                   </p>
                 </div>
@@ -192,29 +192,29 @@ export default function InfluencerMessagesPage() {
                         setSelectedDealId(deal.id);
                         setMobileShowChat(true);
                       }}
-                      className={`w-full text-left p-3 rounded-lg transition-colors hover-glow ${
+                      className={`w-full text-left p-3 rounded-lg transition-colors ${
                         selectedDealId === deal.id
-                          ? "bg-[hsl(var(--primary))]/10 border border-[hsl(var(--primary))]/30"
-                          : "hover:bg-muted/50 border border-transparent"
+                          ? "bg-blue-50 border border-[#0E61FF]/30"
+                          : "hover:bg-gray-50 border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-[hsl(var(--coral))] flex items-center justify-center shrink-0">
+                        <div className="h-9 w-9 rounded-full bg-[#0E61FF] flex items-center justify-center shrink-0">
                           <Building2 className="h-4 w-4 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-medium text-foreground truncate">
+                            <span className="text-sm font-medium text-gray-900 truncate">
                               {getBrandName(deal)}
                             </span>
-                            <span className="text-[10px] font-medium text-[hsl(var(--teal))] uppercase shrink-0">
+                            <span className="text-[10px] font-medium text-[#0E61FF] uppercase shrink-0">
                               {deal.status}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          <p className="text-xs text-gray-500 truncate mt-0.5">
                             {deal.title}
                           </p>
-                          <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
+                          <p className="text-xs text-gray-400 truncate mt-0.5">
                             {getLastMessagePreview(deal)}
                           </p>
                         </div>
@@ -235,25 +235,25 @@ export default function InfluencerMessagesPage() {
             {selectedDeal ? (
               <div className="flex flex-col h-full animate-fade-in">
                 {/* Chat Header */}
-                <div className="p-4 border-b border-border flex items-center gap-3">
+                <div className="p-4 border-b border-gray-200 flex items-center gap-3">
                   <button
                     onClick={() => setMobileShowChat(false)}
-                    className="md:hidden text-muted-foreground hover:text-foreground"
+                    className="md:hidden text-gray-500 hover:text-gray-900"
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </button>
-                  <div className="h-9 w-9 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center shrink-0">
+                  <div className="h-9 w-9 rounded-full bg-[#0E61FF] flex items-center justify-center shrink-0">
                     <Building2 className="h-4 w-4 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
                       {getBrandName(selectedDeal)}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-gray-500 truncate">
                       {selectedDeal.title}
                     </p>
                   </div>
-                  <span className="ml-auto text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[hsl(var(--emerald))] text-white">
+                  <span className="ml-auto text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-emerald-600 text-white">
                     {selectedDeal.status}
                   </span>
                 </div>
@@ -269,20 +269,20 @@ export default function InfluencerMessagesPage() {
                         >
                           <div className="animate-pulse space-y-1.5">
                             <div
-                              className={`h-10 bg-muted rounded-lg ${
+                              className={`h-10 bg-gray-200 rounded-lg ${
                                 i % 2 === 0 ? "w-48" : "w-56"
                               }`}
                             />
-                            <div className="h-2 bg-muted rounded w-16" />
+                            <div className="h-2 bg-gray-200 rounded w-16" />
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
-                      <MessageSquare className="h-10 w-10 text-muted-foreground/30 mb-2" />
-                      <p className="text-sm text-muted-foreground">No messages yet</p>
-                      <p className="text-xs text-muted-foreground/60 mt-1">
+                      <MessageSquare className="h-10 w-10 text-gray-300 mb-2" />
+                      <p className="text-sm text-gray-500">No messages yet</p>
+                      <p className="text-xs text-gray-400 mt-1">
                         Send the first message to get the conversation started
                       </p>
                     </div>
@@ -294,7 +294,7 @@ export default function InfluencerMessagesPage() {
                       if (isSystem) {
                         return (
                           <div key={msg.id} className="flex justify-center">
-                            <div className="bg-muted/60 text-muted-foreground text-xs px-3 py-1.5 rounded-full max-w-[80%] text-center">
+                            <div className="bg-gray-100 text-gray-500 text-xs px-3 py-1.5 rounded-full max-w-[80%] text-center">
                               {msg.content}
                             </div>
                           </div>
@@ -309,8 +309,8 @@ export default function InfluencerMessagesPage() {
                           <div
                             className={`max-w-[70%] rounded-2xl px-4 py-2.5 ${
                               isOwn
-                                ? "bg-primary text-primary-foreground rounded-br-md"
-                                : "bg-muted text-foreground rounded-bl-md"
+                                ? "bg-[#0E61FF] text-white rounded-br-md"
+                                : "bg-gray-100 text-gray-900 rounded-bl-md"
                             }`}
                           >
                             <p className="text-sm whitespace-pre-wrap break-words">
@@ -319,8 +319,8 @@ export default function InfluencerMessagesPage() {
                             <p
                               className={`text-[10px] mt-1 ${
                                 isOwn
-                                  ? "text-primary-foreground/60"
-                                  : "text-muted-foreground"
+                                  ? "text-white/60"
+                                  : "text-gray-500"
                               }`}
                             >
                               {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -337,20 +337,20 @@ export default function InfluencerMessagesPage() {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 border-t border-border">
+                <div className="p-4 border-t border-gray-200">
                   <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                     <Input
                       placeholder="Type your message..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       disabled={sending}
-                      className="flex-1 bg-background"
+                      className="flex-1 bg-white"
                     />
                     <Button
                       type="submit"
                       size="icon"
                       disabled={sending || !newMessage.trim()}
-                      className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white btn-press"
+                      className="bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white btn-premium"
                     >
                       <Send className="h-4 w-4" />
                     </Button>
@@ -359,11 +359,11 @@ export default function InfluencerMessagesPage() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                <MessageSquare className="h-16 w-16 text-[hsl(var(--primary))]/30 mb-4" />
-                <p className="text-lg font-medium text-muted-foreground">
+                <MessageSquare className="h-16 w-16 text-gray-300 mb-4" />
+                <p className="text-lg font-medium text-gray-500">
                   Select a conversation
                 </p>
-                <p className="text-sm text-muted-foreground/60 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Choose a deal from the sidebar to view messages
                 </p>
               </div>
