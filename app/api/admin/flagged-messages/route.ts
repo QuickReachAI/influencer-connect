@@ -1,36 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { chatService } from "@/lib/services/chat.service";
+import { kycService } from "@/lib/services/kyc.service";
+import { verifyAdmin, AuthError } from "@/lib/auth-helpers";
 
-// Get flagged messages (platform leakage attempts)
+const reviewFlaggedMessageSchema = z.object({
+    messageId: z.string().uuid("Invalid message ID"),
+    action: z.enum(['dismiss', 'warn', 'ban'] as const, {
+        message: "Action must be one of: dismiss, warn, ban",
+    }),
+});
+
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        // Verify admin role
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!user || user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { error: 'Admin access required' },
-                { status: 403 }
-            );
-        }
+        await verifyAdmin(request);
 
         const flaggedMessages = await chatService.getFlaggedMessages();
 
         return NextResponse.json({ flaggedMessages });
 
     } catch (error) {
+        if (error instanceof AuthError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.statusCode }
+            );
+        }
         console.error('Get flagged messages error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
@@ -39,39 +35,21 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// Mark a flagged message as reviewed
 export async function PUT(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        // Verify admin role
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!user || user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { error: 'Admin access required' },
-                { status: 403 }
-            );
-        }
+        const adminId = await verifyAdmin(request);
 
         const body = await request.json();
-        const { messageId, action } = body; // action: 'dismiss' or 'warn' or 'ban'
+        const parsed = reviewFlaggedMessageSchema.safeParse(body);
 
-        if (!messageId || !action) {
+        if (!parsed.success) {
             return NextResponse.json(
-                { error: 'messageId and action are required' },
+                { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
                 { status: 400 }
             );
         }
+
+        const { messageId, action } = parsed.data;
 
         const message = await prisma.chatMessage.findUnique({
             where: { id: messageId },
@@ -85,13 +63,12 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        // Audit log the review
         await prisma.auditLog.create({
             data: {
                 entityType: 'chat',
                 entityId: messageId,
                 action: `flagged_message_${action}`,
-                actorId: userId,
+                actorId: adminId,
                 changes: {
                     senderId: message.senderId,
                     dealId: message.dealId,
@@ -101,8 +78,6 @@ export async function PUT(request: NextRequest) {
         });
 
         if (action === 'ban') {
-            // Import kycService to ban the user
-            const { kycService } = await import('@/lib/services/kyc.service');
             await kycService.banUser(
                 message.senderId,
                 `Banned for platform leakage attempt: ${message.flagReason}`
@@ -115,6 +90,12 @@ export async function PUT(request: NextRequest) {
         });
 
     } catch (error) {
+        if (error instanceof AuthError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.statusCode }
+            );
+        }
         console.error('Review flagged message error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { escrowService } from "@/lib/services/escrow.service";
 import { taxService } from "@/lib/services/tax.service";
+import { paymentLimiter } from "@/lib/rate-limit";
+
+const paymentConfirmationSchema = z.object({
+    razorpayPaymentId: z.string().min(1),
+    razorpayOrderId: z.string().min(1),
+    phase: z.enum(['50', '100']),
+});
 
 // Initiate payment (50% or 100%)
 export async function POST(
@@ -9,6 +18,12 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await paymentLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
         const userId = request.cookies.get('user_id')?.value;
         const { id: dealId } = await params;
 
@@ -96,19 +111,65 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id: dealId } = await params;
-        const body = await request.json();
-        const { razorpayPaymentId, razorpayOrderId, phase } = body;
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await paymentLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
 
-        if (!razorpayPaymentId || !razorpayOrderId) {
+        const userId = request.cookies.get('user_id')?.value;
+        const { id: dealId } = await params;
+
+        if (!userId) {
             return NextResponse.json(
-                { error: 'Payment details required' },
+                { error: 'Authentication required' },
+                { status: 401 }
+            );
+        }
+
+        const deal = await prisma.deal.findUnique({
+            where: { id: dealId }
+        });
+
+        if (!deal) {
+            return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
+        }
+
+        if (deal.brandId !== userId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
+
+        const rawBody = await request.text();
+
+        const signature = request.headers.get('x-razorpay-signature');
+        if (!signature) {
+            return NextResponse.json(
+                { error: 'Missing payment signature' },
                 { status: 400 }
             );
         }
 
-        // TODO: Verify payment signature with Razorpay in production
-        // const isValid = verifyRazorpaySignature(body);
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET!)
+            .update(rawBody)
+            .digest('hex');
+
+        if (signature !== expectedSignature) {
+            return NextResponse.json(
+                { error: 'Invalid payment signature' },
+                { status: 400 }
+            );
+        }
+
+        const parsed = paymentConfirmationSchema.safeParse(JSON.parse(rawBody));
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
+                { status: 400 }
+            );
+        }
+
+        const { razorpayPaymentId, razorpayOrderId, phase } = parsed.data;
 
         if (phase === '50') {
             await escrowService.handleFirstPaymentSuccess(
@@ -116,7 +177,7 @@ export async function PUT(
                 razorpayPaymentId,
                 razorpayOrderId
             );
-        } else if (phase === '100') {
+        } else {
             await escrowService.handleFinalPaymentSuccess(
                 dealId,
                 razorpayPaymentId,

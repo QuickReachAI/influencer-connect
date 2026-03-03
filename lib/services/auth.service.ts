@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { UserRole, KYCStatus } from '@prisma/client';
+import type { UserRole, KYCStatus } from '@prisma/client';
 
 interface SignupRequest {
     email: string;
@@ -70,7 +70,7 @@ export class AuthService {
             const hashedPassword = await bcrypt.hash(request.password, this.SALT_ROUNDS);
 
             // Create user with profile in a transaction
-            const user = await prisma.$transaction(async (tx) => {
+            const user = await prisma.$transaction(async (tx: any) => {
                 // Create base user
                 const newUser = await tx.user.create({
                     data: {

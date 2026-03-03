@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, Sora } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-heading",
+});
 
 export const metadata: Metadata = {
-  title: "InfluencerConnect - Connect Brands with Influencers",
-  description: "A platform connecting D2C brands with influencers for authentic collaborations",
+  title: "QuickReach AI — Creator-Brand Collaboration Platform",
+  description: "Connect with verified creators and brands for authentic collaborations. Powered by QuickReach AI.",
 };
 
 export default function RootLayout({
@@ -16,7 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${dmSans.variable} ${sora.variable}`}>
+        {children}
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

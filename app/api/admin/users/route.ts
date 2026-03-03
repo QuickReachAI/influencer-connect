@@ -1,37 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { kycService } from "@/lib/services/kyc.service";
+import { verifyAdmin, AuthError } from "@/lib/auth-helpers";
 
-// Get all users (admin only)
+const banUserSchema = z.object({
+    userId: z.string().uuid("Invalid user ID"),
+    reason: z.string().min(10, "Reason must be at least 10 characters"),
+});
+
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        // Verify admin role
-        const admin = await prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!admin || admin.role !== 'ADMIN') {
-            return NextResponse.json(
-                { error: 'Admin access required' },
-                { status: 403 }
-            );
-        }
+        await verifyAdmin(request);
 
         const searchParams = request.nextUrl.searchParams;
         const role = searchParams.get('role');
         const kycStatus = searchParams.get('kycStatus');
-        const isBanned = searchParams.get('isBanned');
-        const page = parseInt(searchParams.get('page') || '1');
-        const limit = parseInt(searchParams.get('limit') || '20');
+        const isBannedParam = searchParams.get('isBanned');
+        const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20') || 20));
 
         const where: any = {};
 
@@ -41,8 +28,8 @@ export async function GET(request: NextRequest) {
         if (kycStatus) {
             where.kycStatus = kycStatus;
         }
-        if (isBanned !== null) {
-            where.isBanned = isBanned === 'true';
+        if (isBannedParam !== null && isBannedParam !== undefined) {
+            where.isBanned = isBannedParam === 'true';
         }
 
         const [users, total] = await Promise.all([
@@ -85,6 +72,12 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
+        if (error instanceof AuthError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.statusCode }
+            );
+        }
         console.error('Get users error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
@@ -93,41 +86,21 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// Ban a user
 export async function POST(request: NextRequest) {
     try {
-        const adminId = request.cookies.get('user_id')?.value;
-
-        if (!adminId) {
-            return NextResponse.json(
-                { error: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        // Verify admin role
-        const admin = await prisma.user.findUnique({
-            where: { id: adminId }
-        });
-
-        if (!admin || admin.role !== 'ADMIN') {
-            return NextResponse.json(
-                { error: 'Admin access required' },
-                { status: 403 }
-            );
-        }
+        await verifyAdmin(request);
 
         const body = await request.json();
-        const { userId, reason } = body;
+        const parsed = banUserSchema.safeParse(body);
 
-        if (!userId || !reason) {
+        if (!parsed.success) {
             return NextResponse.json(
-                { error: 'userId and reason are required' },
+                { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
                 { status: 400 }
             );
         }
 
-        await kycService.banUser(userId, reason);
+        await kycService.banUser(parsed.data.userId, parsed.data.reason);
 
         return NextResponse.json({
             success: true,
@@ -135,6 +108,12 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error) {
+        if (error instanceof AuthError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.statusCode }
+            );
+        }
         console.error('Ban user error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatService } from "@/lib/services/chat.service";
 import { chatMessageSchema } from "@/lib/validations";
+import { chatLimiter } from "@/lib/rate-limit";
 
 // Get chat history for a deal
 export async function GET(
@@ -37,6 +38,12 @@ export async function POST(
     { params }: { params: Promise<{ dealId: string }> }
 ) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await chatLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
         const userId = request.cookies.get('user_id')?.value;
         const { dealId } = await params;
 

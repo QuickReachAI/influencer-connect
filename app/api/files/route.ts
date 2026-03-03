@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { fileService } from "@/lib/services/file.service";
+import { apiLimiter } from "@/lib/rate-limit";
 
 // Upload file for a deal
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await apiLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
         const userId = request.cookies.get('user_id')?.value;
 
         if (!userId) {

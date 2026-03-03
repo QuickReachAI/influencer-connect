@@ -1,11 +1,17 @@
 import prisma from '@/lib/prisma';
 import Razorpay from 'razorpay';
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!
-});
+let _razorpay: Razorpay | null = null;
+
+function getRazorpay(): Razorpay {
+    if (!_razorpay) {
+        _razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID!,
+            key_secret: process.env.RAZORPAY_KEY_SECRET!,
+        });
+    }
+    return _razorpay;
+}
 
 interface PaymentOrder {
     id: string;
@@ -41,7 +47,7 @@ export class EscrowService {
         const amount50 = Number(deal.totalAmount) * 0.5;
 
         // Create Razorpay order
-        const order = await razorpay.orders.create({
+        const order = await getRazorpay().orders.create({
             amount: Math.round(amount50 * 100), // Convert to paise
             currency: 'INR',
             receipt: `deal_${dealId}_50`,
@@ -202,7 +208,7 @@ export class EscrowService {
         const amount50 = Number(deal.totalAmount) * 0.5;
 
         // Create Razorpay order
-        const order = await razorpay.orders.create({
+        const order = await getRazorpay().orders.create({
             amount: Math.round(amount50 * 100), // Paise
             currency: 'INR',
             receipt: `deal_${dealId}_100`,

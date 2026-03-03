@@ -145,7 +145,7 @@ export class TaxService {
             }
         });
 
-        const totalEarnings = deals.reduce((sum, deal) =>
+        const totalEarnings = deals.reduce((sum: number, deal: any) =>
             sum + Number(deal.creatorPayout), 0
         );
 
@@ -211,11 +211,11 @@ export class TaxService {
             }
         });
 
-        const totalGross = completedDeals.reduce((sum, deal) =>
+        const totalGross = completedDeals.reduce((sum: number, deal: any) =>
             sum + Number(deal.totalAmount), 0
         );
 
-        const totalPlatformFee = completedDeals.reduce((sum, deal) =>
+        const totalPlatformFee = completedDeals.reduce((sum: number, deal: any) =>
             sum + Number(deal.platformFee), 0
         );
 

@@ -235,7 +235,7 @@ export class ChatService {
                 changes: {
                     milestone,
                     messageCount: messages.length,
-                    snapshot: messages.map(m => ({
+                    snapshot: messages.map((m: any) => ({
                         id: m.id,
                         senderId: m.senderId,
                         content: m.content,

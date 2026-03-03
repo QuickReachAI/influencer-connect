@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { chatService } from "@/lib/services/chat.service";
+import { scriptApprovalSchema } from "@/lib/validations";
 
 export async function POST(
     request: NextRequest,
@@ -25,68 +26,73 @@ export async function POST(
             return NextResponse.json({ error: 'Deal not found' }, { status: 404 });
         }
 
-        // Only brand can approve script
         if (deal.brandId !== userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
-        if (deal.status !== 'DRAFT' && deal.status !== 'SCRIPT_PENDING') {
+        if (deal.status !== 'SCRIPT_PENDING') {
             return NextResponse.json(
-                { error: 'Script can only be approved in draft or pending status' },
-                { status: 400 }
+                { error: `Cannot approve script in '${deal.status}' status. Deal must be in SCRIPT_PENDING status.` },
+                { status: 409 }
             );
         }
 
         const body = await request.json();
-        const { approved, notes } = body;
+        const parsed = scriptApprovalSchema.safeParse({ ...body, dealId });
 
-        if (approved) {
-            // Approve script and move to payment pending
-            await prisma.deal.update({
-                where: { id: dealId },
-                data: {
-                    status: 'SCRIPT_APPROVED',
-                    scriptApprovedAt: new Date(),
-                    scriptApprovedBy: userId
-                }
-            });
-
-            // Lock conversation history at this milestone
-            await chatService.lockConversation(dealId, 'script_approved');
-
-            // Send system message
-            await chatService.sendMessage(
-                dealId,
-                'system',
-                '✅ Script has been approved. Brand can now proceed with 50% payment.',
-                'SYSTEM'
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
+                { status: 400 }
             );
-        } else {
-            // Request revisions
-            await prisma.deal.update({
-                where: { id: dealId },
-                data: { status: 'SCRIPT_PENDING' }
-            });
+        }
 
-            if (notes) {
+        const { approved, notes } = parsed.data;
+
+        await prisma.$transaction(async (tx: any) => {
+            if (approved) {
+                await tx.deal.update({
+                    where: { id: dealId },
+                    data: {
+                        status: 'SCRIPT_APPROVED',
+                        scriptApprovedAt: new Date(),
+                        scriptApprovedBy: userId
+                    }
+                });
+
+                await chatService.lockConversation(dealId, 'script_approved');
+
                 await chatService.sendMessage(
                     dealId,
                     'system',
-                    `📝 Script revision requested: ${notes}`,
+                    '✅ Script has been approved. Brand can now proceed with 50% payment.',
                     'SYSTEM'
                 );
-            }
-        }
+            } else {
+                await tx.deal.update({
+                    where: { id: dealId },
+                    data: { status: 'SCRIPT_PENDING' }
+                });
 
-        // Audit log
-        await prisma.auditLog.create({
-            data: {
-                entityType: 'deal',
-                entityId: dealId,
-                action: approved ? 'script_approved' : 'script_revision_requested',
-                actorId: userId,
-                changes: { approved, notes }
+                if (notes) {
+                    await chatService.sendMessage(
+                        dealId,
+                        'system',
+                        `📝 Script revision requested: ${notes}`,
+                        'SYSTEM'
+                    );
+                }
             }
+
+            await tx.auditLog.create({
+                data: {
+                    entityType: 'deal',
+                    entityId: dealId,
+                    action: approved ? 'script_approved' : 'script_revision_requested',
+                    actorId: userId,
+                    changes: { approved, notes }
+                }
+            });
         });
 
         return NextResponse.json({

@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import {
     Star, Clock, CheckCircle2, Heart, Share2, Flag,
     Sparkles, Award, TrendingUp, MessageSquare, ChevronDown,
-    ChevronUp, Instagram, Youtube, Twitter
+    ChevronUp, Instagram, Youtube, Twitter, Zap, ArrowRight
 } from "lucide-react";
 import { sampleGigs, enhancedInfluencers, sampleReviews } from "@/data/enhanced-sample-data";
 import { GigPackage } from "@/data/enhanced-types";
+import { AnimatedSection } from "@/components/ui/animated-section";
 
 export default function GigDetailPage() {
     const params = useParams();
@@ -27,7 +28,7 @@ export default function GigDetailPage() {
 
     if (!gig || !influencer) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen bg-[hsl(var(--bg-blue))] flex items-center justify-center">
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-2">Service Not Found</h1>
                     <p className="text-muted-foreground mb-6">The service you're looking for doesn't exist.</p>
@@ -42,22 +43,23 @@ export default function GigDetailPage() {
     const currentPackage = gig.packages.find(p => p.tier === selectedPackage);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[hsl(var(--bg-blue))]">
             {/* Header */}
             <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                            <Sparkles className="w-6 h-6 text-white" />
+                        <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center shadow-sm icon-hover-bounce">
+                            <Zap className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-2xl font-bold gradient-text">InfluencerConnect</span>
+                        <span className="text-xl font-bold font-heading text-[hsl(var(--navy))]">QuickReach</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[hsl(var(--primary))] px-1.5 py-0.5 rounded-full">AI</span>
                     </Link>
                     <nav className="flex items-center gap-3">
                         <Link href="/auth/login">
                             <Button variant="ghost" className="hidden sm:inline-flex">Sign In</Button>
                         </Link>
                         <Link href="/auth/signup">
-                            <Button className="bg-primary hover:bg-primary-hover">Join</Button>
+                            <Button className="bg-[hsl(var(--coral))] hover:opacity-90 text-white btn-animate">Join</Button>
                         </Link>
                     </nav>
                 </div>
@@ -66,9 +68,9 @@ export default function GigDetailPage() {
             <div className="container mx-auto px-4 py-8">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-                    <Link href="/" className="hover:text-primary">Home</Link>
+                    <Link href="/" className="hover:text-primary animated-underline">Home</Link>
                     <span>/</span>
-                    <Link href="/browse" className="hover:text-primary">Browse</Link>
+                    <Link href="/browse" className="hover:text-primary animated-underline">Browse</Link>
                     <span>/</span>
                     <span className="text-foreground">{gig.title}</span>
                 </nav>
@@ -77,16 +79,17 @@ export default function GigDetailPage() {
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-8">
                         {/* Title & Seller Info */}
+                        <AnimatedSection animation="animate-fade-in">
                         <div>
                             <h1 className="text-3xl font-bold mb-4">{gig.title}</h1>
 
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-lg font-semibold">
+                                    <div className="w-12 h-12 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white text-lg font-semibold">
                                         {influencer.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <Link href={`/influencer/${influencer.id}`} className="font-semibold hover:text-primary">
+                                        <Link href={`/influencer/${influencer.id}`} className="font-semibold hover:text-primary animated-underline">
                                             {influencer.name}
                                         </Link>
                                         <div className="flex items-center gap-2 text-sm">
@@ -103,7 +106,7 @@ export default function GigDetailPage() {
                                 </div>
 
                                 <div className="flex items-center gap-1 ml-auto">
-                                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                    <Star className="w-5 h-5 fill-[hsl(var(--warning))] text-[hsl(var(--warning))]" />
                                     <span className="font-semibold">{gig.rating}</span>
                                     <span className="text-muted-foreground">({gig.reviewCount})</span>
                                 </div>
@@ -111,34 +114,48 @@ export default function GigDetailPage() {
 
                             {/* Tags */}
                             <div className="flex flex-wrap gap-2">
-                                {gig.tags.map((tag) => (
-                                    <Badge key={tag} variant="outline">{tag}</Badge>
-                                ))}
+                                {gig.tags.map((tag, tagIdx) => {
+                                    const tagStyles = [
+                                        'bg-[hsl(var(--bg-blue))] text-[hsl(var(--primary))] border-[hsl(var(--primary)/0.3)]',
+                                        'bg-[hsl(var(--bg-coral))] text-[hsl(var(--coral))] border-[hsl(var(--coral)/0.3)]',
+                                        'bg-[hsl(var(--bg-teal))] text-[hsl(var(--teal))] border-[hsl(var(--teal)/0.3)]',
+                                        'bg-[hsl(var(--bg-sunflower))] text-[hsl(var(--sunflower))] border-[hsl(var(--sunflower)/0.3)]',
+                                    ];
+                                    return (
+                                        <Badge key={tag} variant="outline" className={`hover-pop ${tagStyles[tagIdx % tagStyles.length]}`}>
+                                            {tag}
+                                        </Badge>
+                                    );
+                                })}
                             </div>
                         </div>
+                        </AnimatedSection>
 
                         {/* Gallery */}
-                        <div className="relative h-96 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg overflow-hidden">
+                        <AnimatedSection animation="animate-slide-up">
+                        <div className="relative h-96 bg-[hsl(var(--bg-blue))] rounded-lg overflow-hidden">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="text-center">
-                                    <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
+                                    <Sparkles className="w-16 h-16 text-[hsl(var(--primary))] mx-auto mb-4" />
                                     <p className="text-lg font-medium">Service Preview</p>
                                     <p className="text-sm text-muted-foreground">Professional content creation</p>
                                 </div>
                             </div>
                             <div className="absolute top-4 right-4 flex gap-2">
-                                <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur">
+                                <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur btn-press">
                                     <Heart className="w-4 h-4 mr-2" />
                                     Save
                                 </Button>
-                                <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur">
+                                <Button size="sm" variant="secondary" className="bg-white/90 backdrop-blur btn-press">
                                     <Share2 className="w-4 h-4" />
                                 </Button>
                             </div>
                         </div>
+                        </AnimatedSection>
 
                         {/* About This Service */}
-                        <Card>
+                        <AnimatedSection animation="animate-flip-in" delay={0}>
+                        <Card className="border-l-primary bg-white hover-glow">
                             <CardHeader>
                                 <CardTitle>About This Service</CardTitle>
                             </CardHeader>
@@ -146,15 +163,17 @@ export default function GigDetailPage() {
                                 <p className="text-muted-foreground whitespace-pre-line">{gig.description}</p>
                             </CardContent>
                         </Card>
+                        </AnimatedSection>
 
                         {/* About The Seller */}
-                        <Card>
+                        <AnimatedSection animation="animate-flip-in" delay={150}>
+                        <Card className="border-l-teal bg-white hover-glow">
                             <CardHeader>
                                 <CardTitle>About The Seller</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-2xl font-semibold">
+                                    <div className="w-16 h-16 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white text-2xl font-semibold">
                                         {influencer.name.charAt(0)}
                                     </div>
                                     <div className="flex-1">
@@ -164,7 +183,7 @@ export default function GigDetailPage() {
                                         <div className="grid grid-cols-2 gap-4 mb-4">
                                             <div>
                                                 <div className="flex items-center gap-1 text-sm mb-1">
-                                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                                    <Star className="w-4 h-4 fill-[hsl(var(--warning))] text-[hsl(var(--warning))]" />
                                                     <span className="font-semibold">{influencer.rating}</span>
                                                     <span className="text-muted-foreground">({influencer.reviewCount} reviews)</span>
                                                 </div>
@@ -178,7 +197,7 @@ export default function GigDetailPage() {
                                         {/* Social Platforms */}
                                         <div className="space-y-2">
                                             {influencer.platforms.map((platform) => (
-                                                <div key={platform.platform} className="flex items-center justify-between text-sm">
+                                                <div key={platform.platform} className="flex items-center justify-between text-sm hover-lift rounded-lg p-1 -mx-1">
                                                     <div className="flex items-center gap-2">
                                                         {platform.platform === "Instagram" && <Instagram className="w-4 h-4" />}
                                                         {platform.platform === "YouTube" && <Youtube className="w-4 h-4" />}
@@ -194,14 +213,16 @@ export default function GigDetailPage() {
                                 </div>
 
                                 <Link href={`/influencer/${influencer.id}`}>
-                                    <Button variant="outline" className="w-full">View Full Profile</Button>
+                                    <Button variant="outline" className="w-full btn-animate">View Full Profile</Button>
                                 </Link>
                             </CardContent>
                         </Card>
+                        </AnimatedSection>
 
                         {/* FAQs */}
                         {gig.faqs.length > 0 && (
-                            <Card>
+                            <AnimatedSection animation="animate-flip-in" delay={300}>
+                            <Card className="bg-white hover-glow">
                                 <CardHeader>
                                     <CardTitle>Frequently Asked Questions</CardTitle>
                                 </CardHeader>
@@ -229,19 +250,21 @@ export default function GigDetailPage() {
                                     )}
                                 </CardContent>
                             </Card>
+                            </AnimatedSection>
                         )}
 
                         {/* Reviews */}
-                        <Card>
+                        <AnimatedSection animation="animate-slide-up" delay={200}>
+                        <Card className="bg-white">
                             <CardHeader>
-                                <CardTitle>Reviews ({gig.reviewCount})</CardTitle>
+                                <CardTitle className="text-[hsl(var(--navy))]">Reviews ({gig.reviewCount})</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-6">
                                     {gigReviews.map((review) => (
                                         <div key={review.id} className="border-b last:border-0 pb-6 last:pb-0">
                                             <div className="flex items-start gap-3 mb-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+                                                <div className="w-10 h-10 rounded-full bg-[hsl(var(--teal))] flex items-center justify-center text-white font-semibold">
                                                     {review.reviewerName.charAt(0)}
                                                 </div>
                                                 <div className="flex-1">
@@ -256,8 +279,8 @@ export default function GigDetailPage() {
                                                             <Star
                                                                 key={i}
                                                                 className={`w-4 h-4 ${i < review.rating
-                                                                        ? 'fill-yellow-400 text-yellow-400'
-                                                                        : 'text-gray-300'
+                                                                        ? 'fill-[hsl(var(--warning))] text-[hsl(var(--warning))]'
+                                                                        : 'text-muted'
                                                                     }`}
                                                             />
                                                         ))}
@@ -265,7 +288,7 @@ export default function GigDetailPage() {
                                                     <p className="text-muted-foreground text-sm mb-3">{review.comment}</p>
 
                                                     {review.sellerResponse && (
-                                                        <div className="bg-gray-50 rounded-lg p-4 mt-3">
+                                                        <div className="bg-secondary rounded-lg p-4 mt-3">
                                                             <p className="font-semibold text-sm mb-1">Seller's Response:</p>
                                                             <p className="text-sm text-muted-foreground">{review.sellerResponse.content}</p>
                                                         </div>
@@ -277,12 +300,14 @@ export default function GigDetailPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                        </AnimatedSection>
                     </div>
 
                     {/* Sidebar - Package Selection */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24">
-                            <Card>
+                        <div className="sticky top-24 space-y-4">
+                            <AnimatedSection animation="animate-slide-left" delay={0}>
+                            <Card className="bg-white hover-glow">
                                 <CardHeader className="pb-3">
                                     <div className="flex gap-2">
                                         {(["basic", "standard", "premium"] as const).map((tier) => (
@@ -290,8 +315,8 @@ export default function GigDetailPage() {
                                                 key={tier}
                                                 onClick={() => setSelectedPackage(tier)}
                                                 className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${selectedPackage === tier
-                                                        ? 'bg-primary text-white'
-                                                        : 'bg-gray-100 hover:bg-gray-200'
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'bg-secondary hover:bg-muted'
                                                     }`}
                                             >
                                                 {tier.charAt(0).toUpperCase() + tier.slice(1)}
@@ -307,7 +332,7 @@ export default function GigDetailPage() {
                                             <p className="text-sm text-muted-foreground mb-4">{currentPackage.description}</p>
 
                                             <div className="flex items-baseline gap-2 mb-4">
-                                                <span className="text-3xl font-bold text-primary">
+                                                <span className="text-3xl font-bold text-[hsl(var(--coral))]">
                                                     ${currentPackage.price.toLocaleString()}
                                                 </span>
                                             </div>
@@ -337,12 +362,13 @@ export default function GigDetailPage() {
                                             </div>
 
                                             <Link href={`/order/${gig.id}?package=${selectedPackage}`}>
-                                                <Button className="w-full bg-primary hover:bg-primary-hover btn-animate mb-3">
+                                                <Button className="w-full bg-[hsl(var(--coral))] hover:opacity-90 text-white btn-animate group mb-3">
                                                     Continue (${currentPackage.price.toLocaleString()})
+                                                    <ArrowRight className="w-4 h-4 ml-2 group-hover-arrow" />
                                                 </Button>
                                             </Link>
 
-                                            <Button variant="outline" className="w-full">
+                                            <Button variant="outline" className="w-full btn-animate">
                                                 <MessageSquare className="w-4 h-4 mr-2" />
                                                 Contact Seller
                                             </Button>
@@ -350,9 +376,11 @@ export default function GigDetailPage() {
                                     </CardContent>
                                 )}
                             </Card>
+                            </AnimatedSection>
 
                             {/* Additional Info */}
-                            <Card className="mt-4">
+                            <AnimatedSection animation="animate-slide-left" delay={150}>
+                            <Card className="border-l-sunflower bg-white hover-glow">
                                 <CardContent className="pt-6">
                                     <div className="space-y-4 text-sm">
                                         <div className="flex items-center justify-between">
@@ -370,6 +398,7 @@ export default function GigDetailPage() {
                                     </div>
                                 </CardContent>
                             </Card>
+                            </AnimatedSection>
                         </div>
                     </div>
                 </div>

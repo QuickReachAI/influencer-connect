@@ -91,7 +91,7 @@ export class MediationService {
 
         // Simple round-robin: assign to mediator with fewest active disputes
         const mediatorWithCounts = await Promise.all(
-            mediators.map(async (m) => ({
+            mediators.map(async (m: any) => ({
                 ...m,
                 activeDisputes: await prisma.deal.count({
                     where: {
@@ -103,7 +103,7 @@ export class MediationService {
         );
 
         // Sort by active disputes (ascending)
-        mediatorWithCounts.sort((a, b) => a.activeDisputes - b.activeDisputes);
+        mediatorWithCounts.sort((a: any, b: any) => a.activeDisputes - b.activeDisputes);
 
         return mediatorWithCounts[0];
     }
@@ -321,15 +321,15 @@ export class MediationService {
             select: { mediationDecision: true }
         });
 
-        const favorCreator = resolutions.filter(r =>
+        const favorCreator = resolutions.filter((r: any) =>
             r.mediationDecision?.startsWith('FAVOR_CREATOR')
         ).length;
 
-        const favorBrand = resolutions.filter(r =>
+        const favorBrand = resolutions.filter((r: any) =>
             r.mediationDecision?.startsWith('FAVOR_BRAND')
         ).length;
 
-        const partial = resolutions.filter(r =>
+        const partial = resolutions.filter((r: any) =>
             r.mediationDecision?.startsWith('PARTIAL')
         ).length;
 

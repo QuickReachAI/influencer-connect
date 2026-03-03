@@ -234,7 +234,7 @@ export class FileService {
             }
         });
 
-        return deliverables.map(d => ({
+        return deliverables.map((d: any) => ({
             id: d.id,
             fileName: d.fileName,
             fileSize: d.fileSize,

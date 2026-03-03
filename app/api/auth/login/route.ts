@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/services/auth.service';
 import { loginSchema } from '@/lib/validations';
+import { authLimiter } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await authLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
         const body = await request.json();
 
         // Validate request body

@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { kycService } from '@/lib/services/kyc.service';
 import { kycSchema } from '@/lib/validations';
+import { authLimiter } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+        const { success } = await authLimiter(ip);
+        if (!success) {
+            return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
         const userId = request.cookies.get('user_id')?.value;
 
         if (!userId) {

@@ -3,38 +3,19 @@ import prisma from "@/lib/prisma";
 import { mediationService } from "@/lib/services/mediation.service";
 import { fileService } from "@/lib/services/file.service";
 import { taxService } from "@/lib/services/tax.service";
+import { verifyAdmin, AuthError } from "@/lib/auth-helpers";
 
-// Get admin dashboard statistics
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        await verifyAdmin(request);
 
-        if (!userId) {
-            return NextResponse.json(
-                { error: 'Authentication required' },
-                { status: 401 }
-            );
-        }
-
-        // Verify admin role
-        const user = await prisma.user.findUnique({
-            where: { id: userId }
-        });
-
-        if (!user || user.role !== 'ADMIN') {
-            return NextResponse.json(
-                { error: 'Admin access required' },
-                { status: 403 }
-            );
-        }
-
-        // Get time period from query params
         const searchParams = request.nextUrl.searchParams;
-        const period = searchParams.get('period') || '30'; // days
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - parseInt(period));
+        const periodRaw = parseInt(searchParams.get('period') || '30');
+        const period = Number.isFinite(periodRaw) && periodRaw > 0 ? periodRaw : 30;
 
-        // Fetch all stats in parallel
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - period);
+
         const [
             userStats,
             dealStats,
@@ -43,7 +24,6 @@ export async function GET(request: NextRequest) {
             storageStats,
             recentActivity
         ] = await Promise.all([
-            // User statistics
             Promise.all([
                 prisma.user.count(),
                 prisma.user.count({ where: { role: 'CREATOR' } }),
@@ -55,7 +35,6 @@ export async function GET(request: NextRequest) {
                 })
             ]),
 
-            // Deal statistics
             Promise.all([
                 prisma.deal.count(),
                 prisma.deal.count({ where: { status: 'COMPLETED' } }),
@@ -69,16 +48,12 @@ export async function GET(request: NextRequest) {
                 })
             ]),
 
-            // Revenue statistics (last 30 days)
             taxService.getTaxSummary(startDate, new Date()),
 
-            // Dispute statistics
             mediationService.getDisputeStats(),
 
-            // Storage statistics
             fileService.getStorageStats(),
 
-            // Recent activity
             prisma.auditLog.findMany({
                 where: {
                     action: {
@@ -122,6 +97,12 @@ export async function GET(request: NextRequest) {
         });
 
     } catch (error) {
+        if (error instanceof AuthError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.statusCode }
+            );
+        }
         console.error('Get stats error:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
