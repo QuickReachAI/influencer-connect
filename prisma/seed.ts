@@ -147,6 +147,87 @@ async function main() {
 
   console.log("Sample chat messages created (3 messages)\n");
 
+  // --- Phase 1: Seed SocialEntities ---
+  const entity1 = await prisma.socialEntity.upsert({
+    where: {
+      masterId_platform_handle: {
+        masterId: influencer.id,
+        platform: "INSTAGRAM",
+        handle: "@priyasharma",
+      },
+    },
+    update: {},
+    create: {
+      masterId: influencer.id,
+      platform: "INSTAGRAM",
+      handle: "@priyasharma",
+      followerCount: 520000,
+      engagementRate: 4.2,
+      rating: 4.8,
+      totalDeals: 23,
+      isVerified: true,
+      niche: ["beauty", "lifestyle"],
+      categories: ["skincare", "fashion"],
+    },
+  });
+
+  const entity2 = await prisma.socialEntity.upsert({
+    where: {
+      masterId_platform_handle: {
+        masterId: influencer.id,
+        platform: "YOUTUBE",
+        handle: "PriyaSharmaVlogs",
+      },
+    },
+    update: {},
+    create: {
+      masterId: influencer.id,
+      platform: "YOUTUBE",
+      handle: "PriyaSharmaVlogs",
+      followerCount: 180000,
+      engagementRate: 3.8,
+      rating: 4.5,
+      totalDeals: 8,
+      isVerified: true,
+      niche: ["beauty", "vlogs"],
+      categories: ["skincare", "tutorials"],
+    },
+  });
+
+  console.log(
+    `Social entities created: ${entity1.handle}, ${entity2.handle}`
+  );
+
+  // --- Phase 1: Seed Wallets ---
+  for (const user of [brand, influencer, admin]) {
+    await prisma.wallet.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id },
+    });
+  }
+
+  console.log("Wallets created for all users");
+
+  // --- Phase 1: Seed Sample Campaign ---
+  const campaign = await prisma.campaign.create({
+    data: {
+      brandId: brand.brandProfile!.id,
+      title: "Summer Glow SPF50 Launch Campaign",
+      description:
+        "Looking for beauty creators to showcase our new Summer Glow SPF50 sunscreen. We need engaging Instagram Reels and YouTube Shorts demonstrating product application and benefits.",
+      niche: ["beauty", "skincare"],
+      minFollowers: 10000,
+      maxFollowers: 1000000,
+      contentFormat: ["REEL", "SHORT"],
+      budget: 200000,
+      status: "ACTIVE",
+      publishedAt: new Date(),
+    },
+  });
+
+  console.log(`Sample campaign created: "${campaign.title}"\n`);
+
   console.log("========================================");
   console.log("  SEED COMPLETE - LOGIN CREDENTIALS");
   console.log("========================================");

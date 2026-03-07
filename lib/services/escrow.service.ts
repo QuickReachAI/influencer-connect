@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import Razorpay from 'razorpay';
+import { inngest } from '@/lib/inngest/client';
 
 let _razorpay: Razorpay | null = null;
 
@@ -277,11 +278,11 @@ export class EscrowService {
             }
         });
 
-        // Schedule T+2 payout (48 hours inspection window)
-        // In production, this would use a job queue (BullMQ)
-        setTimeout(() => {
-            this.releaseFundsToCreator(dealId);
-        }, 48 * 60 * 60 * 1000); // 48 hours
+        // Schedule T+2 payout via Inngest (durable, restart-safe)
+        await inngest.send({
+            name: 'deal/payment-completed',
+            data: { dealId },
+        });
 
         // Audit log
         await prisma.auditLog.create({

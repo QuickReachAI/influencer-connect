@@ -235,3 +235,108 @@ export type DisputeInput = z.infer<typeof disputeSchema>;
 export type DisputeResolutionInput = z.infer<typeof disputeResolutionSchema>;
 export type ChatMessageInput = z.infer<typeof chatMessageSchema>;
 export type FileUploadInput = z.infer<typeof fileUploadSchema>;
+
+// ============================================================================
+// PHASE 1 — NEW MODEL VALIDATIONS
+// ============================================================================
+
+// Social Entity
+export const socialEntityCreateSchema = z.object({
+  platform: z.enum(['INSTAGRAM', 'YOUTUBE', 'FACEBOOK']),
+  handle: z.string().min(1, 'Handle is required').max(100),
+  followerCount: z.number().min(0).optional(),
+  engagementRate: z.number().min(0).max(100).optional(),
+  niche: z.array(z.string()).max(10).optional(),
+  categories: z.array(z.string()).max(10).optional(),
+});
+
+export const socialEntityUpdateSchema = z.object({
+  followerCount: z.number().min(0).optional(),
+  engagementRate: z.number().min(0).max(100).optional(),
+  niche: z.array(z.string()).max(10).optional(),
+  categories: z.array(z.string()).max(10).optional(),
+  audienceDemographics: z.record(z.string(), z.unknown()).optional(),
+  portfolioItems: z.array(z.record(z.string(), z.unknown())).optional(),
+});
+
+// Campaign
+export const campaignCreateSchema = z.object({
+  title: z.string().min(10, 'Title must be at least 10 characters').max(200),
+  description: z.string().min(50, 'Description must be at least 50 characters').max(5000),
+  niche: z.array(z.string()).min(1, 'Select at least one niche').max(5),
+  minFollowers: z.number().min(0).default(0),
+  maxFollowers: z.number().min(0).default(999999999),
+  contentFormat: z.array(z.enum(['REEL', 'SHORT', 'VIDEO', 'POST', 'STORY', 'CAROUSEL'])).min(1),
+  duration: z.string().optional(),
+  ownershipTransfer: z.boolean().default(false),
+  budget: z.number().min(1000, 'Minimum budget is ₹1,000'),
+  expiresAt: z.string().datetime().optional(),
+});
+
+export const campaignUpdateSchema = z.object({
+  title: z.string().min(10).max(200).optional(),
+  description: z.string().min(50).max(5000).optional(),
+  niche: z.array(z.string()).max(5).optional(),
+  minFollowers: z.number().min(0).optional(),
+  maxFollowers: z.number().min(0).optional(),
+  contentFormat: z.array(z.enum(['REEL', 'SHORT', 'VIDEO', 'POST', 'STORY', 'CAROUSEL'])).optional(),
+  status: z.enum(['DRAFT', 'ACTIVE', 'PAUSED', 'CANCELLED']).optional(),
+});
+
+// Campaign Application
+export const campaignApplicationSchema = z.object({
+  entityId: z.string().uuid('Invalid entity ID'),
+  creatorMessage: z.string().max(1000).optional(),
+  proposedRate: z.number().min(0).optional(),
+});
+
+// Deal Milestone
+export const dealMilestoneSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters').max(200),
+  description: z.string().max(1000).optional(),
+  dueDate: z.string().datetime().optional(),
+  sortOrder: z.number().min(0).optional(),
+});
+
+// Deal Revision
+export const dealRevisionSchema = z.object({
+  feedback: z.string().min(10, 'Feedback must be at least 10 characters').max(2000),
+});
+
+// Exclusive Negotiation (Lock)
+export const dealLockSchema = z.object({
+  entityId: z.string().uuid('Invalid entity ID'),
+});
+
+// Wallet
+export const walletWithdrawSchema = z.object({
+  amount: z.number().min(100, 'Minimum withdrawal is ₹100'),
+});
+
+// Notification Preference
+export const notificationPreferenceSchema = z.object({
+  type: z.string(),
+  email: z.boolean().optional(),
+  push: z.boolean().optional(),
+  inApp: z.boolean().optional(),
+});
+
+// KYB (GSTIN)
+export const kybSchema = z.object({
+  gstin: z.string()
+    .length(15, 'GSTIN must be 15 characters')
+    .regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GSTIN format'),
+});
+
+// Type exports
+export type SocialEntityCreateInput = z.infer<typeof socialEntityCreateSchema>;
+export type SocialEntityUpdateInput = z.infer<typeof socialEntityUpdateSchema>;
+export type CampaignCreateInput = z.infer<typeof campaignCreateSchema>;
+export type CampaignUpdateInput = z.infer<typeof campaignUpdateSchema>;
+export type CampaignApplicationInput = z.infer<typeof campaignApplicationSchema>;
+export type DealMilestoneInput = z.infer<typeof dealMilestoneSchema>;
+export type DealRevisionInput = z.infer<typeof dealRevisionSchema>;
+export type DealLockInput = z.infer<typeof dealLockSchema>;
+export type WalletWithdrawInput = z.infer<typeof walletWithdrawSchema>;
+export type NotificationPreferenceInput = z.infer<typeof notificationPreferenceSchema>;
+export type KYBInput = z.infer<typeof kybSchema>;
