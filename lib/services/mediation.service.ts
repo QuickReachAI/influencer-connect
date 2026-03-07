@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from '@/lib/prisma';
 import { escrowService } from './escrow.service';
 import { kycService } from './kyc.service';

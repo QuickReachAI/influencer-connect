@@ -66,8 +66,7 @@ export default function HomePage() {
             <div className="w-9 h-9 bg-[#0E61FF] rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -272,7 +271,7 @@ export default function HomePage() {
           </AnimatedSection>
           <AnimatedSection animation="animate-fade-in" delay={150}>
             <p className="text-xl mb-10 max-w-2xl mx-auto text-white/75">
-              Join thousands of brands and creators already collaborating on QuickReach AI.
+              Join thousands of brands and creators already collaborating on InfluencerConnect.
             </p>
           </AnimatedSection>
           <AnimatedSection className="flex flex-col sm:flex-row gap-4 justify-center" animation="animate-slide-up" delay={300}>
@@ -303,11 +302,10 @@ export default function HomePage() {
                 <div className="w-9 h-9 bg-[#0E61FF] rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white">QuickReach</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/10 px-1.5 py-0.5 rounded">AI</span>
+                <span className="text-lg font-bold text-white">Influencer<span className="text-white/60">Connect</span></span>
               </div>
               <p className="text-sm text-gray-400 leading-relaxed">
-                India&apos;s most trusted creator-brand collaboration platform. Powered by AI.
+                India&apos;s most trusted creator-brand collaboration platform. Powered by QuickReach AI.
               </p>
             </div>
 
@@ -340,7 +338,7 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p>&copy; 2026 QuickReach AI. All rights reserved.</p>
+            <p>&copy; 2026 InfluencerConnect. Powered by QuickReach AI. All rights reserved.</p>
             <div className="flex gap-6">
               <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Privacy</Link>
               <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Terms</Link>

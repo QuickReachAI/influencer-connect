@@ -51,8 +51,7 @@ export default function GigDetailPage() {
                         <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                             <Zap className="w-5 h-5 text-white" />
                         </div>
-                        <span className="text-xl font-bold font-heading text-gray-900">QuickReach</span>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-full">AI</span>
+                        <span className="text-xl font-bold font-heading text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
                     </Link>
                     <nav className="flex items-center gap-3">
                         <Link href="/auth/login">

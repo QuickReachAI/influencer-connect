@@ -12,8 +12,30 @@ import { AnimatedSection } from "@/components/ui/animated-section";
 import {
   ArrowLeft, FileText, CheckCircle, DollarSign, Upload,
   MessageSquare, AlertTriangle, Download, Send, Clock,
-  ShieldAlert, User, Building2, ListChecks
+  ShieldAlert, User, Building2, ListChecks, Play,
+  RotateCcw, ThumbsUp, History
 } from "lucide-react";
+import { toast } from "sonner";
+import { VideoPlayer } from "@/components/ui/video-player";
+
+interface DealRevision {
+  id: string;
+  revisionNumber: number;
+  feedback?: string;
+  videoUrl?: string;
+  watermarkedUrl?: string;
+  cleanUrl?: string;
+  status: string;
+  createdAt: string;
+  videoAsset?: {
+    id: string;
+    hlsUrl?: string;
+    watermarkedUrl?: string;
+    cleanUrl?: string;
+    status: string;
+    thumbnailUrl?: string;
+  };
+}
 
 interface DealData {
   id: string;
@@ -23,6 +45,8 @@ interface DealData {
   totalAmount: number;
   platformFee: number;
   creatorPayout: number;
+  maxRevisions: number;
+  currentRevision: number;
   scriptChecklist: string[];
   scriptApprovedAt: string | null;
   payment50Paid: boolean;
@@ -41,7 +65,7 @@ interface DealData {
   creator: {
     id: string;
     email: string;
-    creatorProfile: { name: string; avatar?: string; reliabilityScore?: number } | null;
+    creatorProfile: { name: string; avatar?: string; reliabilityScore?: number; completionScore?: number } | null;
   };
   deliverables: Array<{
     id: string;
@@ -64,15 +88,19 @@ interface DealData {
     status: string;
     createdAt: string;
   }>;
+  revisions?: DealRevision[];
 }
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   DRAFT: { label: "Draft", variant: "secondary" },
+  LOCKED: { label: "Locked", variant: "default" },
   SCRIPT_PENDING: { label: "Script Pending", variant: "secondary" },
   SCRIPT_APPROVED: { label: "Script Approved", variant: "default" },
-  PAYMENT_PENDING: { label: "Payment Pending", variant: "secondary" },
-  IN_PROGRESS: { label: "In Progress", variant: "default" },
-  FILES_UPLOADED: { label: "Files Uploaded", variant: "default" },
+  PAYMENT_50_PENDING: { label: "Payment Pending", variant: "secondary" },
+  PRODUCTION: { label: "In Production", variant: "default" },
+  DELIVERY_PENDING: { label: "Delivery Pending", variant: "secondary" },
+  REVISION_PENDING: { label: "Revision Pending", variant: "secondary" },
+  PAYMENT_100_PENDING: { label: "Final Payment", variant: "secondary" },
   COMPLETED: { label: "Completed", variant: "outline" },
   DISPUTED: { label: "Disputed", variant: "destructive" },
   CANCELLED: { label: "Cancelled", variant: "destructive" },
@@ -91,6 +119,11 @@ export default function BrandDealDetailPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState("");
   const [showDisputeForm, setShowDisputeForm] = useState(false);
+  const [currentRevision, setCurrentRevision] = useState(1);
+  const [maxRevisions] = useState(2);
+  const [revisionHistory] = useState([
+    { id: 1, revision: 1, feedback: "Initial draft uploaded. Please review audio levels in the intro section.", date: "2026-02-28T10:30:00Z" },
+  ]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -184,6 +217,58 @@ export default function BrandDealDetailPage() {
       setError(err instanceof Error ? err.message : "Failed to send");
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  const [revisionFeedback, setRevisionFeedback] = useState("");
+
+  const handleRequestRevision = async () => {
+    if (!revisionFeedback.trim()) return;
+    setActionLoading("revision");
+    try {
+      const latestRevision = deal?.revisions?.length
+        ? deal.revisions[deal.revisions.length - 1]
+        : null;
+      const revisionId = latestRevision?.id;
+      const res = await fetch(`/api/deals/${dealId}/revisions/${revisionId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "REVISION_REQUESTED", feedback: revisionFeedback }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to request revision");
+      }
+      setRevisionFeedback("");
+      await fetchDeal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Revision request failed");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleApproveFinal = async () => {
+    setActionLoading("approve-final");
+    try {
+      const latestRevision = deal?.revisions?.length
+        ? deal.revisions[deal.revisions.length - 1]
+        : null;
+      const revisionId = latestRevision?.id;
+      const res = await fetch(`/api/deals/${dealId}/revisions/${revisionId}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "APPROVED" }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to approve");
+      }
+      await fetchDeal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Approval failed");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -392,6 +477,227 @@ export default function BrandDealDetailPage() {
             </Card>
             </AnimatedSection>
 
+            {/* Video Review */}
+            <AnimatedSection animation="animate-slide-up" delay={250}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Play className="w-5 h-5" />
+                  Video Review
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <VideoPlayer
+                  src={deal.deliverables?.[0]?.fileUrl}
+                  watermarked={true}
+                />
+
+                {/* Revision progress */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-gray-700">Revision {currentRevision} of {maxRevisions}</span>
+                    <span className="text-gray-500">{maxRevisions - currentRevision} remaining</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#0E61FF] transition-all duration-300"
+                      style={{ width: `${(currentRevision / maxRevisions) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="relative flex-1">
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2"
+                      disabled={currentRevision >= maxRevisions}
+                      title={currentRevision >= maxRevisions ? "Max revisions reached" : undefined}
+                      onClick={() => {
+                        if (currentRevision < maxRevisions) {
+                          setCurrentRevision((prev) => prev + 1);
+                          toast("Revision requested", { description: "The creator has been notified." });
+                        }
+                      }}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Request Revision
+                    </Button>
+                  </div>
+                  <Button
+                    className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={() => {
+                      toast.success("Final version approved! Clean render in progress...");
+                    }}
+                  >
+                    <ThumbsUp className="w-4 h-4" />
+                    Approve Final
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            </AnimatedSection>
+
+            {/* Revision History */}
+            <AnimatedSection animation="animate-slide-up" delay={275}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5" />
+                  Revision History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {revisionHistory.length > 0 ? (
+                  <div className="relative pl-6">
+                    <div className="absolute left-[9px] top-2 bottom-2 w-px bg-gray-200" />
+                    <div className="space-y-6">
+                      {revisionHistory.map((entry) => (
+                        <div key={entry.id} className="relative">
+                          <div className="absolute -left-6 top-1 w-[18px] h-[18px] rounded-full border-2 border-[#0E61FF] bg-white flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-[#0E61FF]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">Revision {entry.revision}</p>
+                            <p className="text-sm text-gray-600 mt-1">{entry.feedback}</p>
+                            <p className="text-xs text-gray-400 mt-1">{new Date(entry.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No revisions yet.</p>
+                )}
+              </CardContent>
+            </Card>
+            </AnimatedSection>
+
+            {/* Video Review & Revisions */}
+            {deal.revisions && deal.revisions.length > 0 && (
+              <AnimatedSection animation="animate-slide-up" delay={250}>
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Video Review & Revisions
+                      </CardTitle>
+                      <Badge variant="outline" className="gap-1">
+                        Revision {deal.currentRevision} of {deal.maxRevisions}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {deal.revisions.map((rev) => {
+                      const hlsUrl = rev.videoAsset?.hlsUrl;
+                      const isLatest = rev.revisionNumber === deal.currentRevision;
+
+                      return (
+                        <div
+                          key={rev.id}
+                          className={`rounded-lg border p-4 ${isLatest ? "border-[#0E61FF]/30 bg-blue-50/30" : "border-gray-200"}`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-gray-900">
+                                Revision #{rev.revisionNumber}
+                              </span>
+                              <Badge
+                                variant={
+                                  rev.status === "APPROVED" ? "default" :
+                                  rev.status === "REVISION_REQUESTED" ? "destructive" : "secondary"
+                                }
+                                className="text-[10px]"
+                              >
+                                {rev.status === "REVISION_REQUESTED" ? "Changes Requested" : rev.status}
+                              </Badge>
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {new Date(rev.createdAt).toLocaleDateString("en-IN")}
+                            </span>
+                          </div>
+
+                          {/* HLS Video Player */}
+                          {hlsUrl && (
+                            <div className="mb-3 rounded-lg overflow-hidden bg-black aspect-video">
+                              <video
+                                controls
+                                className="w-full h-full"
+                                poster={rev.videoAsset?.thumbnailUrl || undefined}
+                              >
+                                <source src={hlsUrl} type="application/x-mpegURL" />
+                                Your browser does not support HLS playback.
+                              </video>
+                              <p className="text-[10px] text-gray-400 mt-1 text-center">
+                                Watermarked preview — clean render available after final approval
+                              </p>
+                            </div>
+                          )}
+
+                          {rev.feedback && (
+                            <div className="text-sm text-gray-700 bg-gray-50 rounded p-2 mb-2">
+                              <span className="font-medium text-gray-500 text-xs">Feedback: </span>
+                              {rev.feedback}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Review Actions */}
+                    {deal.status === "REVISION_PENDING" || deal.status === "DELIVERY_PENDING" ? (
+                      <div className="border-t border-gray-200 pt-4 space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            onClick={handleApproveFinal}
+                            disabled={!!actionLoading}
+                          >
+                            {actionLoading === "approve-final" ? (
+                              <Clock className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                            Approve Final
+                          </Button>
+
+                          {deal.currentRevision < deal.maxRevisions ? (
+                            <div className="flex-1 flex gap-2">
+                              <Input
+                                value={revisionFeedback}
+                                onChange={(e) => setRevisionFeedback(e.target.value)}
+                                placeholder="Provide feedback for revision..."
+                                className="flex-1"
+                              />
+                              <Button
+                                variant="outline"
+                                className="gap-1"
+                                onClick={handleRequestRevision}
+                                disabled={!revisionFeedback.trim() || !!actionLoading}
+                              >
+                                {actionLoading === "revision" ? (
+                                  <Clock className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <AlertTriangle className="w-4 h-4" />
+                                )}
+                                Request Revision
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              Max revisions reached ({deal.maxRevisions})
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              </AnimatedSection>
+            )}
+
             {/* Chat */}
             <AnimatedSection animation="animate-slide-up" delay={300}>
             <Card>
@@ -558,6 +864,12 @@ export default function BrandDealDetailPage() {
                     <span className="font-medium">{deal.creator.creatorProfile.reliabilityScore}%</span>
                   </div>
                 )}
+                {deal.creator?.creatorProfile?.completionScore !== undefined && (
+                  <div className="flex justify-between text-sm mt-1">
+                    <span className="text-gray-500">Profile Score</span>
+                    <span className="font-medium">{deal.creator.creatorProfile.completionScore}%</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -584,7 +896,7 @@ export default function BrandDealDetailPage() {
                   ) : showDisputeForm ? (
                     <div className="space-y-3">
                       <textarea
-                        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[80px] resize-none"
+                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E61FF] min-h-[80px] resize-none"
                         placeholder="Describe the reason for your dispute..."
                         value={disputeReason}
                         onChange={(e) => setDisputeReason(e.target.value)}

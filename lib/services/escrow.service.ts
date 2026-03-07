@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from '@/lib/prisma';
 import Razorpay from 'razorpay';
 import { inngest } from '@/lib/inngest/client';

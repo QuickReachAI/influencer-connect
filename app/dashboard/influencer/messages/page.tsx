@@ -5,9 +5,20 @@ import { useRouter } from "next/navigation";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { MessageSquare, Send, ArrowLeft, Building2 } from "lucide-react";
+import {
+  MessageSquare,
+  Send,
+  ArrowLeft,
+  Building2,
+  ShieldAlert,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
+import { usePusherChat } from "@/lib/hooks/use-pusher";
 
 interface Deal {
   id: string;
@@ -34,6 +45,8 @@ interface ChatMessage {
   content: string;
   flagged: boolean;
   createdAt: string;
+  piiRedacted?: boolean;
+  shadowBlocked?: boolean;
   sender: {
     id: string;
     email: string;
@@ -46,6 +59,7 @@ interface ChatMessage {
 export default function InfluencerMessagesPage() {
   const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
@@ -55,6 +69,15 @@ export default function InfluencerMessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
   const [mobileShowChat, setMobileShowChat] = useState(false);
+
+  const {
+    isConnected,
+    typingUsers,
+    bind,
+    sendTypingStart,
+    sendTypingStop,
+    sendReadReceipt,
+  } = usePusherChat(selectedDealId);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -97,18 +120,48 @@ export default function InfluencerMessagesPage() {
     if (!selectedDealId) return;
     setLoadingMessages(true);
     fetchMessages(selectedDealId);
+    sendReadReceipt(selectedDealId);
+  }, [selectedDealId, fetchMessages, sendReadReceipt]);
 
-    const interval = setInterval(() => fetchMessages(selectedDealId), 5000);
-    return () => clearInterval(interval);
-  }, [selectedDealId, fetchMessages]);
+  // Real-time message subscription via Pusher
+  useEffect(() => {
+    if (!selectedDealId || !bind) return;
+
+    const unbindNewMessage = bind<ChatMessage>("new-message", (data) => {
+      setMessages((prev) => [...prev, data]);
+      sendReadReceipt(selectedDealId);
+    });
+
+    const unbindFlagged = bind<{ messageId: string; reason: string }>("message-flagged", (data) => {
+      toast.warning(`PII detected: ${data.reason}`, { duration: 4000 });
+    });
+
+    return () => {
+      unbindNewMessage?.();
+      unbindFlagged?.();
+    };
+  }, [selectedDealId, bind, sendReadReceipt]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleInputChange = (value: string) => {
+    setNewMessage(value);
+    if (selectedDealId && value.trim()) {
+      sendTypingStart(selectedDealId);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        if (selectedDealId) sendTypingStop(selectedDealId);
+      }, 2000);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedDealId) return;
+
+    if (selectedDealId) sendTypingStop(selectedDealId);
 
     setSending(true);
     try {
@@ -119,10 +172,15 @@ export default function InfluencerMessagesPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to send message");
+        if (data.piiWarning) {
+          toast.warning(data.piiWarning, { duration: 5000 });
+        }
+        if (data.error) throw new Error(data.error);
       }
       setNewMessage("");
-      await fetchMessages(selectedDealId);
+      if (!isConnected) {
+        await fetchMessages(selectedDealId);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send message");
     } finally {
@@ -136,10 +194,26 @@ export default function InfluencerMessagesPage() {
     return deal.brand.brandProfile?.companyName || deal.brand.email;
   }
 
-  function getLastMessagePreview(deal: Deal) {
-    const msg = messages.length > 0 && selectedDealId === deal.id ? messages[messages.length - 1] : null;
-    if (msg) return msg.content;
-    return deal._count.chatMessages > 0 ? "Tap to view messages" : "No messages yet";
+  function renderMessageContent(msg: ChatMessage) {
+    if (msg.shadowBlocked) {
+      return <span className="text-gray-400 italic">[Message hidden]</span>;
+    }
+    if (msg.piiRedacted) {
+      return (
+        <span>
+          {msg.content.split(/(\[REDACTED\])/).map((part, i) =>
+            part === "[REDACTED]" ? (
+              <span key={i} className="bg-red-100 text-red-600 px-1 rounded text-xs font-mono">
+                [REDACTED]
+              </span>
+            ) : (
+              <span key={i}>{part}</span>
+            )
+          )}
+        </span>
+      );
+    }
+    return msg.content;
   }
 
   return (
@@ -148,11 +222,19 @@ export default function InfluencerMessagesPage() {
 
       <div className="container mx-auto px-4 py-8 animate-fade-in">
         <AnimatedSection animation="animate-fade-in">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Messages</h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
+            {isConnected && (
+              <Badge variant="success" className="gap-1 text-[10px]">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </Badge>
+            )}
+          </div>
         </AnimatedSection>
 
-        <div className="grid md:grid-cols-12 gap-0 md:gap-0 h-[calc(100vh-200px)] rounded-xl border border-gray-200 overflow-hidden bg-white shadow-md">
-          {/* Sidebar - Conversation List */}
+        <div className="grid md:grid-cols-12 gap-0 h-[calc(100vh-200px)] rounded-xl border border-gray-200 overflow-hidden bg-white shadow-md">
+          {/* Sidebar */}
           <div
             className={`md:col-span-4 border-r border-gray-200 flex flex-col ${
               mobileShowChat ? "hidden md:flex" : "flex"
@@ -163,7 +245,6 @@ export default function InfluencerMessagesPage() {
                 Conversations
               </h2>
             </div>
-
             <div className="flex-1 overflow-y-auto">
               {loadingDeals ? (
                 <div className="p-4 space-y-3">
@@ -171,7 +252,6 @@ export default function InfluencerMessagesPage() {
                     <div key={i} className="animate-pulse space-y-2 p-3 rounded-lg">
                       <div className="h-4 bg-gray-200 rounded w-3/4" />
                       <div className="h-3 bg-gray-200 rounded w-1/2" />
-                      <div className="h-3 bg-gray-200 rounded w-full" />
                     </div>
                   ))}
                 </div>
@@ -179,9 +259,6 @@ export default function InfluencerMessagesPage() {
                 <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                   <MessageSquare className="h-12 w-12 text-gray-300 mb-3" />
                   <p className="text-sm font-medium text-gray-500">No conversations yet</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Conversations appear when brands create deals with you
-                  </p>
                 </div>
               ) : (
                 <div className="p-2 space-y-1">
@@ -213,9 +290,6 @@ export default function InfluencerMessagesPage() {
                           </div>
                           <p className="text-xs text-gray-500 truncate mt-0.5">
                             {deal.title}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate mt-0.5">
-                            {getLastMessagePreview(deal)}
                           </p>
                         </div>
                       </div>
@@ -263,17 +337,9 @@ export default function InfluencerMessagesPage() {
                   {loadingMessages ? (
                     <div className="space-y-4 py-4">
                       {Array.from({ length: 6 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
-                        >
-                          <div className="animate-pulse space-y-1.5">
-                            <div
-                              className={`h-10 bg-gray-200 rounded-lg ${
-                                i % 2 === 0 ? "w-48" : "w-56"
-                              }`}
-                            />
-                            <div className="h-2 bg-gray-200 rounded w-16" />
+                        <div key={i} className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                          <div className="animate-pulse">
+                            <div className={`h-10 bg-gray-200 rounded-lg ${i % 2 === 0 ? "w-48" : "w-56"}`} />
                           </div>
                         </div>
                       ))}
@@ -282,9 +348,6 @@ export default function InfluencerMessagesPage() {
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <MessageSquare className="h-10 w-10 text-gray-300 mb-2" />
                       <p className="text-sm text-gray-500">No messages yet</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Send the first message to get the conversation started
-                      </p>
                     </div>
                   ) : (
                     messages.map((msg) => {
@@ -314,25 +377,50 @@ export default function InfluencerMessagesPage() {
                             }`}
                           >
                             <p className="text-sm whitespace-pre-wrap break-words">
-                              {msg.content}
+                              {renderMessageContent(msg)}
                             </p>
-                            <p
-                              className={`text-[10px] mt-1 ${
-                                isOwn
-                                  ? "text-white/60"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {new Date(msg.createdAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span
+                                className={`text-[10px] ${isOwn ? "text-white/60" : "text-gray-500"}`}
+                              >
+                                {new Date(msg.createdAt).toLocaleTimeString("en-IN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  timeZone: "Asia/Kolkata",
+                                })}
+                              </span>
+                              {msg.flagged && (
+                                <ShieldAlert className={`w-3 h-3 ${isOwn ? "text-white/60" : "text-amber-500"}`} />
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
                     })
                   )}
+
+                  {/* Typing Indicator */}
+                  {typingUsers.length > 0 && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-2xl px-4 py-2 rounded-bl-md">
+                        <div className="flex items-center gap-1">
+                          <div className="flex gap-0.5">
+                            {[0, 1, 2].map((i) => (
+                              <div
+                                key={i}
+                                className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce"
+                                style={{ animationDelay: `${i * 150}ms` }}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-gray-500 ml-1">
+                            {typingUsers.map((u) => u.userName).join(", ")} typing...
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -342,7 +430,7 @@ export default function InfluencerMessagesPage() {
                     <Input
                       placeholder="Type your message..."
                       value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
+                      onChange={(e) => handleInputChange(e.target.value)}
                       disabled={sending}
                       className="flex-1 bg-white"
                     />

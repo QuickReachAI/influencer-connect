@@ -133,9 +133,10 @@ export default function DisputesPage() {
                     <div className="space-y-4">
                         {disputes.map((dispute, index) => (
                             <AnimatedSection key={dispute.id} animation="animate-slide-up" delay={index * 80}>
-                                <div
-                                    onClick={() => setSelectedDispute(dispute)}
-                                    className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all hover-lift group ${
+                                <Link
+                                    href={`/dashboard/admin/disputes/${dispute.id}`}
+                                    onClick={(e) => { e.preventDefault(); setSelectedDispute(dispute); }}
+                                    className={`block bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all hover-lift group ${
                                         selectedDispute?.id === dispute.id
                                             ? 'ring-2 ring-[#0E61FF]'
                                             : 'hover:shadow-lg'
@@ -171,9 +172,18 @@ export default function DisputesPage() {
                                                 currency: 'INR'
                                             }).format(dispute.totalAmount)}
                                         </span>
-                                        <span>{new Date(dispute.updatedAt).toLocaleDateString('en-IN')}</span>
+                                        <div className="flex items-center gap-2">
+                                            <span>{new Date(dispute.updatedAt).toLocaleDateString('en-IN')}</span>
+                                            <Link
+                                                href={`/dashboard/admin/disputes/${dispute.id}`}
+                                                className="text-[#0E61FF] hover:underline text-xs"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                Full View →
+                                            </Link>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             </AnimatedSection>
                         ))}
 

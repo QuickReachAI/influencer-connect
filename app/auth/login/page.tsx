@@ -41,6 +41,12 @@ export default function LoginPage() {
       localStorage.setItem("userRole", role);
       localStorage.setItem("userId", data.user.id);
 
+      if (role === "brand" && data.user.brandProfile) {
+        const bp = data.user.brandProfile;
+        const hasRequired = bp.companyName && bp.industry && bp.description && bp.website;
+        localStorage.setItem("brandProfileComplete", hasRequired ? "true" : "false");
+      }
+
       toast.success("Welcome back!");
       router.push(`/dashboard/${role}`);
     } catch {
@@ -57,8 +63,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
             <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">QuickReach</span>
-          <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/15 px-1.5 py-0.5 rounded-md">AI</span>
+          <span className="text-2xl font-bold text-white">Influencer<span className="text-white/70">Connect</span></span>
         </Link>
 
         <AnimatedSection animation="animate-slide-up">

@@ -91,8 +91,7 @@ export default function PublicInfluencerProfilePage() {
               <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
             </Link>
           </div>
         </header>
@@ -119,8 +118,7 @@ export default function PublicInfluencerProfilePage() {
               <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
+              <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
             </Link>
           </div>
         </header>
@@ -150,8 +148,7 @@ export default function PublicInfluencerProfilePage() {
             <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">QuickReach</span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-white bg-[#0E61FF] px-1.5 py-0.5 rounded-md">AI</span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
           </Link>
           <nav className="flex items-center gap-3">
             <Link href="/auth/login">
@@ -323,7 +320,7 @@ export default function PublicInfluencerProfilePage() {
                 <Sparkles className="w-10 h-10 text-white/80 mx-auto mb-3" />
                 <h2 className="text-xl font-bold mb-2 text-white">Ready to Collaborate?</h2>
                 <p className="text-white/70 mb-4">
-                  Join QuickReach AI to start working with {profile.name} and thousands of other creators.
+                  Join InfluencerConnect to start working with {profile.name} and thousands of other creators.
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Link href="/auth/signup">

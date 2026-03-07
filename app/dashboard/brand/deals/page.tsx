@@ -40,14 +40,11 @@ export default function BrandDealsPage() {
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-fade-in" className="flex items-center justify-between mb-8">
+        <AnimatedSection animation="animate-fade-in" className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Deals</h1>
-            <p className="text-gray-500">Manage your influencer collaborations</p>
+            <p className="text-gray-500">Track and manage your creator collaborations. Deals are created when you and a creator agree terms via chat on your posts.</p>
           </div>
-          <Link href="/dashboard/brand/discover">
-            <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Create New Deal</Button>
-          </Link>
         </AnimatedSection>
 
         {/* Filter Tabs */}
@@ -152,9 +149,6 @@ export default function BrandDealsPage() {
                         <Link href={`/dashboard/brand/deals/${deal.id}`}>
                           <Button variant="outline" size="sm" className="transition-smooth">View Details</Button>
                         </Link>
-                        <Link href={`/dashboard/brand/messages?deal=${deal.id}`}>
-                          <Button variant="ghost" size="sm" className="transition-smooth">Message</Button>
-                        </Link>
                       </div>
                     </div>
                   </CardContent>
@@ -169,8 +163,8 @@ export default function BrandDealsPage() {
             <Card className="shadow-md">
               <CardContent className="py-12 text-center">
                 <p className="text-gray-500 mb-4">No {filter !== "all" ? filter : ""} deals found.</p>
-                <Link href="/dashboard/brand/discover">
-                  <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Find Influencers</Button>
+                <Link href="/dashboard/brand/campaigns">
+                  <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Go to Posts</Button>
                 </Link>
               </CardContent>
             </Card>

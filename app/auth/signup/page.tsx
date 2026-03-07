@@ -81,12 +81,11 @@ function SignupPageContent() {
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">QuickReach</span>
-            <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/15 px-1.5 py-0.5 rounded-md">AI</span>
+            <span className="text-2xl font-bold text-white">Influencer<span className="text-white/70">Connect</span></span>
           </Link>
 
           <AnimatedSection animation="animate-fade-in">
-            <h1 className="text-3xl font-bold text-center mb-2 text-white">Join QuickReach AI</h1>
+            <h1 className="text-3xl font-bold text-center mb-2 text-white">Join InfluencerConnect</h1>
             <p className="text-center text-white/70 mb-8">Choose how you want to get started</p>
           </AnimatedSection>
 
@@ -162,8 +161,7 @@ function SignupPageContent() {
           <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
             <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">QuickReach</span>
-          <span className="text-[9px] font-bold uppercase tracking-widest text-white/60 bg-white/15 px-1.5 py-0.5 rounded-md">AI</span>
+          <span className="text-2xl font-bold text-white">Influencer<span className="text-white/70">Connect</span></span>
         </Link>
 
         <AnimatedSection animation="animate-slide-up">
@@ -173,7 +171,7 @@ function SignupPageContent() {
                 Create your {role === "BRAND" ? "Brand" : "Creator"} Account
               </CardTitle>
               <CardDescription className="text-gray-500">
-                Get started with QuickReach AI today
+                Get started with InfluencerConnect today
               </CardDescription>
             </CardHeader>
             <CardContent>

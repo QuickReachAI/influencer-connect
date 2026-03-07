@@ -261,7 +261,7 @@ function CreateDealPageContent() {
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Description</label>
                 <textarea
-                  className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[100px] resize-y"
+                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E61FF] min-h-[100px] resize-y"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the campaign goals, requirements, and expectations..."

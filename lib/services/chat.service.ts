@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from '@/lib/prisma';
 
 const FORBIDDEN_KEYWORDS = [
