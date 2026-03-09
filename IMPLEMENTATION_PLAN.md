@@ -1,4 +1,4 @@
-# Influencer Connect - Complete Architecture & Implementation Plan
+# QuickConnects - Complete Architecture & Implementation Plan
 
 ## Implementation Progress
 
@@ -97,7 +97,7 @@ See `docs/PHASE_1_DATABASE_INFRASTRUCTURE.md` and `docs/PHASE_2_CAMPAIGN_MARKETP
 
 ## Context
 
-Influencer Connect is a multi-entity influencer-brand marketplace for the Indian market. The existing codebase (Next.js 16, Prisma 7, PostgreSQL, TypeScript) has a solid MVP with auth, deal lifecycle, escrow (50/50), basic chat with keyword-based PII detection, S3 file management, KYC via Digio, tax compliance (GST/TDS), and admin dashboard. However, multiple critical systems from the spec remain unbuilt: multi-entity social management, campaign marketplace, tiered visibility, real-time chat, video watermarking/DRM, wallet system, notification engine, and robust PII detection. The T+2 escrow release currently uses `setTimeout` (lost on restart). Scale target: 10k creators, 5-10k brands.
+QuickConnects is a multi-entity influencer-brand marketplace for the Indian market. The existing codebase (Next.js 16, Prisma 7, PostgreSQL, TypeScript) has a solid MVP with auth, deal lifecycle, escrow (50/50), basic chat with keyword-based PII detection, S3 file management, KYC via Digio, tax compliance (GST/TDS), and admin dashboard. However, multiple critical systems from the spec remain unbuilt: multi-entity social management, campaign marketplace, tiered visibility, real-time chat, video watermarking/DRM, wallet system, notification engine, and robust PII detection. The T+2 escrow release currently uses `setTimeout` (lost on restart). Scale target: 10k creators, 5-10k brands.
 
 **Timezone**: All timestamps, cron schedules, campaign publish times, escrow release windows, lock expiries, and user-facing dates/times operate in **IST (Asia/Kolkata, UTC+5:30)**. The database stores timestamps in UTC but all business logic, display, and scheduling must convert to/from IST. Set `TZ=Asia/Kolkata` in environment config. The platform supports only **Instagram, YouTube, and Facebook** as social platforms.
 

@@ -87,7 +87,7 @@ Used for encrypting social entity OAuth tokens at rest.
 
 | Variable | Status | Action Needed |
 |----------|--------|---------------|
-| `VIDEO_LAMBDA_FUNCTION_NAME` | `influencer-connect-video-processor` | Correct, but the Lambda function must be deployed |
+| `VIDEO_LAMBDA_FUNCTION_NAME` | `quick-connects-video-processor` | Correct, but the Lambda function must be deployed |
 | `VIDEO_LAMBDA_REGION` | `ap-south-1` | Set |
 | `S3_RAW_PREFIX` | `raw/` | Set |
 | `S3_PROCESSED_PREFIX` | `processed/` | Set |
@@ -128,7 +128,7 @@ NEXTAUTH_URL=http://localhost:3000
 **How to set up:**
 1. Go to [AWS Console → S3](https://s3.console.aws.amazon.com)
 2. **Create bucket** in `ap-south-1` (Mumbai):
-   - Name: e.g. `influencer-connect-files`
+   - Name: e.g. `quick-connects-files`
    - Block all public access: **ON** (files served via presigned URLs)
 3. **Set CORS** on the bucket (for browser uploads):
    ```json
@@ -151,7 +151,7 @@ NEXTAUTH_URL=http://localhost:3000
          {
            "Effect": "Allow",
            "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
-           "Resource": "arn:aws:s3:::influencer-connect-files/*"
+           "Resource": "arn:aws:s3:::quick-connects-files/*"
          }
        ]
      }

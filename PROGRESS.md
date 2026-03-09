@@ -1,4 +1,4 @@
-# InfluencerConnect MVP Enhancement - Progress Report
+# QuickConnects MVP Enhancement - Progress Report
 
 ## ✅ Completed (Phase 1 & 2)
 

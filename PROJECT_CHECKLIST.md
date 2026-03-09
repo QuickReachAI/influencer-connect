@@ -1,4 +1,4 @@
-# ✅ InfluencerConnect - Project Completion Checklist
+# ✅ QuickConnects - Project Completion Checklist
 
 ## 📦 Project Setup ✅
 
@@ -249,7 +249,7 @@ Bonus Deliverables:
 ## 🚀 Quick Start Commands
 
 ```bash
-cd influencer-connect
+cd quick-connects
 npm install
 npm run dev
 ```

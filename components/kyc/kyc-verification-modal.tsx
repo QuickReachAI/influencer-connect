@@ -389,7 +389,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
                 </p>
                 <div className="flex items-center justify-center gap-2 text-emerald-600 mb-6">
                   <PartyPopper className="w-5 h-5" />
-                  <span className="text-sm font-medium">Welcome to InfluencerConnect!</span>
+                  <span className="text-sm font-medium">Welcome to QuickConnects!</span>
                 </div>
               </>
             ) : (

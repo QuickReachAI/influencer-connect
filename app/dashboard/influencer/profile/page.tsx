@@ -956,7 +956,7 @@ function InfluencerProfileInner() {
                     className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                    I consent to InfluencerConnect accessing my public social media data (followers, posts) for deal matching purposes.
+                    I consent to QuickConnects accessing my public social media data (followers, posts) for deal matching purposes.
                   </span>
                 </label>
                 <button

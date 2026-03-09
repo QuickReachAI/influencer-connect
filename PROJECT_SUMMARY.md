@@ -1,8 +1,8 @@
-# InfluencerConnect - Project Summary
+# QuickConnects - Project Summary
 
 ## 🎯 Project Overview
 
-**InfluencerConnect** is a comprehensive full-stack prototype that connects D2C brands with influencers for authentic brand collaborations. It provides a complete marketplace experience where both brands and influencers can discover each other, propose deals, communicate, and manage partnerships.
+**QuickConnects** is a comprehensive full-stack prototype that connects D2C brands with influencers for authentic brand collaborations. It provides a complete marketplace experience where both brands and influencers can discover each other, propose deals, communicate, and manage partnerships.
 
 ## ✅ What Was Built
 

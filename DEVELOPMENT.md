@@ -1,6 +1,6 @@
 # Development Guide 🛠️
 
-A guide for developers who want to extend or customize InfluencerConnect.
+A guide for developers who want to extend or customize QuickConnects.
 
 ## Architecture Overview
 

@@ -6,7 +6,7 @@ import { Inngest } from 'inngest';
  * notifications, video pipeline) use this client.
  */
 export const inngest = new Inngest({
-  id: 'influencer-connect',
+  id: 'quick-connects',
 });
 
 // ---- Event type definitions ----

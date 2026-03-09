@@ -1,4 +1,4 @@
-# InfluencerConnect - Feature Overview 🌟
+# QuickConnects - Feature Overview 🌟
 
 ## 🎭 Dual User Experiences
 

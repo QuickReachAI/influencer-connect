@@ -1,5 +1,5 @@
 -- ============================================================
--- Influencer Connect — Comprehensive Test Seed Data
+-- QuickConnects — Comprehensive Test Seed Data
 -- Run in Supabase SQL Editor → New Query → Paste → Run
 -- ============================================================
 -- All accounts use password: Test1234
@@ -415,7 +415,7 @@ BEGIN
      'Deal Locked', 'Your deal "Tech Review: GlowSkin Smart Skincare Device" has been locked for exclusive negotiation',
      false, NOW() - INTERVAL '45 minutes'),
     (gen_random_uuid()::TEXT, a1, 'SYSTEM_ANNOUNCEMENT',
-     'Welcome', 'Welcome to the Influencer Connect admin panel',
+     'Welcome', 'Welcome to the QuickConnects admin panel',
      true, NOW() - INTERVAL '7 days');
 
   RAISE NOTICE '';

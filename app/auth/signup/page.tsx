@@ -85,7 +85,7 @@ function SignupPageContent() {
           </Link>
 
           <AnimatedSection animation="animate-fade-in">
-            <h1 className="text-3xl font-bold text-center mb-2 text-white">Join InfluencerConnect</h1>
+            <h1 className="text-3xl font-bold text-center mb-2 text-white">Join QuickConnects</h1>
             <p className="text-center text-white/70 mb-8">Choose how you want to get started</p>
           </AnimatedSection>
 
@@ -171,7 +171,7 @@ function SignupPageContent() {
                 Create your {role === "BRAND" ? "Brand" : "Creator"} Account
               </CardTitle>
               <CardDescription className="text-gray-500">
-                Get started with InfluencerConnect today
+                Get started with QuickConnects today
               </CardDescription>
             </CardHeader>
             <CardContent>

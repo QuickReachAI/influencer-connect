@@ -877,7 +877,7 @@ export const notificationEmailFunction = inngest.createFunction(
             <p>${message}</p>
             <hr />
             <p style="color: #666; font-size: 12px;">
-              Influencer Connect — You can manage your notification preferences in Settings.
+              QuickConnects — You can manage your notification preferences in Settings.
             </p>
           </div>
         `,

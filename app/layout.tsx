@@ -16,7 +16,7 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "InfluencerConnect — Creator-Brand Collaboration Platform",
+  title: "QuickConnects — Creator-Brand Collaboration Platform",
   description: "Connect with verified creators and brands for authentic collaborations. Powered by QuickReach AI.",
 };
 

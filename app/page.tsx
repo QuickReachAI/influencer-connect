@@ -271,7 +271,7 @@ export default function HomePage() {
           </AnimatedSection>
           <AnimatedSection animation="animate-fade-in" delay={150}>
             <p className="text-xl mb-10 max-w-2xl mx-auto text-white/75">
-              Join thousands of brands and creators already collaborating on InfluencerConnect.
+              Join thousands of brands and creators already collaborating on QuickConnects.
             </p>
           </AnimatedSection>
           <AnimatedSection className="flex flex-col sm:flex-row gap-4 justify-center" animation="animate-slide-up" delay={300}>
@@ -338,7 +338,7 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p>&copy; 2026 InfluencerConnect. Powered by QuickReach AI. All rights reserved.</p>
+            <p>&copy; 2026 QuickConnects. Powered by QuickReach AI. All rights reserved.</p>
             <div className="flex gap-6">
               <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Privacy</Link>
               <Link href="#" onClick={comingSoon} className="hover:text-white transition-colors">Terms</Link>

@@ -1,11 +1,11 @@
 # Quick Start Guide 🚀
 
-Get InfluencerConnect running in 3 minutes!
+Get QuickConnects running in 3 minutes!
 
 ## Step 1: Install Dependencies
 
 ```bash
-cd influencer-connect
+cd quick-connects
 npm install
 ```
 

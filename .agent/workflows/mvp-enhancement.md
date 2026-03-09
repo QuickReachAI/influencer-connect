@@ -2,7 +2,7 @@
 description: MVP Enhancement Plan - Fiverr-like Marketplace
 ---
 
-# InfluencerConnect MVP Enhancement Plan
+# QuickConnects MVP Enhancement Plan
 
 ## Goal
 Transform the existing prototype into a production-ready Fiverr-like marketplace for D2C brands and influencers with premium UX/UI, proper validation, and advanced features.

@@ -1,4 +1,4 @@
-# 🚀 InfluencerConnect - Fiverr-Style Marketplace MVP
+# 🚀 QuickConnects - Fiverr-Style Marketplace MVP
 
 A modern, production-ready marketplace connecting D2C brands with influencers, built with Next.js 15, TypeScript, and TailwindCSS.
 
@@ -61,7 +61,7 @@ A modern, production-ready marketplace connecting D2C brands with influencers, b
 ## 📁 New File Structure
 
 ```
-influencer-connect/
+quick-connects/
 ├── app/
 │   ├── browse/
 │   │   └── page.tsx              # Service browse page with filters
@@ -110,7 +110,7 @@ Foreground: hsl(220, 13%, 13%)
 
 ```bash
 # Navigate to project
-cd influencer-connect
+cd quick-connects
 
 # Install dependencies (already done)
 npm install

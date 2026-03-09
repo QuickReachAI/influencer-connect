@@ -660,7 +660,7 @@ import { Inngest } from 'inngest';
  * @see https://www.inngest.com/docs/reference/client/create
  */
 export const inngest = new Inngest({
-  id: 'influencer-connect',
+  id: 'quick-connects',
   /**
    * Event types used across the application.
    * Extend this as new events are added in later phases.

@@ -320,7 +320,7 @@ export default function PublicInfluencerProfilePage() {
                 <Sparkles className="w-10 h-10 text-white/80 mx-auto mb-3" />
                 <h2 className="text-xl font-bold mb-2 text-white">Ready to Collaborate?</h2>
                 <p className="text-white/70 mb-4">
-                  Join InfluencerConnect to start working with {profile.name} and thousands of other creators.
+                  Join QuickConnects to start working with {profile.name} and thousands of other creators.
                 </p>
                 <div className="flex gap-3 justify-center">
                   <Link href="/auth/signup">
