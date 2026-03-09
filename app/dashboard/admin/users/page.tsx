@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
     Users,
     ChevronLeft,
@@ -50,6 +51,7 @@ interface Pagination {
 }
 
 export default function UsersPage() {
+    const { loading: authLoading } = useAuth('admin');
     const [users, setUsers] = useState<UserData[]>([]);
     const [pagination, setPagination] = useState<Pagination | null>(null);
     const [loading, setLoading] = useState(true);

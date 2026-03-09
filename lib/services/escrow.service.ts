@@ -2,6 +2,8 @@
 import prisma from '@/lib/prisma';
 import Razorpay from 'razorpay';
 import { inngest } from '@/lib/inngest/client';
+import { walletService } from './wallet.service';
+import { notificationService } from './notification.service';
 
 let _razorpay: Razorpay | null = null;
 
@@ -142,7 +144,18 @@ export class EscrowService {
             }
         });
 
-        // TODO: Send notification to creator
+        // Notify creator of payment
+        const deal50 = await prisma.deal.findUnique({ where: { id: dealId } });
+        if (deal50) {
+            const amount50 = Number(deal50.totalAmount) * 0.5;
+            await notificationService.send({
+                userId: deal50.creatorId,
+                type: 'PAYMENT_RECEIVED',
+                title: 'First Payment Received',
+                message: `Brand has paid 50% (₹${amount50.toLocaleString('en-IN')}) for "${deal50.title}". Production can now begin.`,
+                data: { dealId, amount: amount50, phase: '50%' },
+            });
+        }
     }
 
     /**
@@ -182,8 +195,14 @@ export class EscrowService {
             }
         });
 
-        // TODO: Send notification to brand
-        // "Creator has delivered files. Please review and complete payment."
+        // Notify brand to complete payment
+        await notificationService.send({
+            userId: deal.brandId,
+            type: 'PAYMENT_REQUIRED',
+            title: 'Files Delivered — Payment Required',
+            message: `Creator has delivered files for "${deal.title}". Please review and complete the remaining payment.`,
+            data: { dealId },
+        });
     }
 
     /**
@@ -300,8 +319,9 @@ export class EscrowService {
     }
 
     /**
-     * Release funds to creator after T+2 window
-     * Deducts 10% TDS and 5% platform fee
+     * Release funds to creator after T+2 window.
+     * Credits creator's WALLET (not direct bank transfer).
+     * Net amount = gross - platformFee (10%) - TDS (1%/2%).
      */
     async releaseFundsToCreator(dealId: string): Promise<void> {
         const deal = await prisma.deal.findUnique({
@@ -313,35 +333,43 @@ export class EscrowService {
             throw new Error('Deal not found');
         }
 
-        // Calculate TDS (10% for professional services in India)
-        const creatorPayout = Number(deal.creatorPayout);
-        const tdsAmount = creatorPayout * 0.10;
-        const netPayout = creatorPayout - tdsAmount;
+        const totalAmount = Number(deal.totalAmount);
+        const platformFee = totalAmount * 0.10;  // 10% platform fee
+        const tdsRate = totalAmount > 5000000 ? 0.02 : 0.01; // 2% if > 50L, else 1%
+        const tdsAmount = totalAmount * tdsRate;
+        const netPayout = totalAmount - platformFee - tdsAmount;
 
-        // TODO: Transfer to creator via Razorpay Route/Transfer API
-        // const transfer = await razorpay.transfers.create({
-        //   account: creator.razorpayAccountId,
-        //   amount: Math.round(netPayout * 100),
-        //   currency: 'INR',
-        //   notes: { dealId, tds: tdsAmount }
-        // });
-
-        // Record transaction
+        // Record escrow transactions (gross -> net breakdown)
         await prisma.escrowTransaction.create({
             data: {
                 dealId,
                 transactionType: 'RELEASE_TO_CREATOR',
                 amount: netPayout,
-                status: 'COMPLETED'
-            }
+                status: 'COMPLETED',
+            },
         });
+
+        await prisma.escrowTransaction.create({
+            data: {
+                dealId,
+                transactionType: 'PLATFORM_FEE',
+                amount: platformFee,
+                status: 'COMPLETED',
+            },
+        });
+
+        // Credit creator's WALLET
+        await walletService.credit(
+            deal.creatorId,
+            netPayout,
+            dealId,
+            `Payout: ${deal.title} (Gross: ₹${totalAmount}, Fee: ₹${platformFee}, TDS: ₹${tdsAmount})`
+        );
 
         // Update deal status
         await prisma.deal.update({
             where: { id: dealId },
-            data: {
-                status: 'COMPLETED'
-            }
+            data: { status: 'COMPLETED' },
         });
 
         // Update creator stats
@@ -349,8 +377,23 @@ export class EscrowService {
             where: { userId: deal.creatorId },
             data: {
                 totalDealsCompleted: { increment: 1 },
-                totalEarnings: { increment: netPayout }
-            }
+                totalEarnings: { increment: netPayout },
+            },
+        });
+
+        // Send notification to creator
+        await notificationService.send({
+            userId: deal.creatorId,
+            type: 'PAYMENT_RECEIVED',
+            title: 'Payment Received',
+            message: `₹${netPayout.toLocaleString('en-IN')} has been credited to your wallet for "${deal.title}"`,
+            data: {
+                dealId,
+                grossAmount: totalAmount,
+                platformFee,
+                tdsAmount,
+                netPayout,
+            },
         });
 
         // Audit log
@@ -358,13 +401,15 @@ export class EscrowService {
             data: {
                 entityType: 'deal',
                 entityId: dealId,
-                action: 'funds_released_to_creator',
+                action: 'funds_released_to_wallet',
                 changes: {
-                    amount: netPayout,
-                    tds: tdsAmount,
-                    status: 'COMPLETED'
-                }
-            }
+                    grossAmount: totalAmount,
+                    platformFee,
+                    tdsAmount,
+                    netPayout,
+                    status: 'COMPLETED',
+                },
+            },
         });
     }
 
@@ -383,18 +428,47 @@ export class EscrowService {
         const totalPaid = (deal.payment50Paid ? Number(deal.totalAmount) * 0.5 : 0) +
             (deal.payment100Paid ? Number(deal.totalAmount) * 0.5 : 0);
 
-        // TODO: Process refund via Razorpay
-        // const refund = await razorpay.payments.refund(paymentId, {
-        //   amount: Math.round(totalPaid * 100)
-        // });
+        // Process refund via Razorpay for each completed payment
+        const completedPayments = await prisma.escrowTransaction.findMany({
+            where: {
+                dealId,
+                status: 'COMPLETED',
+                transactionType: { in: ['DEPOSIT_50', 'DEPOSIT_100'] },
+                razorpayPaymentId: { not: null },
+            },
+        });
 
-        // Record transaction
+        const razorpayRefundIds: string[] = [];
+        for (const payment of completedPayments) {
+            try {
+                const refund = await getRazorpay().payments.refund(payment.razorpayPaymentId!, {
+                    amount: Math.round(Number(payment.amount) * 100),
+                });
+                razorpayRefundIds.push(refund.id);
+            } catch (error) {
+                await prisma.auditLog.create({
+                    data: {
+                        entityType: 'deal',
+                        entityId: dealId,
+                        action: 'razorpay_refund_failed',
+                        changes: {
+                            paymentId: payment.razorpayPaymentId,
+                            error: error instanceof Error ? error.message : 'Unknown error',
+                        },
+                    },
+                });
+                throw error;
+            }
+        }
+
+        // Record refund transaction
         await prisma.escrowTransaction.create({
             data: {
                 dealId,
                 transactionType: 'REFUND_TO_BRAND',
                 amount: totalPaid,
-                status: 'COMPLETED'
+                status: 'COMPLETED',
+                razorpayPaymentId: razorpayRefundIds.join(','),
             }
         });
 

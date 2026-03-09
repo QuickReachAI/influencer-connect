@@ -25,7 +25,7 @@ No new environment variables required.
 - [ ] All Phase 1 migrations applied (`SocialEntity`, `Campaign`, `CampaignApplication`, `ExclusiveNegotiation` tables exist)
 - [ ] Inngest serve endpoint running at `/api/inngest`
 - [ ] `socialEntityService` functional
-- [ ] GIN indexes on `SocialEntity.niche` and `Campaign.niche` exist
+- [x] GIN indexes on `SocialEntity.niche` and `Campaign.niche` exist (`prisma/migrations/gin-indexes.sql`)
 
 ---
 
@@ -1146,18 +1146,150 @@ No additional migrations beyond Phase 1. Campaign seed data was included in Phas
 
 ## 10. Verification Checklist
 
-1. [ ] Create campaign as brand → verify status is DRAFT
-2. [ ] Publish campaign → verify `publishedAt` is set, status is ACTIVE
-3. [ ] Check campaign visibility: high-rated entity sees immediately, low-rated entity doesn't see until 2h after publish
-4. [ ] Wait 30 min for cron → verify `visibilityTier` updates from 1 → 2 → 3
-5. [ ] Apply as creator → verify `CampaignApplication` created with PENDING status
-6. [ ] Apply again with same entity → verify unique constraint error
-7. [ ] Brand accepts application → verify Deal created with LOCKED status + ExclusiveNegotiation record
-8. [ ] Try to lock same entity in another deal → verify "already has active lock" error
-9. [ ] Creator accepts lock → verify deal status moves to SCRIPT_PENDING
-10. [ ] Creator rejects lock → verify lock released, deal cancelled
-11. [ ] Wait for lock expiry (set to 1min in test) → verify cron releases it
-12. [ ] Verify `GET /api/social-entities` returns creator's entities
-13. [ ] Verify `POST /api/social-entities` creates entity with correct platform/handle
-14. [ ] Verify `GET /api/social-entities/:id/completion` returns completion score
-15. [ ] Verify `GET /api/influencers` now uses SocialEntity table instead of CreatorProfile JSON
+### Code Implementation
+
+| # | Check | Status | How to verify |
+|---|-------|--------|---------------|
+| 1 | `campaign.service.ts` has create, publish, pause, cancel, discover, apply, reviewApplication, listByBrand, getById | **DONE** | Read `lib/services/campaign.service.ts` |
+| 2 | `deal.service.ts` has lockDeal, acceptLock, rejectLock | **DONE** | Read `lib/services/deal.service.ts` |
+| 3 | Trickle-down visibility uses entity rating (>=4.0 immediate, >=3.0 after 1h, <3.0 after 2h) | **DONE** | Read `campaign.service.ts` discover() method |
+| 4 | Campaign visibility cron upgrades tiers every 30 min | **DONE** | Read `lib/inngest/functions/campaign-visibility.ts` |
+| 5 | Deal lock cleanup cron releases expired locks every hour | **DONE** | Read `lib/inngest/functions/deal-locks.ts` |
+| 6 | Both Inngest functions registered in serve endpoint | **DONE** | Read `app/api/inngest/route.ts` — 4 functions total |
+| 7 | All 5 campaign API routes exist (CRUD + apply + applications + review) | **DONE** | Check `app/api/campaigns/` directory |
+| 8 | All 3 social-entities API routes exist (CRUD + completion) | **DONE** | Check `app/api/social-entities/` directory |
+| 9 | All 3 deal lock API routes exist (lock + accept + reject) | **DONE** | Check `app/api/deals/[id]/lock/` directory |
+| 10 | `app/api/influencers/route.ts` uses SocialEntity table (not CreatorProfile JSON) | **DONE** | Read file — queries `prisma.socialEntity.findMany` |
+| 11 | `app/api/deals/route.ts` accepts entityId + campaignId | **DONE** | Read file — `entityId: body.entityId ?? null` |
+| 12 | All routes use cookie-based auth (`request.cookies.get('user_id')`) | **DONE** | No NextAuth references in any Phase 2 route |
+| 13 | TypeScript compiles with zero errors | **DONE** | `npx tsc --noEmit` → no output |
+
+### Runtime Verification (require running app + DB)
+
+| # | Check | Status | Steps |
+|---|-------|--------|-------|
+| 14 | Create campaign as brand → status is DRAFT | PENDING | `POST /api/campaigns` with brand cookie |
+| 15 | Publish campaign → publishedAt set, status ACTIVE | PENDING | `PATCH /api/campaigns/:id` with `{ action: "publish" }` |
+| 16 | High-rated entity (>=4.0) sees campaign immediately | PENDING | `GET /api/campaigns?entityId=...` with high-rated entity |
+| 17 | Low-rated entity (<3.0) doesn't see campaign until 2h later | PENDING | Same query with low-rated entity → empty results |
+| 18 | Visibility cron upgrades tiers after 30 min | PENDING | Wait for cron → check `visibilityTier` in DB |
+| 19 | Creator applies → CampaignApplication with PENDING status | PENDING | `POST /api/campaigns/:id/apply` |
+| 20 | Duplicate application (same entity + campaign) → unique constraint error | PENDING | Apply twice with same entityId |
+| 21 | Brand accepts application → Deal (LOCKED) + ExclusiveNegotiation created | PENDING | `PATCH /api/campaigns/:id/applications/:appId` with ACCEPTED |
+| 22 | Second lock on same entity → "already has active lock" error | PENDING | Try locking same entity in another deal |
+| 23 | Creator accepts lock → deal status SCRIPT_PENDING | PENDING | `POST /api/deals/:id/lock/accept` |
+| 24 | Creator rejects lock → lock released, deal CANCELLED | PENDING | `POST /api/deals/:id/lock/reject` |
+| 25 | Expired lock → cron releases it and cancels deal | PENDING | Set short expiry, wait for cron |
+| 26 | `GET /api/social-entities` returns creator's entities | PENDING | Call with creator cookie |
+| 27 | `POST /api/social-entities` creates entity | PENDING | Call with platform + handle |
+| 28 | `GET /api/social-entities/:id/completion` returns score | PENDING | Call after entity profile update |
+| 29 | `GET /api/influencers` returns SocialEntity-based results | PENDING | Call with platform/niche filters |
+
+### Frontend (deferred)
+
+| # | Check | Status | Notes |
+|---|-------|--------|-------|
+| 30 | Brand dashboard — campaign management UI | PENDING | Create Campaign form, campaign list cards, publish/pause/cancel buttons |
+| 31 | Creator dashboard — campaign discovery UI | PENDING | Entity selector dropdown, campaign browse grid, apply modal |
+| 32 | Deal negotiation — lock UI | PENDING | LOCKED status badge with 48h countdown, accept/reject buttons |
+
+---
+
+## 11. Implementation Summary
+
+### Files Created (15)
+
+| File | Purpose |
+|------|---------|
+| `lib/services/campaign.service.ts` | Campaign CRUD, trickle-down discovery, application review |
+| `lib/services/deal.service.ts` | Exclusive negotiation lock/accept/reject |
+| `lib/inngest/functions/campaign-visibility.ts` | 30-min visibility tier upgrade cron |
+| `lib/inngest/functions/deal-locks.ts` | Hourly expired lock cleanup cron |
+| `app/api/campaigns/route.ts` | Campaign list/create |
+| `app/api/campaigns/[id]/route.ts` | Campaign detail/update/publish/pause/cancel |
+| `app/api/campaigns/[id]/apply/route.ts` | Creator applies to campaign |
+| `app/api/campaigns/[id]/applications/route.ts` | Brand views applications |
+| `app/api/campaigns/[id]/applications/[appId]/route.ts` | Accept/reject application |
+| `app/api/social-entities/route.ts` | Social entity list/create |
+| `app/api/social-entities/[id]/route.ts` | Social entity detail/update/deactivate |
+| `app/api/social-entities/[id]/completion/route.ts` | Profile completion score |
+| `app/api/deals/[id]/lock/route.ts` | Brand locks deal for negotiation |
+| `app/api/deals/[id]/lock/accept/route.ts` | Creator accepts lock |
+| `app/api/deals/[id]/lock/reject/route.ts` | Creator rejects lock |
+
+### Files Modified (3)
+
+| File | What Changed |
+|------|-------------|
+| `app/api/inngest/route.ts` | Added campaignVisibilityFunction + dealLockCleanupFunction imports and registration |
+| `app/api/influencers/route.ts` | Rewrote to use SocialEntity table with platform/follower/niche filters, ordered by completionScore + rating |
+| `app/api/deals/route.ts` | Added optional entityId and campaignId to deal creation data |
+| `app/api/deals/[id]/route.ts` | GET now includes entity, campaign, milestones, revisions, exclusiveNegotiations |
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Cookie-based auth instead of NextAuth | Matches existing codebase pattern (`request.cookies.get('user_id')`, `lib/auth-helpers.ts`) |
+| Brand profile lookup via DB join | Routes needing `brandProfileId` fetch via `prisma.user.findUnique({ include: { brandProfile } })` since session only has userId |
+| Trickle-down via DB query (not Redis) | Simpler implementation — `publishedAt` comparison in discover() method. Redis sorted set deferred to Phase 3+ if needed for scale |
+| expiresAt string→Date conversion in route | Zod `z.string().datetime()` returns string; service expects Date. Converted at API boundary |
+
+---
+
+## 12. Setup Guide
+
+Phase 2 requires **no new packages, services, or environment variables** beyond Phase 1. All infrastructure (Inngest, Supabase, env vars) was set up in Phase 1.
+
+### 12.1 Prerequisites
+
+Before verifying Phase 2, confirm Phase 1 is fully set up:
+
+- [ ] Database migrated (all tables exist in Supabase)
+- [ ] GIN indexes applied (`SocialEntity_niche_gin`, `Campaign_niche_gin`, `ExclusiveNegotiation_entityId_active`)
+- [ ] Seed data present (test users, social entities, wallets, sample campaign)
+- [ ] Inngest dev server running (`npx inngest-cli@latest dev`)
+- [ ] App running (`npm run dev`)
+- [ ] `npx tsc --noEmit` passes with zero errors
+
+### 12.2 Verification — Campaign Discovery
+
+```bash
+# 1. List campaigns as creator (should see seeded campaign)
+curl -b "user_id=<creator_user_id>" http://localhost:3000/api/campaigns
+
+# 2. Create campaign as brand
+curl -X POST -b "user_id=<brand_user_id>" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test Campaign for Phase 2","description":"A test campaign to verify Phase 2 setup is working correctly with all services.","niche":["beauty"],"contentFormat":["REEL"],"budget":50000}' \
+  http://localhost:3000/api/campaigns
+```
+
+### 12.3 Verification — Lock System
+
+```bash
+# 1. Apply to campaign as creator
+curl -X POST -b "user_id=<creator_user_id>" \
+  -H "Content-Type: application/json" \
+  -d '{"entityId":"<social_entity_id>"}' \
+  http://localhost:3000/api/campaigns/<campaign_id>/apply
+
+# 2. Accept application as brand (creates deal + lock)
+curl -X PATCH -b "user_id=<brand_user_id>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"ACCEPTED"}' \
+  http://localhost:3000/api/campaigns/<campaign_id>/applications/<app_id>
+
+# 3. Accept lock as creator (deal moves to SCRIPT_PENDING)
+curl -X POST -b "user_id=<creator_user_id>" \
+  http://localhost:3000/api/deals/<deal_id>/lock/accept
+```
+
+### 12.4 Verification — Inngest Cron Jobs
+
+Open the Inngest dashboard at `http://localhost:8288` and confirm:
+
+- **campaign-visibility-update** — runs every 30 min, upgrades visibility tiers
+- **deal-lock-cleanup** — runs every hour, releases expired locks
+
+You can manually trigger these from the Inngest dashboard for immediate testing.

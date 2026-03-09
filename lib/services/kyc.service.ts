@@ -45,48 +45,55 @@ export class KYCService {
     }
 
     /**
-     * Call Digio API for KYC verification
-     * In production, this would make actual API calls to Digio
+     * Call Gridlines API for KYC verification (PAN + Aadhaar)
+     * Uses the same GSTIN_API_KEY used for KYB verification.
+     * In dev without an API key, returns a mock success response.
      */
     private async callKYCProvider(request: {
         aadhaar: string;
         pan: string;
     }): Promise<KYCVerificationResponse> {
-        // TODO: Implement actual Digio API integration
-        // For now, return mock response
-
-        if (process.env.NODE_ENV === 'development') {
-            // Mock successful verification in development
-            return {
-                success: true,
-                providerId: `DIGIO_${Date.now()}`
-            };
+        // Mock in dev when no API key configured
+        if (process.env.NODE_ENV === 'development' && !process.env.GSTIN_API_KEY) {
+            return { success: true, providerId: `GRIDLINES_MOCK_${Date.now()}` };
         }
 
-        try {
-            // Production Digio API call would go here
-            const response = await fetch('https://api.digio.in/v2/client/kyc/verify', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${process.env.DIGIO_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    aadhaar: request.aadhaar,
-                    pan: request.pan
-                })
-            });
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.GSTIN_API_KEY!}`,
+        };
 
-            const data = await response.json();
+        try {
+            // Step 1: Verify PAN
+            const panRes = await fetch('https://api.gridlines.io/pan-api/fetch', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ pan_number: request.pan, consent: 'Y' }),
+            });
+            const panData = await panRes.json();
+            if (!panRes.ok || panData.error) {
+                return { success: false, error: panData.error?.message ?? 'PAN verification failed' };
+            }
+
+            // Step 2: Verify Aadhaar
+            const aadhaarRes = await fetch('https://api.gridlines.io/aadhaar-api/verify', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ aadhaar_number: request.aadhaar, consent: 'Y' }),
+            });
+            const aadhaarData = await aadhaarRes.json();
+            if (!aadhaarRes.ok || aadhaarData.error) {
+                return { success: false, error: aadhaarData.error?.message ?? 'Aadhaar verification failed' };
+            }
 
             return {
-                success: data.verified,
-                providerId: data.id
+                success: true,
+                providerId: panData.transaction_id ?? aadhaarData.transaction_id ?? `GRIDLINES_${Date.now()}`,
             };
         } catch (error) {
             return {
                 success: false,
-                error: 'KYC verification failed'
+                error: 'KYC verification failed',
             };
         }
     }
@@ -108,7 +115,7 @@ export class KYCService {
                 throw new Error('User is permanently banned. Cannot create new account.');
             }
 
-            // 3. Call KYC provider (Digio/HyperVerge)
+            // 3. Call KYC provider (Gridlines)
             const verification = await this.callKYCProvider({
                 aadhaar: request.aadhaarNumber,
                 pan: request.panNumber

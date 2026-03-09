@@ -6,7 +6,10 @@ import { apiLimiter } from "@/lib/rate-limit";
 
 const querySchema = z.object({
     niche: z.string().max(100).optional(),
+    platform: z.enum(["INSTAGRAM", "YOUTUBE", "FACEBOOK"]).optional(),
     search: z.string().max(200).optional(),
+    minFollowers: z.coerce.number().int().min(0).optional(),
+    maxFollowers: z.coerce.number().int().min(0).optional(),
     page: z.coerce.number().int().positive().default(1),
     limit: z.coerce.number().int().positive().max(50).default(12),
 });
@@ -22,7 +25,10 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const parsed = querySchema.safeParse({
             niche: searchParams.get("niche") ?? undefined,
+            platform: searchParams.get("platform") ?? undefined,
             search: searchParams.get("search") ?? undefined,
+            minFollowers: searchParams.get("minFollowers") ?? undefined,
+            maxFollowers: searchParams.get("maxFollowers") ?? undefined,
             page: searchParams.get("page") ?? undefined,
             limit: searchParams.get("limit") ?? undefined,
         });
@@ -34,48 +40,59 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const { niche, search, page, limit } = parsed.data;
+        const { niche, platform, search, minFollowers, maxFollowers, page, limit } = parsed.data;
 
-        const where: Prisma.CreatorProfileWhereInput = {
-            user: {
+        // Use SocialEntity table for discovery instead of CreatorProfile JSON
+        const entityWhere: Prisma.SocialEntityWhereInput = {
+            isActive: true,
+            master: {
                 kycStatus: "VERIFIED",
                 isBanned: false,
             },
         };
 
-        if (search) {
-            where.name = { contains: search, mode: "insensitive" };
+        if (platform) {
+            entityWhere.platform = platform;
         }
-
         if (niche) {
-            where.socialPlatforms = {
-                path: ["$[*].platform"],
-                string_contains: niche,
-            } as any;
+            entityWhere.niche = { has: niche };
+        }
+        if (minFollowers !== undefined) {
+            entityWhere.followerCount = { ...(entityWhere.followerCount as any ?? {}), gte: minFollowers };
+        }
+        if (maxFollowers !== undefined) {
+            entityWhere.followerCount = { ...(entityWhere.followerCount as any ?? {}), lte: maxFollowers };
+        }
+        if (search) {
+            entityWhere.master = {
+                ...(entityWhere.master as any),
+                creatorProfile: { name: { contains: search, mode: "insensitive" } },
+            };
         }
 
-        const [influencers, total] = await Promise.all([
-            prisma.creatorProfile.findMany({
-                where,
+        const [entities, total] = await Promise.all([
+            prisma.socialEntity.findMany({
+                where: entityWhere,
                 include: {
-                    user: {
-                        select: {
-                            id: true,
-                            email: true,
-                            kycStatus: true,
-                            createdAt: true,
+                    master: {
+                        include: {
+                            creatorProfile: true,
                         },
+                        omit: { password: true },
                     },
                 },
-                orderBy: { totalDealsCompleted: "desc" },
+                orderBy: [
+                    { completionScore: "desc" },
+                    { rating: "desc" },
+                ],
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            prisma.creatorProfile.count({ where }),
+            prisma.socialEntity.count({ where: entityWhere }),
         ]);
 
         return NextResponse.json({
-            influencers,
+            influencers: entities,
             pagination: {
                 page,
                 limit,

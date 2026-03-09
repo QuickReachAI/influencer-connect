@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
     Users,
     FileText,
@@ -10,7 +11,10 @@ import {
     DollarSign,
     MessageSquare,
     Shield,
-    Clock
+    Clock,
+    Landmark,
+    Layers,
+    Search,
 } from 'lucide-react';
 import { AnimatedSection } from '@/components/ui/animated-section';
 
@@ -52,6 +56,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+    const { loading: authLoading } = useAuth('admin');
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -163,6 +168,48 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         </div>
+                    </AnimatedSection>
+                </div>
+
+                {/* Phase 6 Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <AnimatedSection animation="animate-fade-in" delay={400}>
+                        <Link
+                            href="/dashboard/admin/finance"
+                            className="bg-white border border-gray-200 hover:border-[#0E61FF] p-4 rounded-lg flex items-center gap-3 transition-colors hover-lift group"
+                        >
+                            <Landmark className="h-6 w-6 text-emerald-600" />
+                            <div>
+                                <div className="font-semibold text-gray-900">Financial Audit</div>
+                                <div className="text-sm text-gray-500">Escrow, wallet & audit trail</div>
+                            </div>
+                        </Link>
+                    </AnimatedSection>
+
+                    <AnimatedSection animation="animate-fade-in" delay={500}>
+                        <Link
+                            href="/dashboard/admin/escalation"
+                            className="bg-white border border-gray-200 hover:border-[#0E61FF] p-4 rounded-lg flex items-center gap-3 transition-colors hover-lift group"
+                        >
+                            <Layers className="h-6 w-6 text-amber-500" />
+                            <div>
+                                <div className="font-semibold text-gray-900">Escalation Queue</div>
+                                <div className="text-sm text-gray-500">Pending KYC & KYB cases</div>
+                            </div>
+                        </Link>
+                    </AnimatedSection>
+
+                    <AnimatedSection animation="animate-fade-in" delay={600}>
+                        <Link
+                            href="/dashboard/admin/fraud"
+                            className="bg-white border border-gray-200 hover:border-red-400 p-4 rounded-lg flex items-center gap-3 transition-colors hover-lift group"
+                        >
+                            <Search className="h-6 w-6 text-red-600" />
+                            <div>
+                                <div className="font-semibold text-gray-900">Fraud Detection</div>
+                                <div className="text-sm text-gray-500">Engagement anomaly alerts</div>
+                            </div>
+                        </Link>
                     </AnimatedSection>
                 </div>
 

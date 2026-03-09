@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import { AnimatedSection } from "@/components/ui/animated-section";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { usePusherChat } from "@/lib/hooks/use-pusher";
+import { getDealStatusGroup, getDealStatusLabel } from "@/lib/utils/deal-status";
+import { formatINR, formatDate } from "@/lib/utils/format";
 import {
   Clock,
   Send,
@@ -18,92 +22,52 @@ import {
   IndianRupee,
   RotateCcw,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
-interface Deal {
+interface ApiDeal {
   id: string;
-  brandName: string;
-  postTitle: string;
-  status: "active" | "in_review" | "revision_requested" | "completed";
-  agreedRate: number;
-  creatives: { format: string; durationSeconds: number; status: string }[];
-  startDate: string;
-  deadline: string;
+  title: string;
+  description?: string;
+  status: string;
+  totalAmount: number;
   currentRevision: number;
   maxRevisions: number;
-  messages: { id: string; sender: "brand" | "creator" | "system"; text: string; time: string }[];
+  createdAt: string;
+  updatedAt: string;
+  brand: {
+    id: string;
+    brandProfile?: { companyName: string; logo?: string } | null;
+  };
+  _count: { deliverables: number; chatMessages: number };
 }
 
-const mockDeals: Deal[] = [
-  {
-    id: "deal-1",
-    brandName: "GlowSkin Beauty",
-    postTitle: "Summer Skincare Collection Launch",
-    status: "active",
-    agreedRate: 40000,
-    creatives: [
-      { format: "Reel/Short", durationSeconds: 30, status: "pending" },
-      { format: "Reel/Short", durationSeconds: 60, status: "pending" },
-    ],
-    startDate: "2026-03-01",
-    deadline: "2026-03-15",
-    currentRevision: 0,
-    maxRevisions: 2,
-    messages: [
-      { id: "dm1", sender: "system", text: "Deal started! Please review the creative brief.", time: "2026-03-01 10:00" },
-      { id: "dm2", sender: "brand", text: "Hi Sarah! Excited to work with you. Please check the brief and let me know if you have questions.", time: "2026-03-01 10:30" },
-      { id: "dm3", sender: "creator", text: "Thank you! I've reviewed the brief. I'll start working on the first reel today.", time: "2026-03-01 11:00" },
-    ],
-  },
-  {
-    id: "deal-2",
-    brandName: "TechNova Gadgets",
-    postTitle: "Flagship Phone Review",
-    status: "in_review",
-    agreedRate: 120000,
-    creatives: [
-      { format: "Long Form Video", durationSeconds: 600, status: "submitted" },
-    ],
-    startDate: "2026-02-20",
-    deadline: "2026-03-10",
-    currentRevision: 1,
-    maxRevisions: 2,
-    messages: [
-      { id: "dm4", sender: "system", text: "Deal started.", time: "2026-02-20 09:00" },
-      { id: "dm5", sender: "creator", text: "I've uploaded the first draft of the review video.", time: "2026-03-05 15:00" },
-      { id: "dm6", sender: "brand", text: "Thanks! Reviewing now. Will get back to you within 48 hours.", time: "2026-03-05 16:00" },
-    ],
-  },
-  {
-    id: "deal-3",
-    brandName: "FitLife Nutrition",
-    postTitle: "Protein Supplement Partnership",
-    status: "revision_requested",
-    agreedRate: 60000,
-    creatives: [
-      { format: "Reel/Short", durationSeconds: 45, status: "revision_requested" },
-      { format: "Reel/Short", durationSeconds: 30, status: "pending" },
-      { format: "Long Form Video", durationSeconds: 480, status: "pending" },
-    ],
-    startDate: "2026-02-25",
-    deadline: "2026-03-20",
-    currentRevision: 1,
-    maxRevisions: 3,
-    messages: [
-      { id: "dm7", sender: "system", text: "Deal started.", time: "2026-02-25 10:00" },
-      { id: "dm8", sender: "brand", text: "The first reel needs some adjustments — the product placement should be more prominent in the opening.", time: "2026-03-02 14:00" },
-    ],
-  },
-];
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderRole: string;
+  body: string;
+  createdAt: string;
+}
 
-const STATUS_ORDER: Record<Deal["status"], number> = {
+type UIStatus = "active" | "in_review" | "revision_requested" | "completed";
+
+function mapApiStatusToUI(status: string): UIStatus {
+  const group = getDealStatusGroup(status);
+  if (status === "REVISION_PENDING") return "revision_requested";
+  if (status === "DELIVERY_PENDING" || status === "PAYMENT_100_PENDING") return "in_review";
+  if (group === "completed") return "completed";
+  return "active";
+}
+
+const STATUS_ORDER: Record<UIStatus, number> = {
   revision_requested: 0,
   active: 1,
   in_review: 2,
   completed: 3,
 };
 
-const STATUS_CONFIG: Record<Deal["status"], { label: string; color: string; bg: string; ring: string; icon: React.ReactNode }> = {
+const STATUS_CONFIG: Record<UIStatus, { label: string; color: string; bg: string; ring: string; icon: React.ReactNode }> = {
   active: {
     label: "Active",
     color: "text-[#0E61FF]",
@@ -134,102 +98,123 @@ const STATUS_CONFIG: Record<Deal["status"], { label: string; color: string; bg: 
   },
 };
 
-function daysRemaining(deadline: string): number {
-  const now = new Date();
-  const dl = new Date(deadline);
-  return Math.ceil((dl.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds >= 60) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
-  }
-  return `${seconds}s`;
-}
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function CreativeIcon({ format }: { format: string }) {
-  if (format.toLowerCase().includes("reel") || format.toLowerCase().includes("short")) {
-    return <Film className="w-4 h-4 text-gray-400" />;
-  }
-  return <Video className="w-4 h-4 text-gray-400" />;
-}
-
-function CreativeStatusDot({ status }: { status: string }) {
-  const colors: Record<string, string> = {
-    pending: "bg-gray-300",
-    submitted: "bg-amber-400",
-    revision_requested: "bg-red-500",
-    approved: "bg-emerald-500",
-  };
-  return <span className={`inline-block w-2 h-2 rounded-full ${colors[status] || "bg-gray-300"}`} />;
-}
-
 export default function InfluencerDealsPage() {
   const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
+  const { user, loading: authLoading } = useAuth("influencer");
+  const [deals, setDeals] = useState<ApiDeal[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expandedDeal, setExpandedDeal] = useState<string | null>(null);
-  const [deals, setDeals] = useState<Deal[]>(mockDeals);
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
+  const [chatLoading, setChatLoading] = useState<Record<string, boolean>>({});
   const [messageInputs, setMessageInputs] = useState<Record<string, string>>({});
+  const [sendingMessage, setSendingMessage] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    if (role !== "influencer") {
-      router.push("/auth/login");
-      return;
-    }
-    setAuthorized(true);
-  }, [router]);
+  // Pusher for real-time chat
+  const { bind, isConnected } = usePusherChat(expandedDeal);
 
+  // Fetch deals
+  useEffect(() => {
+    if (!user) return;
+
+    async function fetchDeals() {
+      try {
+        const res = await fetch("/api/deals");
+        if (!res.ok) throw new Error("Failed to load deals");
+        const data = await res.json();
+        setDeals(data.deals || []);
+      } catch {
+        // empty state
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDeals();
+  }, [user]);
+
+  // Fetch chat when deal expanded
+  useEffect(() => {
+    if (!expandedDeal || chatMessages[expandedDeal]) return;
+
+    async function fetchChat() {
+      setChatLoading(prev => ({ ...prev, [expandedDeal!]: true }));
+      try {
+        const res = await fetch(`/api/chat/${expandedDeal}`);
+        if (res.ok) {
+          const data = await res.json();
+          setChatMessages(prev => ({ ...prev, [expandedDeal!]: data.messages || [] }));
+        }
+      } catch {
+        // ignore
+      } finally {
+        setChatLoading(prev => ({ ...prev, [expandedDeal!]: false }));
+      }
+    }
+
+    fetchChat();
+  }, [expandedDeal, chatMessages]);
+
+  // Listen for real-time messages
+  useEffect(() => {
+    if (!expandedDeal) return;
+
+    const unbind = bind<ChatMessage>("new-message", (msg) => {
+      setChatMessages(prev => ({
+        ...prev,
+        [expandedDeal!]: [...(prev[expandedDeal!] || []), msg],
+      }));
+    });
+
+    return () => { unbind?.(); };
+  }, [expandedDeal, bind]);
+
+  // Scroll chat to bottom
   useEffect(() => {
     if (expandedDeal && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [expandedDeal, deals]);
+  }, [expandedDeal, chatMessages]);
 
-  const sortedDeals = [...deals].sort(
-    (a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]
-  );
-
-  function handleSendMessage(dealId: string) {
+  const handleSendMessage = useCallback(async (dealId: string) => {
     const text = messageInputs[dealId]?.trim();
-    if (!text) return;
+    if (!text || sendingMessage) return;
 
-    setDeals((prev) =>
-      prev.map((d) =>
-        d.id === dealId
-          ? {
-              ...d,
-              messages: [
-                ...d.messages,
-                {
-                  id: `msg-${Date.now()}`,
-                  sender: "creator" as const,
-                  text,
-                  time: new Date().toISOString().replace("T", " ").slice(0, 16),
-                },
-              ],
-            }
-          : d
-      )
-    );
-    setMessageInputs((prev) => ({ ...prev, [dealId]: "" }));
-  }
+    setSendingMessage(true);
+    try {
+      const res = await fetch(`/api/chat/${dealId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: text }),
+      });
 
-  if (!authorized) {
+      if (res.ok) {
+        const msg = await res.json();
+        setChatMessages(prev => ({
+          ...prev,
+          [dealId]: [...(prev[dealId] || []), msg],
+        }));
+        setMessageInputs(prev => ({ ...prev, [dealId]: "" }));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSendingMessage(false);
+    }
+  }, [messageInputs, sendingMessage]);
+
+  const sortedDeals = [...deals].sort((a, b) => {
+    const sa = STATUS_ORDER[mapApiStatusToUI(a.status)] ?? 1;
+    const sb = STATUS_ORDER[mapApiStatusToUI(b.status)] ?? 1;
+    return sa - sb;
+  });
+
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#0E61FF] border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#0E61FF] animate-spin" />
       </div>
     );
   }
@@ -268,11 +253,10 @@ export default function InfluencerDealsPage() {
           <div className="space-y-4">
             {sortedDeals.map((deal, index) => {
               const isExpanded = expandedDeal === deal.id;
-              const sc = STATUS_CONFIG[deal.status];
-              const days = daysRemaining(deal.deadline);
-              const completedCreatives = deal.creatives.filter(
-                (c) => c.status === "approved" || c.status === "submitted"
-              ).length;
+              const uiStatus = mapApiStatusToUI(deal.status);
+              const sc = STATUS_CONFIG[uiStatus];
+              const msgs = chatMessages[deal.id] || [];
+              const isChatLoading = chatLoading[deal.id];
 
               return (
                 <AnimatedSection key={deal.id} animation="animate-slide-up" delay={index * 80}>
@@ -286,50 +270,31 @@ export default function InfluencerDealsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 flex-wrap mb-1.5">
                             <h3 className="text-base font-semibold text-gray-900 truncate">
-                              {deal.brandName}
+                              {deal.brand?.brandProfile?.companyName || "Brand"}
                             </h3>
                             <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1 ${sc.color} ${sc.bg} ${sc.ring}`}>
                               {sc.icon}
                               {sc.label}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 truncate">{deal.postTitle}</p>
+                          <p className="text-sm text-gray-500 truncate">{deal.title}</p>
 
                           {/* Quick stats row */}
                           <div className="flex items-center gap-4 mt-3 flex-wrap">
                             <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700">
                               <IndianRupee className="w-3.5 h-3.5 text-gray-400" />
-                              ₹{deal.agreedRate.toLocaleString("en-IN")}
+                              {formatINR(Number(deal.totalAmount))}
                             </span>
                             <span className="text-gray-300">|</span>
                             <span className="inline-flex items-center gap-1.5 text-sm text-gray-600">
                               <Film className="w-3.5 h-3.5 text-gray-400" />
-                              {completedCreatives} of {deal.creatives.length} creatives
-                            </span>
-                            <span className="text-gray-300">|</span>
-                            <span className={`inline-flex items-center gap-1.5 text-sm ${days <= 3 ? "text-red-600 font-semibold" : "text-gray-600"}`}>
-                              <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
-                              {days > 0 ? `${days} day${days !== 1 ? "s" : ""} left` : days === 0 ? "Due today" : "Overdue"}
+                              {deal._count?.deliverables || 0} deliverables
                             </span>
                             <span className="text-gray-300">|</span>
                             <span className="inline-flex items-center gap-1.5 text-sm text-gray-600">
                               <RotateCcw className="w-3.5 h-3.5 text-gray-400" />
-                              Revision {deal.currentRevision} of {deal.maxRevisions}
+                              Revision {deal.currentRevision ?? 0} of {deal.maxRevisions ?? 2}
                             </span>
-                          </div>
-
-                          {/* Creatives mini-list */}
-                          <div className="flex gap-2 mt-3 flex-wrap">
-                            {deal.creatives.map((c, ci) => (
-                              <span
-                                key={ci}
-                                className="inline-flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1"
-                              >
-                                <CreativeStatusDot status={c.status} />
-                                <CreativeIcon format={c.format} />
-                                {c.format} · {formatDuration(c.durationSeconds)}
-                              </span>
-                            ))}
                           </div>
                         </div>
 
@@ -349,66 +314,12 @@ export default function InfluencerDealsPage() {
                         <div className="grid lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
                           {/* Left panel — deal info */}
                           <div className="lg:col-span-2 p-6 space-y-6">
-                            {/* Deliverables */}
                             <div>
                               <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                                Deliverables
+                                Deal Details
                               </h4>
-                              <ul className="space-y-2">
-                                {deal.creatives.map((c, ci) => {
-                                  const done = c.status === "approved" || c.status === "submitted";
-                                  return (
-                                    <li key={ci} className="flex items-center gap-3">
-                                      <span
-                                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
-                                          done
-                                            ? "bg-[#0E61FF] border-[#0E61FF]"
-                                            : c.status === "revision_requested"
-                                              ? "border-red-400 bg-red-50"
-                                              : "border-gray-300"
-                                        }`}
-                                      >
-                                        {done && (
-                                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                          </svg>
-                                        )}
-                                        {c.status === "revision_requested" && (
-                                          <RotateCcw className="w-3 h-3 text-red-500" />
-                                        )}
-                                      </span>
-                                      <div className="flex-1 min-w-0">
-                                        <p className={`text-sm font-medium ${done ? "text-gray-400 line-through" : "text-gray-800"}`}>
-                                          {c.format}
-                                        </p>
-                                        <p className="text-xs text-gray-400">
-                                          {formatDuration(c.durationSeconds)} · {c.status.replace("_", " ")}
-                                        </p>
-                                      </div>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-
-                            {/* Timeline */}
-                            <div>
-                              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
-                                Timeline
-                              </h4>
-                              <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                  <p className="text-xs text-gray-400">Start</p>
-                                  <p className="text-sm font-medium text-gray-800">{formatDate(deal.startDate)}</p>
-                                </div>
-                                <div className="w-8 border-t-2 border-dashed border-gray-200" />
-                                <div className="flex-1">
-                                  <p className="text-xs text-gray-400">Deadline</p>
-                                  <p className={`text-sm font-medium ${days <= 3 ? "text-red-600" : "text-gray-800"}`}>
-                                    {formatDate(deal.deadline)}
-                                  </p>
-                                </div>
-                              </div>
+                              <p className="text-sm text-gray-600 mb-3">{deal.description || "No description"}</p>
+                              <p className="text-xs text-gray-400">Status: {getDealStatusLabel(deal.status)}</p>
                             </div>
 
                             {/* Revision + Rate */}
@@ -416,16 +327,22 @@ export default function InfluencerDealsPage() {
                               <div className="bg-gray-50 rounded-xl p-3">
                                 <p className="text-xs text-gray-400 mb-1">Revisions</p>
                                 <p className="text-lg font-bold text-gray-900">
-                                  {deal.currentRevision}
-                                  <span className="text-sm font-normal text-gray-400"> / {deal.maxRevisions}</span>
+                                  {deal.currentRevision ?? 0}
+                                  <span className="text-sm font-normal text-gray-400"> / {deal.maxRevisions ?? 2}</span>
                                 </p>
                               </div>
                               <div className="bg-gray-50 rounded-xl p-3">
                                 <p className="text-xs text-gray-400 mb-1">Agreed Rate</p>
                                 <p className="text-lg font-bold text-gray-900">
-                                  ₹{deal.agreedRate.toLocaleString("en-IN")}
+                                  {formatINR(Number(deal.totalAmount))}
                                 </p>
                               </div>
+                            </div>
+
+                            <div>
+                              <p className="text-xs text-gray-400">
+                                Created: {formatDate(deal.createdAt)} • Updated: {formatDate(deal.updatedAt)}
+                              </p>
                             </div>
                           </div>
 
@@ -438,41 +355,54 @@ export default function InfluencerDealsPage() {
                             </div>
 
                             <div className="flex-1 overflow-y-auto max-h-80 px-6 py-4 space-y-3">
-                              {deal.messages.map((msg) => {
-                                if (msg.sender === "system") {
+                              {isChatLoading ? (
+                                <div className="flex justify-center py-8">
+                                  <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                                </div>
+                              ) : msgs.length === 0 ? (
+                                <p className="text-sm text-gray-400 text-center py-4">No messages yet. Start the conversation!</p>
+                              ) : (
+                                msgs.map((msg) => {
+                                  const isCreator = msg.senderId === user?.id;
+                                  if (msg.senderRole === "SYSTEM") {
+                                    return (
+                                      <div key={msg.id} className="flex justify-center">
+                                        <p className="text-xs text-gray-400 italic bg-gray-50 rounded-full px-3 py-1">
+                                          {msg.body}
+                                        </p>
+                                      </div>
+                                    );
+                                  }
                                   return (
-                                    <div key={msg.id} className="flex justify-center">
-                                      <p className="text-xs text-gray-400 italic bg-gray-50 rounded-full px-3 py-1">
-                                        {msg.text}
-                                      </p>
-                                    </div>
-                                  );
-                                }
-                                const isCreator = msg.sender === "creator";
-                                return (
-                                  <div
-                                    key={msg.id}
-                                    className={`flex ${isCreator ? "justify-end" : "justify-start"}`}
-                                  >
                                     <div
-                                      className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                                        isCreator
-                                          ? "bg-[#0E61FF] text-white rounded-br-md"
-                                          : "bg-gray-100 text-gray-800 rounded-bl-md"
-                                      }`}
+                                      key={msg.id}
+                                      className={`flex ${isCreator ? "justify-end" : "justify-start"}`}
                                     >
-                                      <p className="text-sm leading-relaxed">{msg.text}</p>
-                                      <p
-                                        className={`text-[10px] mt-1 ${
-                                          isCreator ? "text-blue-200" : "text-gray-400"
+                                      <div
+                                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                                          isCreator
+                                            ? "bg-[#0E61FF] text-white rounded-br-md"
+                                            : "bg-gray-100 text-gray-800 rounded-bl-md"
                                         }`}
                                       >
-                                        {msg.time}
-                                      </p>
+                                        <p className="text-sm leading-relaxed">{msg.body}</p>
+                                        <p
+                                          className={`text-[10px] mt-1 ${
+                                            isCreator ? "text-blue-200" : "text-gray-400"
+                                          }`}
+                                        >
+                                          {new Date(msg.createdAt).toLocaleString("en-IN", {
+                                            day: "numeric",
+                                            month: "short",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                          })}
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })
+                              )}
                               <div ref={chatEndRef} />
                             </div>
 
@@ -499,7 +429,7 @@ export default function InfluencerDealsPage() {
                                 />
                                 <button
                                   onClick={() => handleSendMessage(deal.id)}
-                                  disabled={!messageInputs[deal.id]?.trim()}
+                                  disabled={!messageInputs[deal.id]?.trim() || sendingMessage}
                                   className="w-10 h-10 rounded-xl bg-[#0E61FF] text-white flex items-center justify-center hover:bg-[#0B4FD9] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
                                 >
                                   <Send className="w-4 h-4" />

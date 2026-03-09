@@ -863,3 +863,58 @@ No additional migrations. The `PIIViolation` and `UserWarning` tables were creat
 13. [ ] Admin dashboard: verify flagged messages show PII type, severity, and action taken
 14. [ ] Run `npx tsc --noEmit` → no TypeScript errors
 15. [ ] Load test: open 10 browser tabs with same deal chat → verify all receive messages in real-time
+
+---
+
+## 11. Setup Guide
+
+### 11.1 Pusher Account Setup
+
+1. Create a free account at [pusher.com](https://pusher.com)
+2. Create a new Channels app with cluster `ap2` (Asia Pacific - Mumbai)
+3. Copy your app credentials from the Pusher dashboard
+
+### 11.2 Environment Variables
+
+Add the following to your `.env` file:
+
+```env
+PUSHER_APP_ID=your_app_id
+PUSHER_KEY=your_key
+PUSHER_SECRET=your_secret
+PUSHER_CLUSTER=ap2
+NEXT_PUBLIC_PUSHER_KEY=your_key
+NEXT_PUBLIC_PUSHER_CLUSTER=ap2
+```
+
+`NEXT_PUBLIC_` prefixed vars are exposed to the browser for client-side Pusher connection.
+
+### 11.3 Prerequisites Check
+
+Before running Phase 3:
+
+1. **Phase 1 DB models**: Ensure `PIIViolation`, `UserWarning`, `ChatMessage` tables exist in your Supabase database. Run the Phase 1 migration SQL if not already done.
+2. **Redis (Upstash)**: Required for PII escalation tracking (`ic:pii:{userId}` keys). Ensure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are set in `.env`.
+3. **Prisma client**: Run `npx prisma generate` after any schema changes.
+
+### 11.4 Verification Steps
+
+```bash
+# 1. TypeScript check
+npx tsc --noEmit
+
+# 2. Start dev server
+npm run dev
+
+# 3. Test Pusher connection
+# Open browser console → should see Pusher connection log
+
+# 4. Test PII detection
+# Send "9876543210" in chat → should trigger warning
+# Send "2345 6789 0123" (Aadhaar format) → CRITICAL flag
+# Send "user@okaxis" → UPI ID detected
+
+# 5. Test typing indicators
+# Open two browser windows with same deal chat
+# Type in one → other should show "typing..."
+```

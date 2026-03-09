@@ -14,6 +14,7 @@ import {
   AlertTriangle, CheckCircle, ShieldCheck, Image,
   FileCheck, Clock, Info, ChevronDown, X, Megaphone,
 } from "lucide-react";
+import { KYCVerificationModal } from "@/components/kyc/kyc-verification-modal";
 
 const NICHE_OPTIONS = [
   "Beauty", "Skincare", "Technology", "Gadgets", "Fitness", "Health",
@@ -79,6 +80,7 @@ function BrandProfileInner() {
   const [kybStatus, setKybStatus] = useState<"NOT_STARTED" | "PENDING" | "VERIFIED">("NOT_STARTED");
   const [kybSubmitting, setKybSubmitting] = useState(false);
   const [kybToast, setKybToast] = useState(false);
+  const [kycModalOpen, setKycModalOpen] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -358,16 +360,29 @@ function BrandProfileInner() {
                     <p className="text-xs text-gray-500">Identity verification status</p>
                   </div>
                 </div>
-                <Badge
-                  variant={
-                    profile?.kycStatus === "VERIFIED" ? "success"
-                      : profile?.kycStatus === "PENDING" ? "warning"
-                        : "destructive"
-                  }
-                >
-                  {profile?.kycStatus === "VERIFIED" && <CheckCircle className="w-3 h-3 mr-1" />}
-                  {profile?.kycStatus || "Not Started"}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  {(profile?.kycStatus === "PENDING" || profile?.kycStatus === "REJECTED") && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setKycModalOpen(true)}
+                      className="gap-1.5 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      {profile?.kycStatus === "REJECTED" ? "Try Again" : "Start Verification"}
+                    </Button>
+                  )}
+                  <Badge
+                    variant={
+                      profile?.kycStatus === "VERIFIED" ? "success"
+                        : profile?.kycStatus === "PENDING" ? "warning"
+                          : "destructive"
+                    }
+                  >
+                    {profile?.kycStatus === "VERIFIED" && <CheckCircle className="w-3 h-3 mr-1" />}
+                    {profile?.kycStatus || "Not Started"}
+                  </Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -680,6 +695,16 @@ function BrandProfileInner() {
           </div>
         </form>
       </div>
+
+      {/* KYC Modal */}
+      {kycModalOpen && (
+        <KYCVerificationModal
+          onClose={() => {
+            setKycModalOpen(false);
+            fetchProfile();
+          }}
+        />
+      )}
     </div>
   );
 }

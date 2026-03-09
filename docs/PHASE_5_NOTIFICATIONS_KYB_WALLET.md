@@ -1121,3 +1121,48 @@ await notificationService.send({
 14. [ ] Request withdrawal → verify `WalletTransaction` created with PENDING status
 15. [ ] Verify transaction history paginated correctly
 16. [ ] Run `npx tsc --noEmit` → no TypeScript errors
+
+---
+
+## 11. Setup Guide
+
+### 11.1 Resend (Email Notifications)
+
+1. Create account at [resend.com](https://resend.com)
+2. Generate API key from dashboard
+3. Verify your sending domain (or use the sandbox domain for dev)
+4. Set in `.env`:
+   ```env
+   RESEND_API_KEY=re_your_api_key
+   RESEND_FROM_EMAIL=noreply@yourdomain.com
+   ```
+
+### 11.2 GSTIN Verification (Gridlines)
+
+1. Sign up at [gridlines.io](https://gridlines.io) (or HyperVerge)
+2. Get API key from dashboard
+3. Set in `.env`:
+   ```env
+   GSTIN_API_URL=https://api.gridlines.io/gstin-api/gst
+   GSTIN_API_KEY=your_gridlines_api_key
+   ```
+
+### 11.3 Razorpay Payout (Wallet Withdrawals)
+
+1. Activate RazorpayX from your Razorpay dashboard
+2. Set in `.env`:
+   ```env
+   RAZORPAY_PAYOUT_ACCOUNT_NUMBER=your_account_number
+   RAZORPAY_PAYOUT_IFSC=your_ifsc
+   ```
+   Note: The Razorpay Payout integration is currently a placeholder (commented out in `wallet.service.ts`). Uncomment and configure when RazorpayX is activated.
+
+### 11.4 Verification Steps
+
+1. Run `npx tsc --noEmit` — should pass with zero errors
+2. Run `npm run dev` — app should start without errors
+3. Test notification flow: trigger a deal status change → check Pusher delivery + email
+4. Test KYB: submit a GSTIN via `POST /api/auth/kyb` → verify response
+5. Test wallet: complete a deal → check wallet balance via `GET /api/wallet`
+6. Test withdrawal: `POST /api/wallet/withdraw` → check transaction created
+7. Inngest dashboard: verify `notification-email`, `notification-batch`, `gstin-monthly-recheck` functions registered

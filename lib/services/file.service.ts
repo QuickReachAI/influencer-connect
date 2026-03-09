@@ -1,17 +1,16 @@
 // @ts-nocheck
 import prisma from '@/lib/prisma';
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { createClient } from '@supabase/supabase-js';
 import { escrowService } from './escrow.service';
+import { inngest } from '@/lib/inngest/client';
 
-// Initialize S3 Client
-const s3Client = new S3Client({
-    region: process.env.AWS_REGION!,
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-    }
-});
+// Initialize Supabase client (server-side: service role key bypasses RLS)
+const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const BUCKET = process.env.SUPABASE_STORAGE_BUCKET ?? 'deliverables';
 
 interface FileValidation {
     valid: boolean;
@@ -19,7 +18,8 @@ interface FileValidation {
 }
 
 export class FileService {
-    private readonly MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+    // 50 MB — Supabase free tier limit (Pro tier supports 5 GB)
+    private readonly MAX_FILE_SIZE = 50 * 1024 * 1024;
     private readonly ALLOWED_TYPES = [
         'video/mp4',
         'video/quicktime',
@@ -33,15 +33,13 @@ export class FileService {
      * Validate uploaded file
      */
     private validateFile(file: File): FileValidation {
-        // Check file size
         if (file.size > this.MAX_FILE_SIZE) {
             return {
                 valid: false,
-                error: 'File size exceeds 500MB limit'
+                error: 'File size exceeds 50MB limit'
             };
         }
 
-        // Check file type
         if (!this.ALLOWED_TYPES.includes(file.type)) {
             return {
                 valid: false,
@@ -53,15 +51,14 @@ export class FileService {
     }
 
     /**
-     * Upload deliverable file to S3
-     * Triggers automatic payment notification to brand
+     * Upload deliverable file to Supabase Storage.
+     * Triggers automatic payment notification to brand.
      */
     async uploadDeliverable(
         dealId: string,
         creatorId: string,
         file: File
     ): Promise<{ id: string; fileName: string }> {
-        // Verify deal ownership
         const deal = await prisma.deal.findUnique({
             where: { id: dealId }
         });
@@ -78,41 +75,37 @@ export class FileService {
             throw new Error('Brand must pay 50% before file upload');
         }
 
-        // Validate file
         const validation = this.validateFile(file);
         if (!validation.valid) {
             throw new Error(validation.error);
         }
 
-        // Generate S3 key
+        // Generate storage path (reuses s3Key DB field)
         const timestamp = Date.now();
-        const s3Key = `deals/${dealId}/${timestamp}_${file.name}`;
-        const bucket = process.env.AWS_S3_BUCKET!;
+        const storagePath = `deals/${dealId}/${timestamp}_${file.name}`;
 
-        // Upload to S3
+        // Upload to Supabase Storage
         const buffer = await file.arrayBuffer();
-        await s3Client.send(new PutObjectCommand({
-            Bucket: bucket,
-            Key: s3Key,
-            Body: Buffer.from(buffer),
-            ContentType: file.type,
-            ServerSideEncryption: 'AES256',
-            Metadata: {
-                dealId,
-                creatorId,
-                uploadedAt: new Date().toISOString()
-            }
-        }));
+        const { error: uploadError } = await supabase.storage
+            .from(BUCKET)
+            .upload(storagePath, Buffer.from(buffer), {
+                contentType: file.type,
+                upsert: false,
+            });
 
-        // Record in database
+        if (uploadError) {
+            throw new Error(`Upload failed: ${uploadError.message}`);
+        }
+
+        // Record in database (s3Key/s3Bucket fields store Supabase path/bucket)
         const deliverable = await prisma.deliverable.create({
             data: {
                 dealId,
                 fileName: file.name,
                 fileSize: file.size,
                 fileType: file.type,
-                s3Key,
-                s3Bucket: bucket,
+                s3Key: storagePath,
+                s3Bucket: BUCKET,
                 uploadedBy: creatorId
             }
         });
@@ -130,7 +123,7 @@ export class FileService {
                 changes: {
                     fileName: file.name,
                     fileSize: file.size,
-                    s3Key
+                    s3Key: storagePath
                 }
             }
         });
@@ -142,8 +135,8 @@ export class FileService {
     }
 
     /**
-     * Generate secure download link for brand
-     * Only available after 100% payment
+     * Generate secure download link for brand.
+     * Only available after 100% payment.
      */
     async generateSecureDownloadLink(
         deliverableId: string,
@@ -158,30 +151,26 @@ export class FileService {
             throw new Error('File not found');
         }
 
-        // Verify user is the brand
         if (deliverable.deal.brandId !== userId) {
             throw new Error('Unauthorized');
         }
 
-        // Verify payment completed
         if (!deliverable.deal.payment100Paid) {
             throw new Error('Payment required to download files');
         }
 
-        // Check if file expired
         if (deliverable.expiresAt < new Date()) {
             throw new Error('File has expired (30-day retention policy)');
         }
 
         // Generate signed URL (valid for 24 hours)
-        const command = new GetObjectCommand({
-            Bucket: deliverable.s3Bucket,
-            Key: deliverable.s3Key
-        });
+        const { data, error } = await supabase.storage
+            .from(deliverable.s3Bucket)
+            .createSignedUrl(deliverable.s3Key, 86400);
 
-        const signedUrl = await getSignedUrl(s3Client, command, {
-            expiresIn: 86400 // 24 hours
-        });
+        if (error || !data) {
+            throw new Error(`Failed to generate download link: ${error?.message}`);
+        }
 
         // Track download
         await prisma.deliverable.update({
@@ -205,7 +194,7 @@ export class FileService {
             }
         });
 
-        return signedUrl;
+        return data.signedUrl;
     }
 
     /**
@@ -220,7 +209,6 @@ export class FileService {
             throw new Error('Deal not found');
         }
 
-        // Verify user is part of the deal
         if (deal.brandId !== userId && deal.creatorId !== userId) {
             throw new Error('Unauthorized');
         }
@@ -248,8 +236,8 @@ export class FileService {
     }
 
     /**
-     * Cleanup expired files (Cron job - runs daily)
-     * Deletes files older than 30 days
+     * Cleanup expired files (Cron job - runs daily).
+     * Deletes files older than 30 days.
      */
     async cleanupExpiredFiles(): Promise<number> {
         const expired = await prisma.deliverable.findMany({
@@ -263,11 +251,15 @@ export class FileService {
 
         for (const file of expired) {
             try {
-                // Delete from S3
-                await s3Client.send(new DeleteObjectCommand({
-                    Bucket: file.s3Bucket,
-                    Key: file.s3Key
-                }));
+                // Delete from Supabase Storage
+                const { error } = await supabase.storage
+                    .from(file.s3Bucket)
+                    .remove([file.s3Key]);
+
+                if (error) {
+                    console.error(`Supabase delete error for ${file.id}:`, error.message);
+                    continue;
+                }
 
                 // Mark as deleted in database
                 await prisma.deliverable.update({
@@ -315,7 +307,7 @@ export class FileService {
             where: {
                 deletedAt: null,
                 expiresAt: {
-                    lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+                    lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 }
             }
         });
@@ -325,6 +317,117 @@ export class FileService {
             totalSize: stats._sum.fileSize || BigInt(0),
             expiringSoon
         };
+    }
+
+    // ========================================================================
+    // PHASE 4 — UPLOAD SUPPORT (Supabase signed upload URLs)
+    // ========================================================================
+
+    /**
+     * Initiate an upload for large files.
+     * Returns a signed upload URL. Client uploads directly to Supabase.
+     * For files >6 MB, client should use tus-js-client for resumable uploads.
+     */
+    async initiateMultipartUpload(
+        dealId: string,
+        creatorId: string,
+        fileName: string,
+        fileSize: number,
+        fileType: string
+    ): Promise<{
+        path: string;
+        signedUrl: string;
+        token: string;
+    }> {
+        const storagePath = `${process.env.S3_RAW_PREFIX ?? 'raw/'}${dealId}/${Date.now()}_${fileName}`;
+
+        // Create a signed upload URL
+        const { data, error } = await supabase.storage
+            .from(BUCKET)
+            .createSignedUploadUrl(storagePath);
+
+        if (error || !data) {
+            throw new Error(`Failed to create upload URL: ${error?.message}`);
+        }
+
+        // Track upload state in VideoAsset
+        await prisma.videoAsset.create({
+            data: {
+                dealId,
+                originalUrl: storagePath,
+                status: 'UPLOADING',
+                fileSize: BigInt(fileSize),
+            },
+        });
+
+        return {
+            path: storagePath,
+            signedUrl: data.signedUrl,
+            token: data.token,
+        };
+    }
+
+    /**
+     * Complete an upload after the file has been uploaded via signed URL.
+     * Creates a Deliverable record and emits video processing event.
+     */
+    async completeMultipartUpload(
+        dealId: string,
+        creatorId: string,
+        path: string,
+        token: string
+    ): Promise<{ deliverableId: string; videoAssetId: string }> {
+        // Create Deliverable record
+        const deliverable = await prisma.deliverable.create({
+            data: {
+                dealId,
+                fileName: path.split('/').pop()!,
+                fileSize: 0,
+                fileType: 'video/mp4',
+                s3Key: path,
+                s3Bucket: BUCKET,
+                uploadedBy: creatorId,
+            },
+        });
+
+        // Link VideoAsset to Deliverable
+        await prisma.videoAsset.updateMany({
+            where: { dealId, originalUrl: path },
+            data: {
+                deliverableId: deliverable.id,
+                status: 'PROCESSING',
+            },
+        });
+
+        // Get the actual VideoAsset ID
+        const asset = await prisma.videoAsset.findFirst({
+            where: { dealId, originalUrl: path },
+        });
+
+        // Emit video processing event
+        await inngest.send({
+            name: 'video/process',
+            data: {
+                dealId,
+                deliverableId: deliverable.id,
+                s3Key: path,
+            },
+        });
+
+        return {
+            deliverableId: deliverable.id,
+            videoAssetId: asset!.id,
+        };
+    }
+
+    /**
+     * Abort an upload (cleanup on failure).
+     * Deletes the partial file from Supabase Storage.
+     */
+    async abortMultipartUpload(path: string): Promise<void> {
+        await supabase.storage
+            .from(BUCKET)
+            .remove([path]);
     }
 }
 

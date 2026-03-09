@@ -6,6 +6,7 @@ const creatorUpdateSchema = z.object({
     name: z.string().min(2).max(100).optional(),
     bio: z.string().max(500).optional(),
     avatar: z.string().url().optional(),
+    niche: z.string().max(500).optional(),
     socialPlatforms: z.array(z.object({
         platform: z.string(),
         handle: z.string(),

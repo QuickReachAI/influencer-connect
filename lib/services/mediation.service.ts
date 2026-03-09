@@ -2,6 +2,8 @@
 import prisma from '@/lib/prisma';
 import { escrowService } from './escrow.service';
 import { kycService } from './kyc.service';
+import { notificationService } from './notification.service';
+import { walletService } from './wallet.service';
 
 type MediationDecision = 'FAVOR_CREATOR' | 'FAVOR_BRAND' | 'PARTIAL';
 
@@ -68,11 +70,13 @@ export class MediationService {
             }
         });
 
-        // TODO: Send notification to mediator
-        console.log(`[MEDIATOR ALERT] New dispute assigned:`, {
-            dealId,
-            mediatorId: mediator.id,
-            reason
+        // Notify mediator of new dispute assignment
+        await notificationService.send({
+            userId: mediator.id,
+            type: 'DISPUTE_RAISED',
+            title: 'New Dispute Assigned',
+            message: `A new dispute has been assigned to you for deal "${deal.title || dealId}". Reason: ${reason}`,
+            data: { dealId, reason },
         });
     }
 
@@ -199,8 +203,23 @@ export class MediationService {
             );
         }
 
-        // TODO: Send notifications
-        console.log(`[MEDIATION] Favored creator for deal ${deal.id}`);
+        // Notify creator: funds released
+        await notificationService.send({
+            userId: deal.creatorId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Resolved in Your Favor',
+            message: `The dispute for "${deal.title}" has been resolved in your favor. Funds have been released to your wallet.`,
+            data: { dealId: deal.id, decision: 'FAVOR_CREATOR', notes },
+        });
+
+        // Notify brand: dispute resolved against them
+        await notificationService.send({
+            userId: deal.brandId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Resolved',
+            message: `The dispute for "${deal.title}" has been resolved in favor of the creator. Notes: ${notes}`,
+            data: { dealId: deal.id, decision: 'FAVOR_CREATOR', notes },
+        });
     }
 
     /**
@@ -223,13 +242,33 @@ export class MediationService {
             }
         });
 
-        // If score drops below 2.0, consider suspension
+        // If score drops below 2.0, warn creator
         if (newScore < 2.0) {
-            // TODO: Send warning to creator
-            console.log(`[WARNING] Creator ${deal.creatorId} reliability score: ${newScore}`);
+            await notificationService.send({
+                userId: deal.creatorId,
+                type: 'PII_WARNING',
+                title: 'Low Reliability Score Warning',
+                message: `Your reliability score has dropped to ${newScore.toFixed(1)}. Continued disputes may result in account suspension.`,
+                data: { reliabilityScore: newScore, dealId: deal.id },
+            });
         }
 
-        console.log(`[MEDIATION] Favored brand for deal ${deal.id}`);
+        // Notify both parties of resolution
+        await notificationService.send({
+            userId: deal.creatorId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Resolved Against You',
+            message: `The dispute for "${deal.title}" has been resolved in favor of the brand. A refund has been issued. Notes: ${notes}`,
+            data: { dealId: deal.id, decision: 'FAVOR_BRAND', notes },
+        });
+
+        await notificationService.send({
+            userId: deal.brandId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Resolved in Your Favor',
+            message: `The dispute for "${deal.title}" has been resolved in your favor. A refund is being processed.`,
+            data: { dealId: deal.id, decision: 'FAVOR_BRAND', notes },
+        });
     }
 
     /**
@@ -237,18 +276,68 @@ export class MediationService {
      * Mediator can specify custom split
      */
     private async handlePartialResolution(deal: any, notes: string): Promise<void> {
-        // In production, this would parse mediator's decision for split percentage
-        // For now, default to 50-50 split
-
         const totalAmount = Number(deal.totalAmount);
-        const brandRefund = totalAmount * 0.5;
-        const creatorPayout = totalAmount * 0.5 * 0.95; // After 5% platform fee
 
-        // TODO: Implement custom split logic
-        console.log(`[MEDIATION] Partial resolution for deal ${deal.id}:`, {
-            brandRefund,
+        // Parse split from notes (e.g. "60/40 split" means 60% to creator, 40% to brand)
+        let creatorPercent = 50;
+        const splitMatch = notes.match(/(\d+)\s*\/\s*(\d+)/);
+        if (splitMatch) {
+            creatorPercent = parseInt(splitMatch[1], 10);
+            const sum = creatorPercent + parseInt(splitMatch[2], 10);
+            if (sum !== 100) {
+                creatorPercent = 50; // Invalid split, default to 50/50
+            }
+        }
+        const brandPercent = 100 - creatorPercent;
+
+        const creatorShare = totalAmount * (creatorPercent / 100);
+        const brandShare = totalAmount * (brandPercent / 100);
+        const platformFee = creatorShare * 0.10; // 10% platform fee on creator's share
+        const creatorPayout = creatorShare - platformFee;
+
+        // Credit creator's wallet (net of platform fee)
+        await walletService.credit(
+            deal.creatorId,
             creatorPayout,
-            notes
+            deal.id,
+            `Partial resolution: ${creatorPercent}% of ₹${totalAmount} (Fee: ₹${platformFee.toFixed(2)})`
+        );
+
+        // Record brand refund as escrow transaction
+        await prisma.escrowTransaction.create({
+            data: {
+                dealId: deal.id,
+                transactionType: 'REFUND_TO_BRAND',
+                amount: brandShare,
+                status: 'COMPLETED',
+            },
+        });
+
+        // Record platform fee
+        await prisma.escrowTransaction.create({
+            data: {
+                dealId: deal.id,
+                transactionType: 'PLATFORM_FEE',
+                amount: platformFee,
+                status: 'COMPLETED',
+            },
+        });
+
+        // Notify both parties
+        await notificationService.send({
+            userId: deal.creatorId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Partially Resolved',
+            message: `The dispute for "${deal.title}" has been partially resolved. You received ${creatorPercent}% (₹${creatorPayout.toFixed(2)} after fees).`,
+            data: { dealId: deal.id, decision: 'PARTIAL', creatorPercent, creatorPayout, notes },
+        });
+
+        await notificationService.send({
+            userId: deal.brandId,
+            type: 'DISPUTE_RESOLVED',
+            title: 'Dispute Partially Resolved',
+            message: `The dispute for "${deal.title}" has been partially resolved. You will receive a ${brandPercent}% refund (₹${brandShare.toFixed(2)}).`,
+            data: { dealId: deal.id, decision: 'PARTIAL', brandPercent, brandShare, notes },
         });
     }
 

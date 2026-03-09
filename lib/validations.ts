@@ -340,3 +340,58 @@ export type DealLockInput = z.infer<typeof dealLockSchema>;
 export type WalletWithdrawInput = z.infer<typeof walletWithdrawSchema>;
 export type NotificationPreferenceInput = z.infer<typeof notificationPreferenceSchema>;
 export type KYBInput = z.infer<typeof kybSchema>;
+
+// ============================================================================
+// PHASE 3 — CHAT TYPING / READ RECEIPT VALIDATIONS
+// ============================================================================
+
+export const typingSchema = z.object({
+  action: z.enum(['start', 'stop']),
+});
+
+export const readReceiptSchema = z.object({
+  lastReadMessageId: z.string().uuid(),
+});
+
+export type TypingInput = z.infer<typeof typingSchema>;
+export type ReadReceiptInput = z.infer<typeof readReceiptSchema>;
+
+// ============================================================================
+// PHASE 4 — VIDEO UPLOAD VALIDATIONS
+// ============================================================================
+
+export const initiateUploadSchema = z.object({
+  dealId: z.string().uuid(),
+  fileName: z.string().min(1),
+  fileSize: z.number().min(1).max(50 * 1024 * 1024), // Max 50MB (Supabase free tier)
+  fileType: z.enum(['video/mp4', 'video/quicktime', 'video/x-msvideo']),
+});
+
+export const completeUploadSchema = z.object({
+  dealId: z.string().uuid(),
+  path: z.string().min(1),
+  token: z.string().min(1),
+});
+
+export type InitiateUploadInput = z.infer<typeof initiateUploadSchema>;
+export type CompleteUploadInput = z.infer<typeof completeUploadSchema>;
+
+// ============================================================================
+// PHASE 6 — ADMIN BATCH ACTION VALIDATIONS
+// ============================================================================
+
+export const batchActionSchema = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('ban_users'),
+    userIds: z.array(z.string().uuid()).min(1, 'At least one user ID required'),
+    reason: z.string().min(10, 'Reason must be at least 10 characters').max(500),
+  }),
+  z.object({
+    action: z.literal('update_applications'),
+    applicationIds: z.array(z.string().uuid()).min(1, 'At least one application ID required'),
+    status: z.enum(['ACCEPTED', 'REJECTED']),
+    brandProfileId: z.string().uuid('Invalid brand profile ID'),
+  }),
+]);
+
+export type BatchActionInput = z.infer<typeof batchActionSchema>;

@@ -1,65 +1,13 @@
 // @ts-nocheck
 import prisma from '@/lib/prisma';
-
-const FORBIDDEN_KEYWORDS = [
-    'whatsapp', 'wa', 'email', 'gmail', 'yahoo', 'phone', 'number', 'call',
-    'outside', 'offline', 'direct payment', 'bank transfer', 'upi', 'paytm',
-    'gpay', 'phonepe', 'cash', 'meet', 'zoom', 'telegram', 'instagram dm',
-    'facebook', 'linkedin', 'twitter', 'contact me at'
-];
-
-interface FlagResult {
-    detected: boolean;
-    reason?: string;
-}
+import { piiService, type PIIScanResult } from './pii.service';
+import { triggerDealEvent } from '@/lib/pusher';
+import { notificationService } from './notification.service';
 
 export class ChatService {
     /**
-     * Detect forbidden keywords that indicate platform leakage attempts
-     */
-    private detectForbiddenContent(content: string): FlagResult {
-        const lowerContent = content.toLowerCase();
-
-        // Check for forbidden keywords
-        for (const keyword of FORBIDDEN_KEYWORDS) {
-            if (lowerContent.includes(keyword)) {
-                return {
-                    detected: true,
-                    reason: `Forbidden keyword detected: "${keyword}"`
-                };
-            }
-        }
-
-        // Regex for phone numbers (10 digits)
-        if (/\d{10}/.test(content)) {
-            return {
-                detected: true,
-                reason: 'Phone number detected'
-            };
-        }
-
-        // Regex for email addresses
-        if (/\S+@\S+\.\S+/.test(content)) {
-            return {
-                detected: true,
-                reason: 'Email address detected'
-            };
-        }
-
-        // Regex for URLs
-        if (/(https?:\/\/|www\.)\S+/i.test(content)) {
-            return {
-                detected: true,
-                reason: 'External URL detected'
-            };
-        }
-
-        return { detected: false };
-    }
-
-    /**
      * Send a chat message
-     * Automatically detects and flags forbidden content
+     * Integrates PII detection, Pusher real-time delivery, and progressive enforcement
      */
     async sendMessage(
         dealId: string,
@@ -70,19 +18,36 @@ export class ChatService {
     ): Promise<any> {
         // Verify user is part of the deal
         const deal = await prisma.deal.findUnique({
-            where: { id: dealId }
+            where: { id: dealId },
         });
-
-        if (!deal) {
-            throw new Error('Deal not found');
-        }
-
+        if (!deal) throw new Error('Deal not found');
         if (deal.brandId !== senderId && deal.creatorId !== senderId) {
             throw new Error('Unauthorized');
         }
 
-        // Detect forbidden content
-        const flagged = this.detectForbiddenContent(content);
+        // --- PII scan (replaces old detectForbiddenContent) ---
+        const piiResult: PIIScanResult = await piiService.scan(content, senderId);
+
+        // Determine what content to store/deliver
+        let storedContent = content;
+        let flagged = false;
+        let flagReason: string | null = null;
+
+        if (piiResult.hasPII || piiResult.hasPlatformLeakage) {
+            flagged = true;
+            flagReason = piiResult.violations
+                .map((v) => v.description)
+                .concat(piiResult.leakageKeywords.map((k) => `Platform keyword: ${k}`))
+                .join('; ');
+
+            // If action is REDACTED or higher, store redacted version
+            if (piiResult.action === 'REDACTED' || piiResult.action === 'SHADOW_BLOCKED') {
+                storedContent = piiResult.redactedContent;
+            }
+        }
+
+        // Shadow block: save message but don't deliver to recipient
+        const shadowBlocked = piiResult.action === 'SHADOW_BLOCKED';
 
         // Create message
         const message = await prisma.chatMessage.create({
@@ -90,10 +55,10 @@ export class ChatService {
                 dealId,
                 senderId,
                 messageType,
-                content,
+                content: storedContent,
                 metadata,
-                flagged: flagged.detected,
-                flagReason: flagged.reason
+                flagged,
+                flagReason,
             },
             include: {
                 sender: {
@@ -101,39 +66,72 @@ export class ChatService {
                         id: true,
                         email: true,
                         role: true,
-                        creatorProfile: {
-                            select: { name: true, avatar: true }
-                        },
-                        brandProfile: {
-                            select: { companyName: true, logo: true }
-                        }
-                    }
-                }
-            }
+                        creatorProfile: { select: { name: true, avatar: true } },
+                        brandProfile: { select: { companyName: true, logo: true } },
+                    },
+                },
+            },
         });
 
-        if (flagged.detected) {
-            // Warn user
+        // Record PII violations
+        if (piiResult.hasPII) {
+            for (const violation of piiResult.violations) {
+                await piiService.recordViolation(senderId, message.id, {
+                    type: violation.type,
+                    severity: violation.severity,
+                    originalContent: content,
+                    redactedContent: piiResult.redactedContent,
+                }, piiResult.action);
+            }
+        }
+
+        // --- Pusher: Real-time delivery ---
+        if (!shadowBlocked) {
+            await triggerDealEvent(dealId, 'new-message', {
+                id: message.id,
+                dealId,
+                senderId,
+                content: storedContent,
+                messageType,
+                metadata,
+                flagged,
+                createdAt: message.createdAt,
+                sender: message.sender,
+            });
+        }
+
+        // Send warning if PII detected
+        if (flagged && piiResult.action === 'WARNED') {
             await this.sendSystemMessage(
                 dealId,
-                '⚠️ Warning: Attempting to communicate outside the platform is prohibited and may result in account suspension.'
+                'Warning: Sharing personal information or attempting to communicate outside the platform is prohibited.'
             );
+            await triggerDealEvent(dealId, 'message-flagged', {
+                userId: senderId,
+                action: piiResult.action,
+                violationCount: piiResult.violationCount + 1,
+            });
+        }
 
-            // Notify admins
-            await this.notifyAdminsOfLeakageAttempt(dealId, senderId, content, flagged.reason!);
+        // Notify admins for HIGH/CRITICAL severity
+        if (piiResult.violations.some((v) => v.severity === 'HIGH' || v.severity === 'CRITICAL')) {
+            await this.notifyAdminsOfLeakageAttempt(dealId, senderId, content, flagReason!);
+        }
 
-            // Audit log
+        // Audit log for flagged messages
+        if (flagged) {
             await prisma.auditLog.create({
                 data: {
                     entityType: 'chat',
                     entityId: message.id,
-                    action: 'platform_leakage_attempt',
+                    action: 'pii_violation',
                     actorId: senderId,
                     changes: {
-                        reason: flagged.reason,
-                        content: content.substring(0, 100) // First 100 chars
-                    }
-                }
+                        action: piiResult.action,
+                        violationCount: piiResult.violationCount + 1,
+                        types: piiResult.violations.map((v) => v.type),
+                    },
+                },
             });
         }
 
@@ -144,13 +142,24 @@ export class ChatService {
      * Send system message (automated)
      */
     private async sendSystemMessage(dealId: string, content: string): Promise<void> {
-        await prisma.chatMessage.create({
+        const message = await prisma.chatMessage.create({
             data: {
                 dealId,
-                senderId: 'system', // Special system user
+                senderId: 'system',
                 messageType: 'SYSTEM',
-                content
-            }
+                content,
+            },
+        });
+
+        // Also broadcast system messages via Pusher
+        await triggerDealEvent(dealId, 'new-message', {
+            id: message.id,
+            dealId,
+            senderId: 'system',
+            content,
+            messageType: 'SYSTEM',
+            createdAt: message.createdAt,
+            sender: null,
         });
     }
 
@@ -163,33 +172,33 @@ export class ChatService {
         content: string,
         reason: string
     ): Promise<void> {
-        // Get all admin users
         const admins = await prisma.user.findMany({
-            where: { role: 'ADMIN' }
+            where: { role: 'ADMIN' },
         });
 
-        // TODO: Send email/notification to admins
-        console.log(`[ADMIN ALERT] Platform leakage attempt:`, {
-            dealId,
-            userId,
-            reason,
-            content: content.substring(0, 100)
-        });
+        // Notify all admins of PII leakage attempt
+        await Promise.all(
+            admins.map((admin) =>
+                notificationService.send({
+                    userId: admin.id,
+                    type: 'PII_WARNING',
+                    title: 'PII Leakage Attempt Detected',
+                    message: `User attempted to share restricted information in deal ${dealId}. Reason: ${reason}`,
+                    data: { dealId, userId, reason, contentPreview: content.substring(0, 100) },
+                })
+            )
+        );
     }
 
     /**
      * Get chat history for a deal
      */
     async getChatHistory(dealId: string, userId: string): Promise<any[]> {
-        // Verify user is part of the deal
         const deal = await prisma.deal.findUnique({
-            where: { id: dealId }
+            where: { id: dealId },
         });
 
-        if (!deal) {
-            throw new Error('Deal not found');
-        }
-
+        if (!deal) throw new Error('Deal not found');
         if (deal.brandId !== userId && deal.creatorId !== userId) {
             throw new Error('Unauthorized');
         }
@@ -202,16 +211,12 @@ export class ChatService {
                         id: true,
                         email: true,
                         role: true,
-                        creatorProfile: {
-                            select: { name: true, avatar: true }
-                        },
-                        brandProfile: {
-                            select: { companyName: true, logo: true }
-                        }
-                    }
-                }
+                        creatorProfile: { select: { name: true, avatar: true } },
+                        brandProfile: { select: { companyName: true, logo: true } },
+                    },
+                },
             },
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'asc' },
         });
 
         return messages;
@@ -224,10 +229,9 @@ export class ChatService {
     async lockConversation(dealId: string, milestone: string): Promise<void> {
         const messages = await prisma.chatMessage.findMany({
             where: { dealId },
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'asc' },
         });
 
-        // Audit log with snapshot
         await prisma.auditLog.create({
             data: {
                 entityType: 'deal',
@@ -240,10 +244,10 @@ export class ChatService {
                         id: m.id,
                         senderId: m.senderId,
                         content: m.content,
-                        createdAt: m.createdAt
-                    }))
-                }
-            }
+                        createdAt: m.createdAt,
+                    })),
+                },
+            },
         });
     }
 
@@ -257,19 +261,19 @@ export class ChatService {
                 deal: {
                     include: {
                         brand: { select: { email: true, brandProfile: true } },
-                        creator: { select: { email: true, creatorProfile: true } }
-                    }
+                        creator: { select: { email: true, creatorProfile: true } },
+                    },
                 },
                 sender: {
                     select: {
                         id: true,
                         email: true,
-                        role: true
-                    }
-                }
+                        role: true,
+                    },
+                },
             },
             orderBy: { createdAt: 'desc' },
-            take: 100
+            take: 100,
         });
     }
 }

@@ -43,8 +43,22 @@ export class SocialEntityService {
       );
     }
 
-    return prisma.socialEntity.create({
-      data: {
+    return prisma.socialEntity.upsert({
+      where: {
+        masterId_platform_handle: {
+          masterId: input.masterId,
+          platform: input.platform,
+          handle: input.handle,
+        },
+      },
+      update: {
+        followerCount: input.followerCount ?? 0,
+        engagementRate: input.engagementRate ?? 0,
+        niche: input.niche ?? [],
+        categories: input.categories ?? [],
+        isActive: true,
+      },
+      create: {
         masterId: input.masterId,
         platform: input.platform,
         handle: input.handle,

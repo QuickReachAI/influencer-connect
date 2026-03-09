@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +51,7 @@ type FilterSource = "ALL" | "ESCROW" | "WALLET";
 type FilterStatus = "ALL" | "COMPLETED" | "PENDING" | "FAILED";
 
 export default function FinanceAuditPage() {
+  const { loading: authLoading } = useAuth("admin");
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
   const [summary, setSummary] = useState<FinanceSummary>({
     totalEscrowDeposits: 0,

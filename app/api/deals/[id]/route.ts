@@ -49,7 +49,12 @@ export async function GET(
                 },
                 assignedMediator: {
                     select: { id: true, email: true }
-                }
+                },
+                entity: true,
+                campaign: true,
+                milestones: { orderBy: { sortOrder: 'asc' } },
+                revisions: { orderBy: { revisionNumber: 'desc' } },
+                exclusiveNegotiations: { where: { isActive: true } }
             }
         });
 

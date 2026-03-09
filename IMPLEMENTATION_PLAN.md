@@ -1,5 +1,100 @@
 # Influencer Connect - Complete Architecture & Implementation Plan
 
+## Implementation Progress
+
+| Phase | Description | Status |
+|-------|-------------|--------|
+| Phase 1 | Database Schema Evolution & Core Infrastructure | **DONE** |
+| Phase 2 | Campaign Marketplace & Discovery | **DONE** |
+| Phase 3 | Real-Time Chat & Enhanced PII Detection | PENDING |
+| Phase 4 | Video Processing & Content Pipeline | PENDING |
+| Phase 5 | Notification Engine & Brand KYB | PENDING |
+| Phase 6 | Admin Enhancements, Edge Cases & Hardening | PENDING |
+
+See `docs/PHASE_1_DATABASE_INFRASTRUCTURE.md` and `docs/PHASE_2_CAMPAIGN_MARKETPLACE.md` for detailed implementation status.
+
+### What Has Been Implemented
+
+**Schema & Infrastructure (Phase 1)**
+- `prisma/schema.prisma` — 15 new enums, 14 new models, 5 existing models modified
+- `prisma/seed.ts` — SocialEntity, Wallet, Campaign seed data added
+- `lib/validations.ts` — 12 new Zod schemas + type exports
+- `lib/inngest/client.ts` — Inngest singleton + 8 event types
+- `lib/inngest/functions/escrow-release.ts` — Durable T+2 escrow release (replaced unsafe setTimeout)
+- `lib/inngest/functions/cleanup.ts` — Daily expired file cleanup cron
+- `lib/services/escrow.service.ts` — Modified: setTimeout → inngest.send()
+- `lib/services/social-entity.service.ts` — CRUD, cross-user duplicate check, completion score
+- `lib/services/wallet.service.ts` — credit, debit, withdraw, transaction history
+
+**Campaign Marketplace & Discovery (Phase 2)**
+- `lib/services/campaign.service.ts` — Campaign CRUD, trickle-down visibility discovery, applications, review
+- `lib/services/deal.service.ts` — Exclusive negotiation lock/accept/reject
+- `lib/inngest/functions/campaign-visibility.ts` — 30-min visibility tier upgrade cron
+- `lib/inngest/functions/deal-locks.ts` — Hourly expired lock cleanup cron
+- `app/api/inngest/route.ts` — Serves all 4 Inngest functions
+- 11 new API routes: campaigns (5), social-entities (3), deal locks (3)
+- `app/api/influencers/route.ts` — Rewritten: uses SocialEntity table instead of CreatorProfile JSON
+- `app/api/deals/route.ts` — Modified: accepts optional entityId + campaignId
+
+**Pre-existing MVP (before Phase 1)**
+- `lib/services/auth.service.ts`, `lib/services/chat.service.ts`, `lib/services/file.service.ts`
+- `lib/services/kyc.service.ts`, `lib/services/mediation.service.ts`, `lib/services/tax.service.ts`
+- `lib/auth-helpers.ts` — Cookie-based auth (user_id cookie)
+- `lib/rate-limit.ts` — Upstash Redis / in-memory fallback
+- API routes: auth (login/signup/me/kyc), deals (CRUD/approve-script/payment/dispute), chat, files, influencers, brands, admin (disputes/users/stats/flagged-messages)
+
+### What Remains To Be Built
+
+**Phase 3 — Real-Time Chat & PII Detection**
+- `lib/pusher.ts` — Pusher server singleton
+- `lib/hooks/use-pusher.ts` — Client-side React hook
+- `lib/services/pii.service.ts` — Comprehensive regex PII engine (Indian-specific patterns)
+- `app/api/pusher/auth/route.ts` — Private channel auth
+- `app/api/chat/[dealId]/typing/route.ts` — Typing indicators
+- `app/api/chat/[dealId]/read/route.ts` — Read receipts
+- Modify `lib/services/chat.service.ts` — Integrate Pusher + PII service
+- Modify dashboard message pages — Replace setInterval polling with Pusher
+
+**Phase 4 — Video Processing & Content Pipeline**
+- `lib/inngest/functions/video-pipeline.ts` — Multi-step FFmpeg processing
+- `lib/inngest/functions/video-clean-render.ts` — Clean version on approval
+- `lib/services/revision.service.ts` — Bounded revision cycle workflow
+- `app/api/files/initiate-upload/route.ts` — S3 multipart upload initiation
+- `app/api/files/complete-upload/route.ts` — Multipart completion
+- `app/api/files/[id]/stream/route.ts` — Secure HLS streaming
+- `app/api/deals/[id]/revisions/route.ts` — Revision CRUD
+- `app/api/deals/[id]/revisions/[revisionId]/review/route.ts` — Approve/request revision
+- Modify `lib/services/file.service.ts` — Add multipart upload support
+
+**Phase 5 — Notifications, KYB & Wallet**
+- `lib/services/notification.service.ts` — Notification routing + preferences
+- `lib/inngest/functions/notifications.ts` — Dispatch, batching, thundering herd prevention
+- `lib/services/kyb.service.ts` — GSTIN verification (Gridlines/HyperVerge)
+- `lib/inngest/functions/gstin-recheck.ts` — Monthly GSTIN re-verification cron
+- `app/api/notifications/route.ts` — List/read notifications
+- `app/api/notifications/preferences/route.ts` — Preference management
+- `app/api/wallet/route.ts` — Balance, withdraw, transaction history
+- `app/api/auth/kyb/route.ts` — KYB endpoint
+- Modify `lib/services/escrow.service.ts` — Credit wallet on fund release
+
+**Phase 6 — Admin & Hardening**
+- Admin dispute split-screen UI
+- Financial audit trail view
+- KYC/KYB escalation queue
+- Fraud detection (engagement anomalies)
+- Batch admin actions
+- Edge case handlers (API outages, interrupted uploads, inactivity auto-cancel)
+- OAuth social account linking (stretch)
+
+**Frontend (deferred across all phases)**
+- Brand dashboard: campaign management UI (create, list, status actions)
+- Creator dashboard: campaign discovery UI (entity selector, browse, apply)
+- Deal negotiation: lock UI (countdown timer, accept/reject)
+- Notification bell component
+- Wallet UI
+
+---
+
 ## Context
 
 Influencer Connect is a multi-entity influencer-brand marketplace for the Indian market. The existing codebase (Next.js 16, Prisma 7, PostgreSQL, TypeScript) has a solid MVP with auth, deal lifecycle, escrow (50/50), basic chat with keyword-based PII detection, S3 file management, KYC via Digio, tax compliance (GST/TDS), and admin dashboard. However, multiple critical systems from the spec remain unbuilt: multi-entity social management, campaign marketplace, tiered visibility, real-time chat, video watermarking/DRM, wallet system, notification engine, and robust PII detection. The T+2 escrow release currently uses `setTimeout` (lost on restart). Scale target: 10k creators, 5-10k brands.
@@ -8,7 +103,7 @@ Influencer Connect is a multi-entity influencer-brand marketplace for the Indian
 
 ---
 
-## Phase 1: Database Schema Evolution & Core Infrastructure (Week 1-3)
+## Phase 1: Database Schema Evolution & Core Infrastructure (Week 1-3) ✅ IMPLEMENTED
 
 ### 1.1 New Prisma Enums
 
@@ -150,7 +245,7 @@ All changes are **additive** (no breaking changes):
 
 ---
 
-## Phase 2: Campaign Marketplace & Discovery (Week 4-5)
+## Phase 2: Campaign Marketplace & Discovery (Week 4-5) ✅ IMPLEMENTED
 
 ### 2.1 Campaign Service (`lib/services/campaign.service.ts`)
 
@@ -475,9 +570,9 @@ GET  /api/wallet/transactions - Transaction history (paginated)
 
 After each phase, verify with:
 
-1. **Phase 1**: Run `prisma migrate deploy` successfully. Seed DB. Verify Inngest dashboard shows escrow-release function. Test T+2 release fires correctly (set `ESCROW_RELEASE_DELAY=30s` in `.env.test`).
+1. **Phase 1** ✅: Run `prisma migrate deploy` successfully. Seed DB. Verify Inngest dashboard shows escrow-release function. Test T+2 release fires correctly (set `ESCROW_RELEASE_DELAY=30s` in `.env.test`). **Status**: All code implemented, TypeScript passes. Deploy-time steps (migrations, GIN indexes, seed) pending database connection.
 
-2. **Phase 2**: Create campaign as brand → verify tiered visibility (check at 0h, 1h, 2h). Apply as creator → verify exclusive negotiation lock prevents second lock. Verify completion score updates on profile change.
+2. **Phase 2** ✅: Create campaign as brand → verify tiered visibility (check at 0h, 1h, 2h). Apply as creator → verify exclusive negotiation lock prevents second lock. Verify completion score updates on profile change. **Status**: All services, routes, and Inngest functions implemented. TypeScript passes. Frontend dashboard UI deferred.
 
 3. **Phase 3**: Send message → verify appears in real-time (no page refresh). Send phone number → verify soft warning. Send 3 violations → verify hard redaction. Send 5 → verify shadow block.
 
@@ -491,15 +586,16 @@ After each phase, verify with:
 
 ## Key Files Reference
 
-| Existing File | Modifications Needed |
-|--------------|---------------------|
-| `prisma/schema.prisma` | All new models, enums, indexes (Phase 1) |
-| `lib/services/escrow.service.ts` | Replace setTimeout:282 with Inngest, credit wallet (Phase 1, 5) |
-| `lib/services/chat.service.ts` | Integrate Pusher + PII service (Phase 3) |
-| `lib/services/file.service.ts` | Multipart upload, video processing (Phase 4) |
-| `lib/validations.ts` | Add schemas for all new models (Phase 1-5) |
-| `app/api/influencers/route.ts` | Use SocialEntity for discovery (Phase 2) |
-| `app/api/deals/route.ts` | Accept entityId, campaignId (Phase 2) |
-| `app/dashboard/*/messages/page.tsx` | Replace polling with Pusher (Phase 3) |
-| `prisma/seed.ts` | Seed new tables (Phase 1) |
-| `package.json` | Add: pusher, pusher-js, inngest, resend, tus-js-client, hls.js (Phase 1-5) |
+| Existing File | Modifications Needed | Status |
+|--------------|---------------------|--------|
+| `prisma/schema.prisma` | All new models, enums, indexes (Phase 1) | **DONE** |
+| `lib/services/escrow.service.ts` | Replace setTimeout:282 with Inngest, credit wallet (Phase 1, 5) | **DONE** (Phase 1: Inngest) |
+| `lib/services/chat.service.ts` | Integrate Pusher + PII service (Phase 3) | PENDING |
+| `lib/services/file.service.ts` | Multipart upload, video processing (Phase 4) | PENDING |
+| `lib/validations.ts` | Add schemas for all new models (Phase 1-5) | **DONE** (Phase 1-2 schemas) |
+| `app/api/influencers/route.ts` | Use SocialEntity for discovery (Phase 2) | **DONE** |
+| `app/api/deals/route.ts` | Accept entityId, campaignId (Phase 2) | **DONE** |
+| `app/dashboard/*/messages/page.tsx` | Replace polling with Pusher (Phase 3) | PENDING |
+| `prisma/seed.ts` | Seed new tables (Phase 1) | **DONE** |
+| `package.json` | Add: pusher, pusher-js, inngest, resend, tus-js-client, hls.js (Phase 1-5) | **DONE** (inngest) |
+| `app/api/inngest/route.ts` | Register all Inngest functions | **DONE** (4 functions) |

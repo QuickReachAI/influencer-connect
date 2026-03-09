@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/use-auth';
 import {
     AlertTriangle,
     ChevronLeft,
@@ -39,6 +40,7 @@ interface Dispute {
 }
 
 export default function DisputesPage() {
+    const { loading: authLoading } = useAuth('admin');
     const [disputes, setDisputes] = useState<Dispute[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);

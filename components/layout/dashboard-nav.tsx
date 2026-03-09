@@ -20,6 +20,7 @@ import {
   Wallet,
   Megaphone,
   IndianRupee,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,48 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState<number | null>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  // Fetch unread notification count
+  useEffect(() => {
+    fetch("/api/notifications/unread-count")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setUnreadCount(data.count || 0); })
+      .catch(() => {});
+  }, [pathname]);
+
+  async function toggleNotifications() {
+    if (notifOpen) {
+      setNotifOpen(false);
+      return;
+    }
+    setNotifOpen(true);
+    setNotifLoading(true);
+    try {
+      const res = await fetch("/api/notifications?pageSize=10");
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setNotifLoading(false);
+    }
+  }
+
+  async function markAllRead() {
+    try {
+      await fetch("/api/notifications/read-all", { method: "PUT" });
+      setUnreadCount(0);
+      setNotifications(prev => prev.map(n => ({ ...n, readAt: new Date().toISOString() })));
+    } catch {
+      // ignore
+    }
+  }
 
   useEffect(() => {
     if (role !== "brand" && role !== "influencer") return;
@@ -108,11 +151,20 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
         ? brandNavItems
         : influencerNavItems;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // continue with client-side cleanup even if API fails
+    }
     localStorage.removeItem("userRole");
     localStorage.removeItem("userId");
     localStorage.removeItem("brandProfileComplete");
     localStorage.removeItem("brandNiches");
+    localStorage.removeItem("infProfileComplete");
+    localStorage.removeItem("infNiches");
+    localStorage.removeItem("infEntities");
+    localStorage.removeItem("infPrivacyConsent");
     router.push("/");
   };
 
@@ -152,6 +204,70 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
             </nav>
 
             <div className="flex items-center gap-2">
+              {/* Notification Bell */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-gray-500 hover:text-gray-900"
+                  onClick={toggleNotifications}
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+
+                {notifOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setNotifOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2 z-40 w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                        <span className="text-sm font-semibold text-gray-900">Notifications</span>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllRead}
+                            className="text-xs text-[#0E61FF] hover:underline font-medium"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+
+                      {notifLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="w-5 h-5 border-2 border-[#0E61FF] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-sm text-gray-400">
+                          No notifications yet
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-50">
+                          {notifications.map((n: any) => (
+                            <div
+                              key={n.id}
+                              className={`px-4 py-3 hover:bg-gray-50 transition-colors ${!n.readAt ? "bg-blue-50/50" : ""}`}
+                            >
+                              <p className="text-sm text-gray-800">{n.title}</p>
+                              {n.body && <p className="text-xs text-gray-500 mt-0.5">{n.body}</p>}
+                              <p className="text-[10px] text-gray-400 mt-1">
+                                {new Date(n.createdAt).toLocaleString("en-IN", {
+                                  day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
               <Button variant="ghost" onClick={handleLogout} className="gap-2 text-gray-500 hover:text-red-600">
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>

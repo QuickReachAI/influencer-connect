@@ -63,4 +63,11 @@ export type InngestEvents = {
       message: string;
     };
   };
+  'kyb/retry-verification': {
+    data: {
+      brandProfileId: string;
+      gstin: string;
+      attempt: number;
+    };
+  };
 };

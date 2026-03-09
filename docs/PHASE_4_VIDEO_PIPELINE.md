@@ -1034,3 +1034,41 @@ Push to ECR and create Lambda function with:
 13. [ ] Verify clean version available for download after approval
 14. [ ] Verify S3 lifecycle rules configured for raw/ and processed/ prefixes
 15. [ ] Run `npx tsc --noEmit` → no TypeScript errors
+
+---
+
+## 11. Setup Guide
+
+### 11.1 Environment Variables
+
+Add to `.env`:
+
+```env
+VIDEO_LAMBDA_FUNCTION_NAME=influencer-connect-video-processor
+VIDEO_LAMBDA_REGION=ap-south-1
+S3_RAW_PREFIX=raw/
+S3_PROCESSED_PREFIX=processed/
+HLS_PRESIGNED_URL_EXPIRY=900
+```
+
+Existing AWS vars (`AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_BUCKET`) must already be set from the MVP.
+
+### 11.2 Lambda Setup (Required for Video Processing)
+
+1. Build the Docker image from the Dockerfile in section 9
+2. Push to ECR: `aws ecr create-repository --repository-name influencer-connect-video-processor`
+3. Create Lambda function with: Memory 3072MB, Timeout 300s, Ephemeral storage 10GB
+4. Grant Lambda read/write access to your S3 bucket
+
+### 11.3 S3 Lifecycle Rules
+
+Configure via AWS Console:
+- `raw/` prefix: Transition to Glacier after 7 days, delete after 30 days
+- `processed/` prefix: Delete after 60 days
+
+### 11.4 Prerequisites Check
+
+- Phase 1 models: `VideoAsset`, `DealRevision`, `Deliverable` exist in DB
+- Phase 1 enums: `VideoAssetStatus`, `RevisionStatus` exist
+- Deal model has `maxRevisions` and `currentRevision` fields
+- Inngest serve endpoint running with 6 functions registered

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/lib/hooks/use-auth";
 import {
   MessageSquare,
   ChevronLeft,
@@ -69,6 +70,7 @@ interface EngagementAnomaly {
 type Tab = "flagged" | "warnings" | "anomalies";
 
 export default function FlaggedMessagesPage() {
+  const { loading: authLoading } = useAuth("admin");
   const [messages, setMessages] = useState<FlaggedMessage[]>([]);
   const [warnings, setWarnings] = useState<UserWarning[]>([]);
   const [anomalies, setAnomalies] = useState<EngagementAnomaly[]>([]);

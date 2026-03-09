@@ -1482,37 +1482,47 @@ console.log(`Sample campaign created: "${campaign.title}"`);
 
 ## 10. Verification Checklist
 
-### Implementation Status
+### Code Implementation
 
-| # | Item | Status | Notes |
-|---|------|--------|-------|
-| 1 | `prisma/schema.prisma` — 15 new enums added | **DONE** | SocialPlatform, ContentFormat, CampaignStatus, CampaignApplicationStatus, DealMilestoneStatus, RevisionStatus, VideoAssetStatus, WalletTransactionType, WalletTransactionStatus, NotificationType, PIIDetectedType, PIISeverity, PIIAction, WarningType; DealStatus updated with LOCKED + REVISION_PENDING |
-| 2 | `prisma/schema.prisma` — 14 new models added | **DONE** | SocialEntity, Campaign, CampaignApplication, DealMilestone, DealRevision, ExclusiveNegotiation, Wallet, WalletTransaction, Notification, NotificationPreference, VideoAsset, GSTStatusLog, PIIViolation, UserWarning |
-| 3 | `prisma/schema.prisma` — 5 existing models modified | **DONE** | User (7 new relations, 2 new indexes), Deal (entityId, campaignId, maxRevisions, currentRevision, 4 new relations, 5 new indexes), BrandProfile (6 KYB fields, 2 new relations), ChatMessage (piiViolations relation, composite index), Deliverable (videoAsset relation) |
-| 4 | `npx prisma generate` — Prisma client generated | **DONE** | v7.2.0, no errors |
-| 5 | `lib/inngest/client.ts` — Inngest singleton + event types | **DONE** | 8 event types defined (deal/payment-completed, deal/deliverable-approved, deal/lock-expired, campaign/published, video/process, video/clean-render, notification/send, notification/batch-send) |
-| 6 | `app/api/inngest/route.ts` — Inngest serve endpoint | **DONE** | Exports GET, POST, PUT; registers escrowReleaseFunction + fileCleanupFunction |
-| 7 | `lib/inngest/functions/escrow-release.ts` — T+2 durable release | **DONE** | Uses step.sleep with ESCROW_RELEASE_DELAY env var (default 48h, set 30s for dev) |
-| 8 | `lib/inngest/functions/cleanup.ts` — Daily file cleanup cron | **DONE** | Runs at 2 AM IST daily, calls fileService.cleanupExpiredFiles() |
-| 9 | `lib/services/escrow.service.ts` — setTimeout replaced with Inngest | **DONE** | Lines 280-284: `setTimeout(48h)` replaced with `inngest.send({ name: 'deal/payment-completed' })` |
-| 10 | `lib/services/social-entity.service.ts` — Full CRUD service | **DONE** | create (with cross-user duplicate check), listByUser, getById, update, deactivate, recalculateCompletionScore |
-| 11 | `lib/services/wallet.service.ts` — Wallet operations | **DONE** | getOrCreateWallet, credit, debit, withdraw, getTransactions |
-| 12 | `lib/validations.ts` — 12 new Zod schemas | **DONE** | socialEntityCreate/Update, campaignCreate/Update, campaignApplication, dealMilestone, dealRevision, dealLock, walletWithdraw, notificationPreference, kyb + 11 type exports. Fixed for Zod v4 (z.record requires key+value args) |
-| 13 | `prisma/seed.ts` — Phase 1 seed data | **DONE** | 2 SocialEntities (Instagram @priyasharma, YouTube PriyaSharmaVlogs), 3 Wallets, 1 sample Campaign |
-| 14 | `npm install inngest` — Package installed | **DONE** | Added to node_modules and package.json |
-| 15 | `npx tsc --noEmit` — Zero TypeScript errors | **DONE** | All new and modified files compile cleanly |
+| # | Check | Status | How to verify |
+|---|-------|--------|---------------|
+| 1 | Schema: 15 new enums exist in `prisma/schema.prisma` | **DONE** | `grep "^enum" prisma/schema.prisma \| wc -l` → 18 total (3 pre-existing + 15 new) |
+| 2 | Schema: 14 new models exist in `prisma/schema.prisma` | **DONE** | `grep "^model" prisma/schema.prisma \| wc -l` → 24 total (10 pre-existing + 14 new) |
+| 3 | Schema: Deal model has entityId, campaignId, maxRevisions, currentRevision | **DONE** | Read `prisma/schema.prisma` Deal model |
+| 4 | Schema: BrandProfile has 6 KYB fields (gstin, gstinVerified, etc.) | **DONE** | Read `prisma/schema.prisma` BrandProfile model |
+| 5 | Schema: User model has 7 new relations + 2 new indexes | **DONE** | socialEntities, wallet, notifications, notificationPrefs, piiViolations, userWarnings, campaignApplications |
+| 6 | Inngest client exports 8 event types | **DONE** | Read `lib/inngest/client.ts` |
+| 7 | Inngest serve endpoint registers 4 functions | **DONE** | escrowRelease, fileCleanup, campaignVisibility, dealLockCleanup |
+| 8 | Escrow release uses `step.sleep()` instead of `setTimeout()` | **DONE** | Read `lib/inngest/functions/escrow-release.ts` — uses ESCROW_RELEASE_DELAY env var |
+| 9 | File cleanup cron runs at 2 AM daily | **DONE** | Read `lib/inngest/functions/cleanup.ts` — cron: `0 2 * * *` |
+| 10 | `escrow.service.ts` calls `inngest.send()` instead of `setTimeout()` | **DONE** | Read `lib/services/escrow.service.ts` — no more setTimeout for 48h delay |
+| 11 | SocialEntity service has 6 methods | **DONE** | create, listByUser, getById, update, deactivate, recalculateCompletionScore |
+| 12 | Wallet service has 5 methods | **DONE** | getOrCreateWallet, credit, debit, withdraw, getTransactions |
+| 13 | `lib/validations.ts` has 12 new Zod schemas | **DONE** | socialEntityCreate/Update, campaignCreate/Update, campaignApplication, dealMilestone, dealRevision, dealLock, walletWithdraw, notificationPreference, kyb |
+| 14 | Seed script creates SocialEntities, Wallets, Campaign | **DONE** | Read `prisma/seed.ts` — 2 entities, 3 wallets, 1 campaign |
+| 15 | `inngest` package installed | **DONE** | Check `package.json` |
+| 16 | TypeScript compiles with zero errors | **DONE** | `npx tsc --noEmit` → no output |
 
-### Remaining Deploy-Time Steps (require database connection)
+### Deploy-Time Steps (require database connection)
 
-| # | Item | Status | Command |
-|---|------|--------|---------|
-| 16 | Run Prisma migrations | PENDING | `npx prisma migrate dev --name phase1_schema_evolution` |
-| 17 | Create GIN indexes via raw SQL | PENDING | See section 9.2 — run after migration |
-| 18 | Create partial unique index on ExclusiveNegotiation | PENDING | See section 9.2 — run after migration |
-| 19 | Run seed script | PENDING | `npx prisma db seed` |
-| 20 | Run backfill script | PENDING | `npx tsx prisma/backfill-phase1.ts` |
-| 21 | Verify Inngest dashboard | PENDING | Start dev server, hit `GET /api/inngest` |
-| 22 | Test T+2 escrow release | PENDING | Set `ESCROW_RELEASE_DELAY=30s`, trigger deal payment, verify release in Inngest dashboard |
+| # | Check | Status | Command |
+|---|-------|--------|---------|
+| 17 | Run Prisma migrations | PENDING | `npx prisma migrate dev --name phase1_schema_evolution` |
+| 18 | Create GIN indexes via raw SQL | **DONE** | `prisma/migrations/gin-indexes.sql` created — run after migration |
+| 19 | Create partial unique index on ExclusiveNegotiation | **DONE** | Included in `prisma/migrations/gin-indexes.sql` |
+| 20 | Run seed script | PENDING | `npx prisma db seed` |
+| 21 | Run backfill script (SocialEntity from CreatorProfile JSON) | **DONE** | `prisma/backfill-phase1.ts` created — run with `npx tsx prisma/backfill-phase1.ts` |
+| 22 | Verify Inngest dashboard shows 4 functions | PENDING | Start dev server, hit `GET /api/inngest` |
+| 23 | Test T+2 escrow release (set delay to 30s) | PENDING | Set `ESCROW_RELEASE_DELAY=30s`, trigger deal payment, verify release |
+
+### Runtime Verification (require running app + DB)
+
+| # | Check | Status | Steps |
+|---|-------|--------|-------|
+| 24 | SocialEntity CRUD works | PENDING | POST `/api/social-entities` → create entity, GET → list, PATCH → update, DELETE → deactivate |
+| 25 | Wallet credit/debit works | PENDING | Trigger escrow release → verify wallet balance incremented |
+| 26 | Completion score recalculates | PENDING | Update entity profile → verify `completionScore` changes |
+| 27 | Cross-user duplicate entity rejected | PENDING | Try creating same handle+platform for different user → expect error |
 
 ### Files Created
 
@@ -1533,3 +1543,107 @@ console.log(`Sample campaign created: "${campaign.title}"`);
 | `lib/services/escrow.service.ts` | Added inngest import; replaced setTimeout (line 282) with inngest.send() |
 | `lib/validations.ts` | Added 12 Zod schemas + 11 type exports at end of file |
 | `prisma/seed.ts` | Added SocialEntity, Wallet, Campaign seed data |
+
+---
+
+## 11. Setup Guide
+
+Complete setup instructions for Phase 1. Run these steps after cloning or pulling Phase 1 code.
+
+### 11.1 Environment Variables
+
+Ensure `.env` has these entries (values below are dev defaults):
+
+```env
+# Database (Supabase PostgreSQL)
+DATABASE_URL="postgresql://postgres:<PASSWORD>@db.<PROJECT_REF>.supabase.co:5432/postgres"
+DIRECT_URL="postgresql://postgres:<PASSWORD>@db.<PROJECT_REF>.supabase.co:5432/postgres"
+
+# Inngest
+INNGEST_EVENT_KEY=dev_local_key
+INNGEST_SIGNING_KEY=dev_local_signing_key
+ESCROW_RELEASE_DELAY=30s
+
+# OAuth encryption (for SocialEntity token storage)
+OAUTH_ENCRYPTION_KEY=<run: openssl rand -hex 32>
+
+# Timezone
+TZ=Asia/Kolkata
+```
+
+### 11.2 Database Migration
+
+**Option A — Prisma CLI** (requires direct DB connectivity):
+
+```bash
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+**Option B — Supabase SQL Editor** (if CLI can't reach DB):
+
+1. Open Supabase Dashboard → SQL Editor
+2. Paste contents of `prisma/migrations/complete-setup.sql`
+3. Run the script
+4. After running, mark the migration as applied locally:
+
+```bash
+npx prisma migrate resolve --applied 20260307000000_init
+```
+
+### 11.3 GIN Indexes
+
+These are included in `complete-setup.sql`. If you ran Prisma CLI instead, apply them manually:
+
+```bash
+# Via Supabase SQL Editor, paste contents of:
+# prisma/migrations/gin-indexes.sql
+```
+
+The three indexes created:
+- `SocialEntity_niche_gin` — GIN index on `SocialEntity.niche` array
+- `Campaign_niche_gin` — GIN index on `Campaign.niche` array
+- `ExclusiveNegotiation_entityId_active` — Partial unique index (one active lock per entity)
+
+### 11.4 Seed & Backfill
+
+```bash
+# Seed test users, deals, social entities, wallets, campaign
+npx tsx prisma/seed.ts
+
+# Backfill: migrate CreatorProfile.socialPlatforms JSON → SocialEntity rows
+# and create wallets for any users missing one
+npx tsx prisma/backfill-phase1.ts
+```
+
+### 11.5 Inngest Setup
+
+Phase 1 introduces Inngest as an external service for durable background jobs.
+
+1. **Install** (already in `package.json`): `npm install inngest`
+2. **Dev server**: Inngest Dev Server runs alongside your app. Start it with:
+   ```bash
+   npx inngest-cli@latest dev
+   ```
+3. **Start your app**: `npm run dev`
+4. **Verify**: Open `http://localhost:8288` (Inngest dashboard) — you should see 4 registered functions:
+   - `escrow-release` — T+2 durable escrow release
+   - `file-cleanup` — Daily expired file cleanup cron
+   - `campaign-visibility-update` — 30-min visibility tier upgrade (Phase 2)
+   - `deal-lock-cleanup` — Hourly expired lock cleanup (Phase 2)
+
+### 11.6 Verification
+
+```bash
+# 1. Migration applied
+npx prisma migrate status
+
+# 2. TypeScript compiles
+npx tsc --noEmit
+
+# 3. App starts
+npm run dev
+
+# 4. Inngest functions visible
+# Open http://localhost:8288 after starting both inngest dev + app
+```

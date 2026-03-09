@@ -35,7 +35,10 @@ import {
   ChevronDown,
   Megaphone,
   Lock,
+  Unlink,
+  XCircle,
 } from "lucide-react";
+import { KYCVerificationModal } from "@/components/kyc/kyc-verification-modal";
 
 const NICHE_OPTIONS = [
   "Beauty", "Skincare", "Technology", "Gadgets", "Fitness", "Health",
@@ -71,12 +74,14 @@ interface SocialEntity {
   engagementRate: number;
   connected: boolean;
   connecting?: boolean;
+  disconnecting?: boolean;
 }
 
 interface InfluencerProfileData {
   id: string;
   email: string;
   role: string;
+  phone?: string;
   kycStatus?: string;
   creatorProfile?: {
     name: string;
@@ -107,11 +112,18 @@ function InfluencerProfileInner() {
   const searchParams = useSearchParams();
   const redirectToDiscover = searchParams.get("complete") === "true";
 
+  // OAuth callback params
+  const oauthStatus = searchParams.get("oauth");
+  const oauthPlatform = searchParams.get("platform");
+  const oauthMessage = searchParams.get("message");
+
   const [profile, setProfile] = useState<InfluencerProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [oauthToast, setOauthToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [kycModalOpen, setKycModalOpen] = useState(false);
 
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -128,6 +140,23 @@ function InfluencerProfileInner() {
     const role = localStorage.getItem("userRole");
     if (role !== "influencer") router.push("/auth/login");
   }, [router]);
+
+  // Handle OAuth callback toast
+  useEffect(() => {
+    if (oauthStatus) {
+      setOauthToast({
+        type: oauthStatus === "success" ? "success" : "error",
+        message: oauthMessage || (oauthStatus === "success" ? "Account connected successfully!" : "OAuth failed"),
+      });
+      // Clean URL params
+      const url = new URL(window.location.href);
+      url.searchParams.delete("oauth");
+      url.searchParams.delete("platform");
+      url.searchParams.delete("message");
+      window.history.replaceState({}, "", url.pathname);
+      setTimeout(() => setOauthToast(null), 6000);
+    }
+  }, [oauthStatus, oauthMessage]);
 
   useEffect(() => {
     try {
@@ -234,21 +263,69 @@ function InfluencerProfileInner() {
   };
 
   const handleOAuthConnect = (idx: number) => {
-    if (entities[idx].connected) return;
-    updateEntity(idx, "connecting", true);
-    setTimeout(() => {
+    const entity = entities[idx];
+    if (entity.connected) return;
+    if (!entity.handle.trim()) return;
+
+    const platformMap: Record<string, string> = {
+      Instagram: "instagram",
+      YouTube: "youtube",
+    };
+
+    const platformKey = platformMap[entity.platform];
+    if (platformKey) {
+      // Real OAuth redirect
+      window.location.href = `/api/oauth/${platformKey}/initiate`;
+    } else {
+      // Facebook — no OAuth implemented, just mark as connected locally
+      updateEntity(idx, "connecting", true);
+      setTimeout(() => {
+        setEntities(prev => {
+          const updated = [...prev];
+          updated[idx] = { ...updated[idx], connected: true, connecting: false };
+          return updated;
+        });
+      }, 1000);
+    }
+  };
+
+  const handleDisconnect = async (idx: number) => {
+    const entity = entities[idx];
+    if (!entity.id || !entity.connected) return;
+
+    updateEntity(idx, "disconnecting", true);
+
+    const platformMap: Record<string, string> = {
+      Instagram: "instagram",
+      YouTube: "youtube",
+    };
+
+    const platformKey = platformMap[entity.platform] || "instagram";
+
+    try {
+      const res = await fetch(`/api/oauth/${platformKey}/disconnect`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ entityId: entity.id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Disconnect failed");
+      }
+
       setEntities(prev => {
         const updated = [...prev];
-        updated[idx] = {
-          ...updated[idx],
-          connected: true,
-          connecting: false,
-          followers: updated[idx].followers || Math.floor(Math.random() * 50000) + 1000,
-          engagementRate: updated[idx].engagementRate || parseFloat((Math.random() * 5 + 1).toFixed(1)),
-        };
+        updated[idx] = { ...updated[idx], connected: false, disconnecting: false };
         return updated;
       });
-    }, 1000);
+
+      setOauthToast({ type: "success", message: `${entity.platform} account disconnected` });
+      setTimeout(() => setOauthToast(null), 4000);
+    } catch (err) {
+      updateEntity(idx, "disconnecting", false);
+      setError(err instanceof Error ? err.message : "Disconnect failed");
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -284,23 +361,27 @@ function InfluencerProfileInner() {
       const entityPromises = entities
         .filter(p => p.handle.trim())
         .map(entity => {
-          const payload = {
-            platform: platformMap[entity.platform] || entity.platform,
-            handle: entity.handle.trim(),
-            followerCount: Number(entity.followers) || 0,
-            engagementRate: Number(entity.engagementRate) || 0,
-          };
           if (entity.id) {
+            // PATCH only sends update-safe fields (no platform/handle)
             return fetch(`/api/social-entities/${entity.id}`, {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
+              body: JSON.stringify({
+                followerCount: Number(entity.followers) || 0,
+                engagementRate: Number(entity.engagementRate) || 0,
+              }),
             });
           }
+          // POST for new entities includes platform + handle
           return fetch("/api/social-entities", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({
+              platform: platformMap[entity.platform] || entity.platform,
+              handle: entity.handle.trim(),
+              followerCount: Number(entity.followers) || 0,
+              engagementRate: Number(entity.engagementRate) || 0,
+            }),
           });
         });
 
@@ -370,6 +451,27 @@ function InfluencerProfileInner() {
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardNav role="influencer" />
+
+      {/* OAuth Toast */}
+      {oauthToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-down">
+          <Card className={`shadow-lg ${oauthToast.type === "success" ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
+            <CardContent className="py-3 px-4 flex items-center gap-2">
+              {oauthToast.type === "success" ? (
+                <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              ) : (
+                <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              )}
+              <span className={`text-sm font-medium ${oauthToast.type === "success" ? "text-emerald-700" : "text-red-700"}`}>
+                {oauthToast.message}
+              </span>
+              <button onClick={() => setOauthToast(null)} className="ml-2">
+                <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         <Link
@@ -615,6 +717,8 @@ function InfluencerProfileInner() {
                     bg: "bg-gray-500",
                   };
 
+                  const isOAuthPlatform = entity.platform === "Instagram" || entity.platform === "YouTube";
+
                   return (
                     <div key={idx} className="rounded-xl border border-gray-200 overflow-hidden">
                       {/* Entity Header */}
@@ -628,7 +732,8 @@ function InfluencerProfileInner() {
                               <select
                                 value={entity.platform}
                                 onChange={e => updateEntity(idx, "platform", e.target.value)}
-                                className="font-semibold text-sm text-gray-900 bg-transparent border-none outline-none cursor-pointer"
+                                disabled={entity.connected}
+                                className="font-semibold text-sm text-gray-900 bg-transparent border-none outline-none cursor-pointer disabled:cursor-default"
                               >
                                 {platformOptions.map(opt => (
                                   <option key={opt} value={opt}>{opt}</option>
@@ -652,7 +757,24 @@ function InfluencerProfileInner() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {entities.length > 1 && (
+                          {entity.connected && isOAuthPlatform && entity.id && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDisconnect(idx)}
+                              disabled={entity.disconnecting}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 gap-1"
+                            >
+                              {entity.disconnecting ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Unlink className="w-3.5 h-3.5" />
+                              )}
+                              Disconnect
+                            </Button>
+                          )}
+                          {entities.length > 1 && !entity.connected && (
                             <Button
                               type="button"
                               variant="ghost"
@@ -676,42 +798,68 @@ function InfluencerProfileInner() {
                               onChange={e => updateEntity(idx, "handle", e.target.value)}
                               placeholder="@yourhandle"
                               className="rounded-xl"
+                              disabled={entity.connected && isOAuthPlatform}
                             />
                           </div>
                           <div className="flex items-end">
-                            <Button
-                              type="button"
-                              variant={entity.connected ? "outline" : "default"}
-                              size="sm"
-                              onClick={() => handleOAuthConnect(idx)}
-                              disabled={entity.connecting || entity.connected || !entity.handle.trim()}
-                              className={`w-full gap-1.5 ${!entity.connected ? "bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90" : ""}`}
-                            >
-                              {entity.connecting ? (
-                                <><Loader2 className="w-3.5 h-3.5 animate-spin" />Connecting...</>
-                              ) : entity.connected ? (
-                                <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" />Connected via OAuth</>
-                              ) : (
-                                <><Zap className="w-3.5 h-3.5" />Connect via OAuth</>
-                              )}
-                            </Button>
+                            {!entity.connected ? (
+                              <Button
+                                type="button"
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleOAuthConnect(idx)}
+                                disabled={entity.connecting || !entity.handle.trim()}
+                                className="w-full gap-1.5 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
+                              >
+                                {entity.connecting ? (
+                                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />Connecting...</>
+                                ) : (
+                                  <><Zap className="w-3.5 h-3.5" />Connect via OAuth</>
+                                )}
+                              </Button>
+                            ) : (
+                              <div className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-emerald-600 font-medium">
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                Verified via OAuth
+                              </div>
+                            )}
                           </div>
                         </div>
 
                         {entity.connected && (
-                          <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                              <Users className="w-3.5 h-3.5" />
-                              <span className="font-medium text-gray-900">{formatFollowers(entity.followers)}</span>
-                              followers
+                          <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+                            <div>
+                              <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" /> Followers
+                              </label>
+                              <Input
+                                type="number"
+                                min={0}
+                                value={entity.followers || ""}
+                                onChange={e => updateEntity(idx, "followers", Number(e.target.value) || 0)}
+                                placeholder="e.g. 50000"
+                                className="rounded-xl"
+                                readOnly={isOAuthPlatform}
+                              />
+                              {isOAuthPlatform && entity.followers > 0 && (
+                                <p className="text-xs text-emerald-600 mt-1">Auto-populated from {entity.platform} API</p>
+                              )}
                             </div>
-                            {entity.engagementRate > 0 && (
-                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                <BarChart3 className="w-3.5 h-3.5" />
-                                <span className="font-medium text-gray-900">{entity.engagementRate}%</span>
-                                engagement
-                              </div>
-                            )}
+                            <div>
+                              <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                                <BarChart3 className="w-3.5 h-3.5" /> Engagement Rate (%)
+                              </label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                step={0.1}
+                                value={entity.engagementRate || ""}
+                                onChange={e => updateEntity(idx, "engagementRate", parseFloat(e.target.value) || 0)}
+                                placeholder="e.g. 4.2"
+                                className="rounded-xl"
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
@@ -776,16 +924,29 @@ function InfluencerProfileInner() {
                       <p className="text-xs text-gray-500">Identity verification status</p>
                     </div>
                   </div>
-                  <Badge
-                    variant={
-                      profile?.kycStatus === "VERIFIED" ? "success"
-                        : profile?.kycStatus === "PENDING" ? "warning"
-                          : "destructive"
-                    }
-                  >
-                    {profile?.kycStatus === "VERIFIED" && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {profile?.kycStatus || "Not Started"}
-                  </Badge>
+                  <div className="flex items-center gap-3">
+                    {(profile?.kycStatus === "PENDING" || profile?.kycStatus === "REJECTED") && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setKycModalOpen(true)}
+                        className="gap-1.5 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        {profile?.kycStatus === "REJECTED" ? "Try Again" : "Start Verification"}
+                      </Button>
+                    )}
+                    <Badge
+                      variant={
+                        profile?.kycStatus === "VERIFIED" ? "success"
+                          : profile?.kycStatus === "PENDING" ? "warning"
+                            : "destructive"
+                      }
+                    >
+                      {profile?.kycStatus === "VERIFIED" && <CheckCircle className="w-3 h-3 mr-1" />}
+                      {profile?.kycStatus || "Not Started"}
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -806,6 +967,17 @@ function InfluencerProfileInner() {
           </div>
         </form>
       </div>
+
+      {/* KYC Modal */}
+      {kycModalOpen && (
+        <KYCVerificationModal
+          userPhone={profile?.phone}
+          onClose={() => {
+            setKycModalOpen(false);
+            fetchProfile();
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import {
@@ -21,58 +20,86 @@ import {
   Briefcase,
   Clock,
   LinkIcon,
+  Loader2,
+  ShieldCheck,
 } from "lucide-react";
-import { sampleDeals, sampleInfluencers } from "@/data/sample-data";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { getDealStatusGroup, getDealStatusLabel, getDealStatusColor } from "@/lib/utils/deal-status";
+import { formatINR } from "@/lib/utils/format";
+
+interface DealData {
+  id: string;
+  title: string;
+  status: string;
+  totalAmount: number;
+  _count: { chatMessages: number };
+}
+
+interface SocialEntity {
+  id: string;
+  platform: string;
+  handle: string;
+  followerCount: number;
+}
 
 export default function InfluencerDashboard() {
-  const router = useRouter();
-  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([]);
+  const { user, loading: authLoading } = useAuth("influencer");
+  const [deals, setDeals] = useState<DealData[]>([]);
+  const [entities, setEntities] = useState<SocialEntity[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const role = localStorage.getItem("userRole");
-    if (role !== "influencer") {
-      router.push("/auth/login");
-      return;
-    }
+    if (!user) return;
 
-    // Profile completion check — nav banner handles the UI prompt
-    localStorage.getItem("infProfileComplete");
+    async function fetchData() {
+      try {
+        const [dealsRes, entitiesRes] = await Promise.all([
+          fetch("/api/deals"),
+          fetch("/api/social-entities"),
+        ]);
 
-    try {
-      const raw = localStorage.getItem("infEntities");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          setConnectedPlatforms(parsed.map((e: { platform?: string }) => e.platform || "Unknown"));
+        if (dealsRes.ok) {
+          const d = await dealsRes.json();
+          setDeals(d.deals || []);
         }
+        if (entitiesRes.ok) {
+          const e = await entitiesRes.json();
+          const list = e.entities ?? (Array.isArray(e) ? e : []);
+          setEntities(list);
+        }
+      } catch {
+        // silently fail — dashboard shows empty state
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      // ignore parse errors
     }
-  }, [router]);
 
-  const influencerDeals = sampleDeals.filter(
-    (deal) => deal.influencerId === "inf-1"
-  );
+    fetchData();
+  }, [user]);
 
-  const activeDealsCount = influencerDeals.filter(
-    (d) => d.status === "active"
-  ).length;
+  const displayName = user?.creatorProfile?.name || "Creator";
 
-  const totalEarnings = influencerDeals
-    .filter((d) => d.status === "completed")
-    .reduce((sum, d) => sum + d.compensation, 0);
+  const activeDealsCount = deals.filter(d => getDealStatusGroup(d.status) === "active").length;
+  const pendingCount = deals.filter(d => getDealStatusGroup(d.status) === "pending").length;
+  const totalEarnings = deals
+    .filter(d => d.status === "COMPLETED")
+    .reduce((sum, d) => sum + Number(d.totalAmount), 0);
+  const activeConversations = deals.filter(d => (d._count?.chatMessages || 0) > 0).length;
 
-  const activeOrPendingDeals = influencerDeals
-    .filter((d) => d.status === "active" || d.status === "pending")
+  const activeOrPendingDeals = deals
+    .filter(d => {
+      const g = getDealStatusGroup(d.status);
+      return g === "active" || g === "pending";
+    })
     .slice(0, 3);
 
-  const statusColor: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    pending: "bg-amber-100 text-amber-700 border-amber-200",
-    completed: "bg-blue-100 text-blue-700 border-blue-200",
-    cancelled: "bg-red-100 text-red-700 border-red-200",
-  };
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#0E61FF] animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -83,13 +110,38 @@ export default function InfluencerDashboard() {
         <AnimatedSection animation="animate-fade-in">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-1 text-gray-900">
-              Welcome back, Sarah!
+              Welcome back, {displayName}!
             </h1>
             <p className="text-gray-500">
               Here&apos;s an overview of your collaborations and earnings
             </p>
           </div>
         </AnimatedSection>
+
+        {/* KYC Banner */}
+        {user && user.kycStatus !== "VERIFIED" && (
+          <AnimatedSection animation="animate-slide-up" className="mb-6">
+            <Card className="border-amber-200 bg-amber-50">
+              <CardContent className="py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <ShieldCheck className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-800">Complete KYC verification to unlock all features</p>
+                    <p className="text-xs text-amber-600">Verify your identity to start accepting deals and receiving payments.</p>
+                  </div>
+                </div>
+                <Link href="/dashboard/influencer/profile">
+                  <Button size="sm" className="bg-amber-600 text-white hover:bg-amber-700 gap-1.5 flex-shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Verify Now
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </AnimatedSection>
+        )}
 
         {/* Stat Cards Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -105,7 +157,7 @@ export default function InfluencerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  {activeDealsCount}
+                  {loading ? "–" : activeDealsCount}
                 </div>
                 <p className="text-xs text-white/70 mt-1">In progress</p>
               </CardContent>
@@ -123,7 +175,9 @@ export default function InfluencerDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">3</div>
+                <div className="text-2xl font-bold text-white">
+                  {loading ? "–" : pendingCount}
+                </div>
                 <p className="text-xs text-white/70 mt-1">Awaiting response</p>
               </CardContent>
             </Card>
@@ -141,7 +195,7 @@ export default function InfluencerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-white">
-                  ₹{totalEarnings.toLocaleString("en-IN")}
+                  {loading ? "–" : formatINR(totalEarnings)}
                 </div>
                 <p className="text-xs text-white/70 mt-1">Lifetime</p>
               </CardContent>
@@ -159,7 +213,9 @@ export default function InfluencerDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">5</div>
+                <div className="text-2xl font-bold text-white">
+                  {loading ? "–" : activeConversations}
+                </div>
                 <p className="text-xs text-white/70 mt-1">Ongoing chats</p>
               </CardContent>
             </Card>
@@ -230,7 +286,11 @@ export default function InfluencerDashboard() {
               <CardTitle className="text-gray-900">Active Deals</CardTitle>
             </CardHeader>
             <CardContent>
-              {activeOrPendingDeals.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                </div>
+              ) : activeOrPendingDeals.length === 0 ? (
                 <p className="text-gray-500 text-sm py-4 text-center">
                   No active or pending deals right now.
                 </p>
@@ -247,17 +307,16 @@ export default function InfluencerDashboard() {
                         </h4>
                         <div className="flex items-center gap-3 mt-2">
                           <Badge
-                            className={`text-xs border ${statusColor[deal.status] || "bg-gray-100 text-gray-600"}`}
+                            className={`text-xs border ${getDealStatusColor(deal.status)}`}
                           >
-                            {deal.status.charAt(0).toUpperCase() +
-                              deal.status.slice(1)}
+                            {getDealStatusLabel(deal.status)}
                           </Badge>
                           <span className="text-sm font-medium text-gray-700">
-                            ₹{deal.compensation.toLocaleString("en-IN")}
+                            {formatINR(Number(deal.totalAmount))}
                           </span>
                         </div>
                       </div>
-                      <Link href="/dashboard/influencer/deals">
+                      <Link href={`/dashboard/influencer/deals`}>
                         <Button
                           size="sm"
                           variant="outline"
@@ -283,16 +342,20 @@ export default function InfluencerDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {connectedPlatforms.length > 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                </div>
+              ) : entities.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {connectedPlatforms.map((platform, idx) => (
+                  {entities.map((entity) => (
                     <Badge
-                      key={idx}
+                      key={entity.id}
                       variant="secondary"
                       className="px-3 py-1 text-sm"
                     >
                       <LinkIcon className="h-3 w-3 mr-1.5" />
-                      {platform}
+                      {entity.platform} — @{entity.handle}
                     </Badge>
                   ))}
                 </div>

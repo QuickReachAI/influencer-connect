@@ -755,3 +755,75 @@ function decryptToken(encryptedData: string): string {
 38. [ ] Rate limiting active on all public endpoints
 39. [ ] SQL injection protection via Prisma parameterized queries
 40. [ ] XSS protection via React's default escaping + CSP headers
+
+---
+
+## 12. Setup & Deployment Notes
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `lib/services/admin.service.ts` | AdminService: dispute context, financial audit, escalation queue, fraud detection, batch operations |
+| `lib/inngest/functions/oauth-refresh.ts` | Daily cron (4 AM IST) — deactivates social entities with expired OAuth tokens |
+| `lib/inngest/functions/inactivity-check.ts` | Hourly cron — monitors creator responsiveness on active deals |
+| `app/api/admin/disputes/[dealId]/route.ts` | GET — dispute split-screen context |
+| `app/api/admin/financial-audit/route.ts` | GET — financial audit trail with filters |
+| `app/api/admin/escalation-queue/route.ts` | GET — pending KYC/KYB cases |
+| `app/api/admin/fraud-detection/route.ts` | GET — engagement anomaly detection |
+| `app/api/admin/batch/route.ts` | POST — batch ban users / update applications |
+| `app/dashboard/admin/disputes/[dealId]/page.tsx` | Split-screen dispute resolution UI |
+| `app/dashboard/admin/finance/page.tsx` | Financial audit trail UI |
+| `app/dashboard/admin/escalation/page.tsx` | KYC/KYB escalation queue UI |
+| `app/dashboard/admin/fraud/page.tsx` | Fraud detection UI |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `lib/validations.ts` | Added `batchActionSchema` discriminated union |
+| `lib/inngest/client.ts` | Added `kyb/retry-verification` event type |
+| `lib/inngest/functions/gstin-recheck.ts` | Added `kybRetryFunction` with exponential backoff |
+| `lib/services/kyb.service.ts` | Added API outage try/catch + Inngest retry in `verifyGSTIN()` |
+| `app/api/inngest/route.ts` | Registered 3 new functions (12 total) |
+| `app/dashboard/admin/page.tsx` | Added quick-action links to finance, escalation, fraud pages |
+
+### Inngest Functions (12 Total)
+
+| Function | Trigger | ID |
+|----------|---------|-----|
+| `escrowReleaseFunction` | Event | `escrow-release` |
+| `fileCleanupFunction` | Cron | `file-cleanup` |
+| `campaignVisibilityFunction` | Event | `campaign-visibility` |
+| `dealLockCleanupFunction` | Cron | `deal-lock-cleanup` |
+| `videoPipelineFunction` | Event | `video-pipeline` |
+| `videoCleanRenderFunction` | Event | `video-clean-render` |
+| `notificationEmailFunction` | Event | `notification-email` |
+| `notificationBatchFunction` | Event | `notification-batch` |
+| `gstinRecheckFunction` | Cron (monthly) | `gstin-monthly-recheck` |
+| `kybRetryFunction` | Event | `kyb-retry-verification` |
+| `oauthRefreshFunction` | Cron (daily) | `oauth-token-check` |
+| `inactivityCheckFunction` | Cron (hourly) | `creator-inactivity-check` |
+
+### Running Locally
+
+```bash
+# Start Inngest dev server
+npx inngest-cli@latest dev
+
+# Start Next.js
+npm run dev
+```
+
+### Verification Commands
+
+```bash
+# Type check
+npx tsc --noEmit
+
+# Test admin endpoints (replace with valid cookie)
+curl -b "user_id=ADMIN_ID" http://localhost:3000/api/admin/escalation-queue
+curl -b "user_id=ADMIN_ID" http://localhost:3000/api/admin/fraud-detection
+curl -b "user_id=ADMIN_ID" http://localhost:3000/api/admin/financial-audit
+curl -b "user_id=ADMIN_ID" "http://localhost:3000/api/admin/disputes/DEAL_ID"
+```

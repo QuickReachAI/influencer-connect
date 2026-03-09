@@ -150,6 +150,8 @@ export async function POST(request: NextRequest) {
             data: {
                 brandId: userId,
                 creatorId,
+                entityId: body.entityId ?? null,
+                campaignId: body.campaignId ?? null,
                 title,
                 description,
                 totalAmount,
