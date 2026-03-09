@@ -177,7 +177,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
       <div className="border-b-2 border-[hsl(var(--border))] bg-white shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2.5 group">
+            <Link href={role === "admin" ? "/dashboard/admin" : role === "brand" ? "/dashboard/brand" : "/dashboard/influencer"} className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 bg-[#0E61FF] rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105">
                 <Zap className="w-5 h-5 text-white" />
               </div>
