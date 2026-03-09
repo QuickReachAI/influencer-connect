@@ -29,7 +29,6 @@ import {
   Youtube,
   Facebook,
   Link2,
-  BarChart3,
   Users,
   Zap,
   ChevronDown,
@@ -66,6 +65,17 @@ const platformConfig: Record<string, { icon: React.ReactNode; color: string; bg:
   },
 };
 
+interface InstagramLookupResult {
+  username: string;
+  fullName: string;
+  bio: string;
+  followerCount: number;
+  followingCount: number;
+  postCount: number;
+  profilePicUrl: string;
+  isVerified: boolean;
+}
+
 interface SocialEntity {
   id?: string;
   platform: string;
@@ -75,6 +85,7 @@ interface SocialEntity {
   connected: boolean;
   connecting?: boolean;
   disconnecting?: boolean;
+  lookupData?: InstagramLookupResult;
 }
 
 interface InfluencerProfileData {
@@ -262,41 +273,104 @@ function InfluencerProfileInner() {
     });
   };
 
-  const handleOAuthConnect = (idx: number) => {
+  const handleOAuthConnect = async (idx: number) => {
     const entity = entities[idx];
     if (entity.connected) return;
     if (!entity.handle.trim()) return;
 
-    const platformMap: Record<string, string> = {
-      Instagram: "instagram",
-      YouTube: "youtube",
-    };
-
-    const platformKey = platformMap[entity.platform];
-    if (platformKey) {
-      // Real OAuth redirect
-      window.location.href = `/api/oauth/${platformKey}/initiate`;
-    } else {
-      // Facebook — no OAuth implemented, just mark as connected locally
+    if (entity.platform === "Instagram") {
+      // Use Apify scraper to look up Instagram profile
       updateEntity(idx, "connecting", true);
-      setTimeout(() => {
+      try {
+        const res = await fetch("/api/instagram/lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ handle: entity.handle.trim() }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to look up Instagram profile");
+        }
+
+        const profile: InstagramLookupResult = data.profile;
         setEntities(prev => {
           const updated = [...prev];
-          updated[idx] = { ...updated[idx], connected: true, connecting: false };
+          updated[idx] = {
+            ...updated[idx],
+            handle: `@${profile.username}`,
+            followers: profile.followerCount,
+            connected: true,
+            connecting: false,
+            lookupData: profile,
+          };
           return updated;
         });
-      }, 1000);
+
+        setOauthToast({
+          type: "success",
+          message: `@${profile.username}: ${profile.followerCount.toLocaleString()} followers`,
+        });
+        setTimeout(() => setOauthToast(null), 6000);
+      } catch (err) {
+        updateEntity(idx, "connecting", false);
+        setOauthToast({
+          type: "error",
+          message: err instanceof Error ? err.message : "Instagram lookup failed",
+        });
+        setTimeout(() => setOauthToast(null), 6000);
+      }
+      return;
     }
+
+    if (entity.platform === "YouTube") {
+      window.location.href = `/api/oauth/youtube/initiate`;
+      return;
+    }
+
+    // Facebook — no OAuth implemented, just mark as connected locally
+    updateEntity(idx, "connecting", true);
+    setTimeout(() => {
+      setEntities(prev => {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], connected: true, connecting: false };
+        return updated;
+      });
+    }, 1000);
   };
 
   const handleDisconnect = async (idx: number) => {
     const entity = entities[idx];
-    if (!entity.id || !entity.connected) return;
+    if (!entity.connected) return;
 
     updateEntity(idx, "disconnecting", true);
 
+    // For Instagram (Apify-based), just reset locally — no OAuth token to revoke
+    if (entity.platform === "Instagram") {
+      setEntities(prev => {
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          connected: false,
+          disconnecting: false,
+          followers: 0,
+          lookupData: undefined,
+        };
+        return updated;
+      });
+      setOauthToast({ type: "success", message: "Instagram account disconnected" });
+      setTimeout(() => setOauthToast(null), 4000);
+      return;
+    }
+
+    // YouTube / others — use OAuth disconnect
+    if (!entity.id) {
+      updateEntity(idx, "disconnecting", false);
+      return;
+    }
+
     const platformMap: Record<string, string> = {
-      Instagram: "instagram",
       YouTube: "youtube",
     };
 
@@ -717,7 +791,7 @@ function InfluencerProfileInner() {
                     bg: "bg-gray-500",
                   };
 
-                  const isOAuthPlatform = entity.platform === "Instagram" || entity.platform === "YouTube";
+                  const isVerifiablePlatform = entity.platform === "Instagram" || entity.platform === "YouTube";
 
                   return (
                     <div key={idx} className="rounded-xl border border-gray-200 overflow-hidden">
@@ -747,7 +821,7 @@ function InfluencerProfileInner() {
                               {entity.connected && (
                                 <Badge variant="success" className="text-[10px] gap-0.5">
                                   <CheckCircle className="w-2.5 h-2.5" />
-                                  Connected
+                                  {entity.platform === "Instagram" ? "Followers loaded" : "Connected"}
                                 </Badge>
                               )}
                             </div>
@@ -757,7 +831,7 @@ function InfluencerProfileInner() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {entity.connected && isOAuthPlatform && entity.id && (
+                          {entity.connected && isVerifiablePlatform && (
                             <Button
                               type="button"
                               variant="ghost"
@@ -796,9 +870,17 @@ function InfluencerProfileInner() {
                             <Input
                               value={entity.handle}
                               onChange={e => updateEntity(idx, "handle", e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  if (!entity.connected && entity.handle.trim()) {
+                                    handleOAuthConnect(idx);
+                                  }
+                                }
+                              }}
                               placeholder="@yourhandle"
                               className="rounded-xl"
-                              disabled={entity.connected && isOAuthPlatform}
+                              disabled={entity.connected && isVerifiablePlatform}
                             />
                           </div>
                           <div className="flex items-end">
@@ -812,53 +894,37 @@ function InfluencerProfileInner() {
                                 className="w-full gap-1.5 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
                               >
                                 {entity.connecting ? (
-                                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />Connecting...</>
+                                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />{entity.platform === "Instagram" ? "Fetching..." : "Connecting..."}</>
                                 ) : (
-                                  <><Zap className="w-3.5 h-3.5" />Connect via OAuth</>
+                                  <><Zap className="w-3.5 h-3.5" />{entity.platform === "Instagram" ? "Get Followers" : "Connect via OAuth"}</>
                                 )}
                               </Button>
                             ) : (
                               <div className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-emerald-600 font-medium">
                                 <CheckCircle className="w-3.5 h-3.5" />
-                                Verified via OAuth
+                                {entity.platform === "Instagram" ? "Followers loaded" : "Verified via OAuth"}
                               </div>
                             )}
                           </div>
                         </div>
 
                         {entity.connected && (
-                          <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100">
-                            <div>
-                              <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                                <Users className="w-3.5 h-3.5" /> Followers
-                              </label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={entity.followers || ""}
-                                onChange={e => updateEntity(idx, "followers", Number(e.target.value) || 0)}
-                                placeholder="e.g. 50000"
-                                className="rounded-xl"
-                                readOnly={isOAuthPlatform}
-                              />
-                              {isOAuthPlatform && entity.followers > 0 && (
-                                <p className="text-xs text-emerald-600 mt-1">Auto-populated from {entity.platform} API</p>
+                          <div className="pt-3 border-t border-gray-100">
+                            <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0E61FF]/10">
+                                <Users className="h-5 w-5 text-[#0E61FF]" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-gray-500">Followers</p>
+                                <p className="text-lg font-semibold tabular-nums text-gray-900">
+                                  {entity.followers > 0 ? formatFollowers(entity.followers) : "—"}
+                                </p>
+                              </div>
+                              {entity.followers > 0 && (
+                                <p className="ml-auto text-xs text-gray-400">
+                                  {entity.platform === "Instagram" ? "From Instagram" : `From ${entity.platform}`}
+                                </p>
                               )}
-                            </div>
-                            <div>
-                              <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                                <BarChart3 className="w-3.5 h-3.5" /> Engagement Rate (%)
-                              </label>
-                              <Input
-                                type="number"
-                                min={0}
-                                max={100}
-                                step={0.1}
-                                value={entity.engagementRate || ""}
-                                onChange={e => updateEntity(idx, "engagementRate", parseFloat(e.target.value) || 0)}
-                                placeholder="e.g. 4.2"
-                                className="rounded-xl"
-                              />
                             </div>
                           </div>
                         )}
@@ -890,7 +956,7 @@ function InfluencerProfileInner() {
                     className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                    I consent to InfluencerConnect accessing my public social media data (followers, engagement, posts) for deal matching purposes.
+                    I consent to InfluencerConnect accessing my public social media data (followers, posts) for deal matching purposes.
                   </span>
                 </label>
                 <button

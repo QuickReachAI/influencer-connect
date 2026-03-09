@@ -51,6 +51,60 @@ export async function POST(request: NextRequest) {
   }
 }
 
+const MOCK_CAMPAIGNS = [
+  {
+    id: 'camp-mock-1',
+    title: 'Summer Skincare Collection Launch',
+    description: 'Looking for beauty creators to showcase our new summer skincare line. Must create engaging content highlighting product benefits.',
+    niche: ['Beauty', 'Skincare'],
+    minFollowers: 10000,
+    maxFollowers: 500000,
+    contentFormat: ['REEL', 'SHORT'],
+    duration: '30-60s',
+    ownershipTransfer: true,
+    budget: 50000,
+    status: 'ACTIVE',
+    publishedAt: new Date().toISOString(),
+    expiresAt: null,
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    _count: { applications: 8, deals: 0 },
+  },
+  {
+    id: 'camp-mock-2',
+    title: 'Tech Product Review Series',
+    description: 'Need tech reviewers for our latest smartphone. Detailed honest review with camera comparisons.',
+    niche: ['Technology', 'Gadgets'],
+    minFollowers: 50000,
+    maxFollowers: 2000000,
+    contentFormat: ['VIDEO'],
+    duration: '8-15 min',
+    ownershipTransfer: true,
+    budget: 100000,
+    status: 'ACTIVE',
+    publishedAt: new Date().toISOString(),
+    expiresAt: null,
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    _count: { applications: 15, deals: 1 },
+  },
+  {
+    id: 'camp-mock-3',
+    title: 'Fitness Challenge Campaign',
+    description: 'Partner with us for a 3-month fitness challenge. Create motivational content and workout demos.',
+    niche: ['Fitness', 'Health'],
+    minFollowers: 5000,
+    maxFollowers: 200000,
+    contentFormat: ['REEL', 'SHORT', 'POST'],
+    duration: '30-90s',
+    ownershipTransfer: true,
+    budget: 30000,
+    status: 'DRAFT',
+    publishedAt: null,
+    expiresAt: null,
+    createdAt: new Date().toISOString(),
+    _count: { applications: 0, deals: 0 },
+  },
+];
+
 export async function GET(request: NextRequest) {
   try {
     const userId = request.cookies.get('user_id')?.value;
@@ -67,6 +121,11 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+
+    // Mock mode: return mock campaigns for brands (no database)
+    if (!process.env.DATABASE_URL && user.role === 'BRAND') {
+      return NextResponse.json({ campaigns: MOCK_CAMPAIGNS });
+    }
 
     // Brand: list own campaigns
     if (user.role === 'BRAND') {
