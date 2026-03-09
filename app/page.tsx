@@ -66,7 +66,7 @@ export default function HomePage() {
             <div className="w-9 h-9 bg-[#0E61FF] rounded-xl flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-105">
               <Zap className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
+            <span className="text-xl font-bold tracking-tight text-gray-900">Quick<span className="text-[#0E61FF]">Connects</span></span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -302,7 +302,7 @@ export default function HomePage() {
                 <div className="w-9 h-9 bg-[#0E61FF] rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-white">Influencer<span className="text-white/60">Connect</span></span>
+                <span className="text-lg font-bold text-white">Quick<span className="text-white/60">Connects</span></span>
               </div>
               <p className="text-sm text-gray-400 leading-relaxed">
                 India&apos;s most trusted creator-brand collaboration platform. Powered by QuickReach AI.

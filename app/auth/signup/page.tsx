@@ -81,7 +81,7 @@ function SignupPageContent() {
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
               <Zap className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white">Influencer<span className="text-white/70">Connect</span></span>
+            <span className="text-2xl font-bold text-white">Quick<span className="text-white/70">Connects</span></span>
           </Link>
 
           <AnimatedSection animation="animate-fade-in">
@@ -161,7 +161,7 @@ function SignupPageContent() {
           <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
             <Zap className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">Influencer<span className="text-white/70">Connect</span></span>
+          <span className="text-2xl font-bold text-white">Quick<span className="text-white/70">Connects</span></span>
         </Link>
 
         <AnimatedSection animation="animate-slide-up">

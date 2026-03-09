@@ -154,7 +154,7 @@ function OrderPageContent() {
           <div className="w-8 h-8 bg-[#0E61FF] rounded-lg flex items-center justify-center shadow-sm">
             <Zap className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-gray-900">Influencer<span className="text-[#0E61FF]">Connect</span></span>
+          <span className="text-xl font-bold tracking-tight text-gray-900">Quick<span className="text-[#0E61FF]">Connects</span></span>
         </Link>
         <nav className="flex items-center gap-3">
           <Link href="/auth/login">
