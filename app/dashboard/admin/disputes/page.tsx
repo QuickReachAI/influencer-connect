@@ -151,7 +151,7 @@ export default function DisputesPage() {
                                         </span>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                                         <div className="flex items-center gap-2">
                                             <Building2 className="h-4 w-4 text-gray-400" />
                                             <span className="text-gray-700">{dispute.brand.brandProfile?.companyName || dispute.brand.email}</span>
@@ -210,7 +210,7 @@ export default function DisputesPage() {
 
                             <div className="p-6 space-y-6">
                                 {/* Parties */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                                     <div className="p-4 bg-[#0E61FF] rounded-lg">
                                         <div className="flex items-center gap-2 mb-2">
                                             <Building2 className="h-5 w-5 text-white" />
@@ -240,7 +240,7 @@ export default function DisputesPage() {
                                 </div>
 
                                 {/* Evidence */}
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
                                     <div className="p-3 border border-gray-200 rounded">
                                         <div className="flex items-center gap-2 mb-1">
                                             <MessageSquare className="h-4 w-4 text-gray-400" />
@@ -265,7 +265,7 @@ export default function DisputesPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                             <button
                                                 onClick={() => setDecision('FAVOR_CREATOR')}
                                                 className={`p-3 rounded-lg border text-center transition-colors ${

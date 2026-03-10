@@ -95,7 +95,7 @@ export default function BrandDashboard() {
       <DashboardNav role="brand" />
 
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-fade-in" className="flex items-center justify-between mb-8">
+        <AnimatedSection animation="animate-fade-in" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {companyName}!</h1>
             <p className="text-gray-500">Manage your posts and track creator collaborations</p>
@@ -112,7 +112,7 @@ export default function BrandDashboard() {
         {user && user.kycStatus !== "VERIFIED" && (
           <AnimatedSection animation="animate-slide-up" className="mb-6">
             <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="py-4 flex items-center justify-between">
+              <CardContent className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
                     <ShieldCheck className="w-5 h-5 text-amber-600" />
@@ -134,14 +134,14 @@ export default function BrandDashboard() {
         )}
 
         {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
           <AnimatedSection animation="animate-slide-up" delay={0}>
             <div className="rounded-xl bg-[#0E61FF] p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-white/90">Active Posts</span>
                 <Megaphone className="h-5 w-5 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white">{loading ? "–" : activePosts}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{loading ? "–" : activePosts}</div>
               <p className="text-xs text-white/70 mt-1">Currently live</p>
             </div>
           </AnimatedSection>
@@ -152,7 +152,7 @@ export default function BrandDashboard() {
                 <span className="text-sm font-medium text-white/90">Creator Applications</span>
                 <Users className="h-5 w-5 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white">{loading ? "–" : totalApplicants}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{loading ? "–" : totalApplicants}</div>
               <p className="text-xs text-white/70 mt-1">Awaiting your review</p>
             </div>
           </AnimatedSection>
@@ -163,7 +163,7 @@ export default function BrandDashboard() {
                 <span className="text-sm font-medium text-white/90">Active Deals</span>
                 <FileText className="h-5 w-5 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white">{loading ? "–" : activeDeals}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{loading ? "–" : activeDeals}</div>
               <p className="text-xs text-white/70 mt-1">In progress</p>
             </div>
           </AnimatedSection>
@@ -174,7 +174,7 @@ export default function BrandDashboard() {
                 <span className="text-sm font-medium text-white/90">Pending Proposals</span>
                 <Clock className="h-5 w-5 text-white" />
               </div>
-              <div className="text-3xl font-bold text-white">{loading ? "–" : pendingDeals}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-white">{loading ? "–" : pendingDeals}</div>
               <p className="text-xs text-white/70 mt-1">Awaiting response</p>
             </div>
           </AnimatedSection>
@@ -187,7 +187,7 @@ export default function BrandDashboard() {
         )}
 
         {!loading && (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Ongoing Posts */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
               <Card className="shadow-md">

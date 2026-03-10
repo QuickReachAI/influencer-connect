@@ -126,9 +126,9 @@ function BrowsePageContent() {
             </header>
 
             <div className="container mx-auto px-4 py-8">
-                <div className="flex gap-8">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
                     {/* Filters Sidebar */}
-                    <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-64 flex-shrink-0`}>
+                    <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-64 flex-shrink-0 mb-4 lg:mb-0`}>
                         <AnimatedSection animation="animate-slide-up">
                         <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-24 shadow-sm">
                             <div className="flex items-center justify-between mb-6">
@@ -218,7 +218,7 @@ function BrowsePageContent() {
                     <main className="flex-1">
                         {/* Results Header */}
                         <AnimatedSection animation="animate-fade-in">
-                        <div className="flex items-center justify-between mb-6 bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200">
                             <div>
                                 <h1 className="text-2xl font-bold font-heading mb-1 text-gray-900">
                                     {selectedCategory

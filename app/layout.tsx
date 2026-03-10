@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -14,6 +14,12 @@ const sora = Sora({
   weight: ["600", "700", "800"],
   variable: "--font-heading",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: "QuickConnects — Creator-Brand Collaboration Platform",

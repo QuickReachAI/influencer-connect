@@ -142,7 +142,7 @@ export default function FinanceAuditPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="animate-pulse max-w-6xl mx-auto">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-24 bg-gray-200 rounded-xl" />
             ))}
@@ -165,7 +165,7 @@ export default function FinanceAuditPage() {
             <ChevronLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-emerald-600 flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-white" />

@@ -207,9 +207,9 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
         </div>
       )}
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5 text-[#0E61FF]" />
@@ -231,7 +231,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
 
         {/* Step 1: Document Input */}
         {step === "input" && (
-          <div className="p-6 space-y-5">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
             {/* Aadhaar */}
             <div>
               <label className="text-sm font-medium text-gray-900 mb-1.5 flex items-center gap-2">
@@ -336,7 +336,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
 
         {/* Step 2: Processing Animation */}
         {step === "processing" && (
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
                 <Loader2 className="w-8 h-8 text-[#0E61FF] animate-spin" />
@@ -377,7 +377,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
 
         {/* Step 3: Result */}
         {step === "result" && result && (
-          <div className="p-6 text-center">
+          <div className="p-4 sm:p-6 text-center">
             {result.success ? (
               <>
                 <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
@@ -429,7 +429,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
 
         {/* Waiting for API (result screen but no result yet) */}
         {step === "result" && !result && (
-          <div className="p-6 text-center">
+          <div className="p-4 sm:p-6 text-center">
             <Loader2 className="w-8 h-8 text-[#0E61FF] animate-spin mx-auto mb-4" />
             <p className="text-gray-500">Finalizing verification...</p>
           </div>

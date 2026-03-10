@@ -213,7 +213,7 @@ export default function FlaggedMessagesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1 w-full sm:w-fit overflow-x-auto">
           {[
             { id: "flagged" as Tab, label: "Flagged Messages", count: messages.length, icon: <ShieldAlert className="w-3.5 h-3.5" /> },
             { id: "warnings" as Tab, label: "User Warnings", count: warnings.length, icon: <AlertTriangle className="w-3.5 h-3.5" /> },
@@ -222,7 +222,7 @@ export default function FlaggedMessagesPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
@@ -382,7 +382,7 @@ export default function FlaggedMessagesPage() {
               warnings.map((warning, idx) => (
                 <AnimatedSection key={warning.id} animation="animate-slide-up" delay={idx * 80}>
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
                           warning.shadowBlocked ? "bg-red-600" : "bg-amber-500"
@@ -443,7 +443,7 @@ export default function FlaggedMessagesPage() {
               anomalies.map((anomaly, idx) => (
                 <AnimatedSection key={anomaly.entityId} animation="animate-slide-up" delay={idx * 80}>
                   <div className="bg-white rounded-lg shadow-md p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-full bg-orange-500 flex items-center justify-center">
                           <Activity className="w-4 h-4 text-white" />

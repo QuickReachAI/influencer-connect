@@ -122,7 +122,7 @@ export default function InfluencerDashboard() {
         {user && user.kycStatus !== "VERIFIED" && (
           <AnimatedSection animation="animate-slide-up" className="mb-6">
             <Card className="border-amber-200 bg-amber-50">
-              <CardContent className="py-4 flex items-center justify-between">
+              <CardContent className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
                     <ShieldCheck className="w-5 h-5 text-amber-600" />
@@ -360,7 +360,7 @@ export default function InfluencerDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <p className="text-sm text-gray-500">
                     No accounts connected yet. Link your social profiles to
                     attract more brands.
@@ -368,7 +368,7 @@ export default function InfluencerDashboard() {
                   <Link href="/dashboard/influencer/profile">
                     <Button
                       size="sm"
-                      className="bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white ml-4 shrink-0"
+                      className="bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white shrink-0"
                     >
                       Connect Accounts
                     </Button>

@@ -106,7 +106,7 @@ export default function HomePage() {
             </AnimatedSection>
 
             <AnimatedSection animation="animate-slide-up" delay={100}>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-[1.05] text-white">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-[1.05] text-white">
                 Where Brands Meet
                 <span className="block mt-2 text-white/90">Verified Creators</span>
               </h1>
@@ -166,7 +166,7 @@ export default function HomePage() {
                 <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-white/20 flex items-center justify-center">
                   <stat.icon className="w-7 h-7 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-white mb-1">
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} duration={2500} />
                 </div>
                 <div className="text-sm text-white/70 font-medium">{stat.label}</div>
@@ -181,7 +181,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
             <span className="inline-block text-sm font-bold text-[#0E61FF] bg-blue-100 px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Platform Features</span>
-            <h2 className="text-4xl font-bold text-gray-900">Why Brands & Creators Choose Us</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Why Brands & Creators Choose Us</h2>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto mt-4">
               Built from the ground up for the Indian creator economy
             </p>
@@ -211,7 +211,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
             <span className="inline-block text-sm font-bold text-white bg-[#0E61FF] px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Simple Process</span>
-            <h2 className="text-4xl font-bold text-gray-900">How It Works</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">How It Works</h2>
             <p className="text-lg text-gray-500 mt-4">From discovery to delivery — three simple steps</p>
           </AnimatedSection>
 
@@ -265,7 +265,7 @@ export default function HomePage() {
         </div>
         <div className="container mx-auto px-4 relative z-10 text-center">
           <AnimatedSection animation="animate-slide-up">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white">
               Ready to Launch Your Next Campaign?
             </h2>
           </AnimatedSection>
@@ -296,7 +296,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 py-14 text-white">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-9 h-9 bg-[#0E61FF] rounded-lg flex items-center justify-center">

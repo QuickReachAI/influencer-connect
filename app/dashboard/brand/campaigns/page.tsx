@@ -301,7 +301,7 @@ function CampaignsContent() {
                 <CardDescription className="text-gray-500">{selectedCampaign.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <div>
                     <span className="text-sm text-gray-500">Budget</span>
                     <p className="font-semibold text-gray-900">Up to {formatINR(Number(selectedCampaign.budget))}</p>
@@ -598,7 +598,7 @@ function CampaignsContent() {
     <div className="min-h-screen bg-gray-50">
       <DashboardNav role="brand" />
       <div className="container mx-auto px-4 py-8">
-        <AnimatedSection animation="animate-fade-in" className="flex items-center justify-between mb-8">
+        <AnimatedSection animation="animate-fade-in" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Posts</h1>
             <p className="text-gray-500">Create and manage your brand campaigns</p>
@@ -637,7 +637,7 @@ function CampaignsContent() {
                 <AnimatedSection key={campaign.id} animation="animate-slide-up" delay={index * 80}>
                   <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedCampaignId(campaign.id)}>
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-lg font-semibold text-gray-900">{campaign.title}</h3>
@@ -673,7 +673,7 @@ function CampaignsContent() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-2 shrink-0">
+                        <div className="flex flex-row sm:flex-col gap-2 shrink-0">
                           {campaign.status === "DRAFT" && (
                             <Button
                               size="sm"

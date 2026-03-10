@@ -85,7 +85,7 @@ export default function AdminDashboard() {
             <div className="min-h-screen bg-gray-50 p-8">
                 <div className="animate-pulse">
                     <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {[...Array(8)].map((_, i) => (
                             <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
                         ))}
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
                 </AnimatedSection>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <AnimatedSection animation="animate-fade-in" delay={0}>
                         <Link
                             href="/dashboard/admin/disputes"
@@ -373,14 +373,14 @@ export default function AdminDashboard() {
                     <div className="divide-y divide-gray-100 bg-white">
                         {stats?.recentActivity.map((activity, index) => (
                             <div key={index} className="p-4 hover:bg-gray-50 transition-all">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                                     <div>
                                         <span className="font-medium text-gray-900">{activity.action.replace(/_/g, ' ')}</span>
                                         <span className="text-gray-500 ml-2">
                                             on {activity.entityType} {activity.entityId.slice(0, 8)}...
                                         </span>
                                     </div>
-                                    <div className="text-sm text-gray-500">
+                                    <div className="text-xs sm:text-sm text-gray-500">
                                         {new Date(activity.createdAt).toLocaleString('en-IN')}
                                     </div>
                                 </div>

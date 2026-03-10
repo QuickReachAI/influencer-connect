@@ -126,7 +126,7 @@ export default function BrandDealsPage() {
                 <AnimatedSection key={deal.id} animation="animate-slide-up" delay={index * 100}>
                   <Card className="shadow-md card-interactive group">
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="text-xl font-semibold text-gray-900">{deal.title}</h3>
@@ -170,7 +170,7 @@ export default function BrandDealsPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex flex-col gap-2 ml-0 sm:ml-4">
                           <Link href={`/dashboard/brand/deals/${deal.id}`}>
                             <Button variant="outline" size="sm" className="transition-smooth">View Details</Button>
                           </Link>

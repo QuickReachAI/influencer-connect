@@ -351,26 +351,26 @@ export default function InfluencerDiscoverPage() {
                 </div>
 
                 {/* Budget range */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">Min ₹</span>
                     <Input
                       type="number"
                       value={minBudget}
                       onChange={e => { setMinBudget(e.target.value); setPage(1); }}
-                      className="pl-14 w-40 rounded-xl"
+                      className="pl-14 w-full sm:w-40 rounded-xl"
                       placeholder="0"
                       min="0"
                     />
                   </div>
-                  <span className="text-gray-300">—</span>
+                  <span className="text-gray-300 hidden sm:inline">—</span>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">Max ₹</span>
                     <Input
                       type="number"
                       value={maxBudget}
                       onChange={e => { setMaxBudget(e.target.value); setPage(1); }}
-                      className="pl-14 w-40 rounded-xl"
+                      className="pl-14 w-full sm:w-40 rounded-xl"
                       placeholder="∞"
                       min="0"
                     />
@@ -394,14 +394,14 @@ export default function InfluencerDiscoverPage() {
 
         {/* Posts Grid */}
         {loading ? (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="h-72 rounded-xl bg-gray-200 animate-pulse" />
             ))}
           </div>
         ) : campaigns.length > 0 ? (
           <>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {campaigns.map((campaign, index) => {
                 const applied = appliedPosts.get(campaign.id);
                 const isExpanded = expandedPostId === campaign.id;

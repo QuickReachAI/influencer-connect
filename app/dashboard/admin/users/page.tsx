@@ -203,6 +203,7 @@ export default function UsersPage() {
 
                 {/* Users Table */}
                 <AnimatedSection animation="animate-slide-up" delay={100} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-900">
                             <tr>
@@ -215,13 +216,13 @@ export default function UsersPage() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     KYC Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     Deals
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     Actions
                                 </th>
                             </tr>
@@ -281,10 +282,10 @@ export default function UsersPage() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {user._count.dealsAsCreator + user._count.dealsAsBrand}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                         {user.isBanned ? (
                                             <span className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded font-medium">
                                                 Banned
@@ -295,7 +296,7 @@ export default function UsersPage() {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
                                         {!user.isBanned && user.role !== 'ADMIN' && (
                                             <button
                                                 onClick={() => setBanModal({ user, reason: '' })}
@@ -315,10 +316,11 @@ export default function UsersPage() {
                             ))}
                         </tbody>
                     </table>
+                  </div>
 
                     {/* Pagination */}
                     {pagination && pagination.totalPages > 1 && (
-                        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
                             <div className="text-sm text-gray-500">
                                 Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
                                 {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}

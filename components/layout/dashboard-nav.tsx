@@ -224,7 +224,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                 {notifOpen && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setNotifOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 z-40 w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                    <div className="absolute right-0 top-full mt-2 z-40 w-[calc(100vw-2rem)] sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
                       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                         <span className="text-sm font-semibold text-gray-900">Notifications</span>
                         {unreadCount > 0 && (
@@ -315,7 +315,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
       {/* Brand profile completion banner — visible on every page until complete */}
       {showBanner && (
         <div className="bg-amber-50 border-b border-amber-200">
-          <div className="container mx-auto px-4 py-2.5 flex items-center gap-4">
+          <div className="container mx-auto px-4 py-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
             <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
