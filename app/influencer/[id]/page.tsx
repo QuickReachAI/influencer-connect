@@ -170,7 +170,7 @@ export default function PublicInfluencerProfilePage() {
           <span className="text-gray-900">{profile.name}</span>
         </nav>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="space-y-6">
             <AnimatedSection animation="animate-slide-up">
             <Card>
@@ -182,7 +182,7 @@ export default function PublicInfluencerProfilePage() {
                     profile.name.charAt(0)
                   )}
                 </div>
-                <h1 className="text-2xl font-bold mb-1 text-gray-900">{profile.name}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold mb-1 text-gray-900">{profile.name}</h1>
                 <div className="flex items-center justify-center gap-2 mb-2">
                   {profile.verified && (
                     <Badge variant="default" className="gap-1">
@@ -225,26 +225,26 @@ export default function PublicInfluencerProfilePage() {
             <AnimatedSection animation="animate-slide-up" delay={100}>
             <Card>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <div className="text-2xl font-bold text-[#0E61FF]">{profile.engagementRate}%</div>
-                    <div className="text-xs text-gray-500">Engagement</div>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 text-center">
+                  <div className="bg-blue-50 rounded-xl p-3 sm:p-4">
+                    <div className="text-xl sm:text-2xl font-bold text-[#0E61FF]">{profile.engagementRate}%</div>
+                    <div className="text-[11px] sm:text-xs text-gray-500">Engagement</div>
                   </div>
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="text-2xl font-bold text-gray-900">{totalFollowers >= 1000000 ? `${(totalFollowers / 1000000).toFixed(1)}M` : totalFollowers >= 1000 ? `${(totalFollowers / 1000).toFixed(0)}K` : totalFollowers}</div>
-                    <div className="text-xs text-gray-500">Total Followers</div>
+                  <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                    <div className="text-xl sm:text-2xl font-bold text-gray-900">{totalFollowers >= 1000000 ? `${(totalFollowers / 1000000).toFixed(1)}M` : totalFollowers >= 1000 ? `${(totalFollowers / 1000).toFixed(0)}K` : totalFollowers}</div>
+                    <div className="text-[11px] sm:text-xs text-gray-500">Total Followers</div>
                   </div>
                   {profile.totalOrders !== undefined && (
-                    <div className="bg-emerald-50 rounded-xl p-4">
-                      <div className="text-2xl font-bold text-emerald-600">{profile.totalOrders}+</div>
-                      <div className="text-xs text-gray-500">Deals Completed</div>
+                    <div className="bg-emerald-50 rounded-xl p-3 sm:p-4">
+                      <div className="text-xl sm:text-2xl font-bold text-emerald-600">{profile.totalOrders}+</div>
+                      <div className="text-[11px] sm:text-xs text-gray-500">Deals Completed</div>
                     </div>
                   )}
                   {profile.rating !== undefined && (
-                    <div className="bg-amber-50 rounded-xl p-4">
+                    <div className="bg-amber-50 rounded-xl p-3 sm:p-4">
                       <div className="flex items-center justify-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-2xl font-bold text-amber-600">{profile.rating}</span>
+                        <span className="text-xl sm:text-2xl font-bold text-amber-600">{profile.rating}</span>
                       </div>
                       <div className="text-xs text-gray-500">
                         ({profile.reviewCount || 0} reviews)
@@ -322,15 +322,15 @@ export default function PublicInfluencerProfilePage() {
                 <p className="text-white/70 mb-4">
                   Join QuickConnects to start working with {profile.name} and thousands of other creators.
                 </p>
-                <div className="flex gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Link href="/auth/signup">
-                    <Button size="lg" className="gap-2 bg-white text-[#0E61FF] hover:bg-gray-100">
+                    <Button size="lg" className="gap-2 bg-white text-[#0E61FF] hover:bg-gray-100 w-full sm:w-auto">
                       Get Started
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Link href="/browse">
-                    <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10">
+                    <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 w-full sm:w-auto">
                       Browse More
                     </Button>
                   </Link>

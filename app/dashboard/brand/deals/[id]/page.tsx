@@ -302,8 +302,8 @@ export default function BrandDealDetailPage() {
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <div className="skeleton h-8 w-48 mb-6 rounded" />
           <div className="skeleton h-12 w-96 mb-4 rounded" />
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="md:col-span-2 lg:col-span-2 space-y-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="skeleton h-48 rounded-xl" />
               ))}
@@ -359,12 +359,12 @@ export default function BrandDealDetailPage() {
         {/* Deal Header */}
         <AnimatedSection animation="animate-fade-in" className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">{deal.title}</h1>
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold">{deal.title}</h1>
               <Badge variant={status.variant}>{status.label}</Badge>
             </div>
             <p className="text-gray-500 mb-3">{deal.description}</p>
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <User className="w-4 h-4" />
                 Creator: {deal.creator?.creatorProfile?.name || deal.creator?.email || "Unknown"}
@@ -383,9 +383,9 @@ export default function BrandDealDetailPage() {
           </div>
         </AnimatedSection>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="md:col-span-2 lg:col-span-2 space-y-6">
             {/* Script Checklist */}
             <AnimatedSection animation="animate-slide-up" delay={100}>
             <Card>
@@ -410,7 +410,7 @@ export default function BrandDealDetailPage() {
                 )}
               </CardContent>
               {(deal.status === "DRAFT" || deal.status === "SCRIPT_PENDING") && (
-                <CardFooter className="gap-2">
+                <CardFooter className="flex-col sm:flex-row gap-2">
                   <Button
                     onClick={() => handleApproveScript(true)}
                     disabled={actionLoading === "script"}
@@ -451,7 +451,7 @@ export default function BrandDealDetailPage() {
                 {deal.deliverables && deal.deliverables.length > 0 ? (
                   <div className="space-y-3">
                     {deal.deliverables.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
+                      <div key={file.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 rounded-lg border border-gray-200">
                         <div className="flex items-center gap-3">
                           <FileText className="w-5 h-5 text-gray-500" />
                           <div>
@@ -506,7 +506,7 @@ export default function BrandDealDetailPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Button
                       variant="outline"
@@ -527,7 +527,7 @@ export default function BrandDealDetailPage() {
                   <Button
                     className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
                     onClick={() => {
-                      toast.success("Final version approved! Clean render in progress...");
+                      toast.success("Final version approved! Clean render is being prepared");
                     }}
                   >
                     <ThumbsUp className="w-4 h-4" />
@@ -648,7 +648,7 @@ export default function BrandDealDetailPage() {
                     {/* Review Actions */}
                     {deal.status === "REVISION_PENDING" || deal.status === "DELIVERY_PENDING" ? (
                       <div className="border-t border-gray-200 pt-4 space-y-3">
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button
                             className="gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                             onClick={handleApproveFinal}
@@ -708,7 +708,7 @@ export default function BrandDealDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="max-h-96 overflow-y-auto space-y-3 mb-4 custom-scrollbar">
+                <div className="max-h-64 sm:max-h-96 overflow-y-auto space-y-3 mb-4 custom-scrollbar">
                   {messages.length > 0 ? (
                     messages.map((msg) => (
                       <div
@@ -766,17 +766,10 @@ export default function BrandDealDetailPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Total Amount</span>
-                    <span className="font-medium">₹{Number(deal.totalAmount).toLocaleString()}</span>
+                    <span className="text-gray-500">Deal Amount</span>
+                    <span className="font-semibold">₹{Number(deal.totalAmount).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Platform Fee (5%)</span>
-                    <span>₹{Number(deal.platformFee).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-gray-200 pt-2">
-                    <span className="text-gray-500">Creator Payout</span>
-                    <span className="font-medium">₹{Number(deal.creatorPayout).toLocaleString()}</span>
-                  </div>
+                  <p className="text-xs text-gray-400">No platform fees — QuickConnects is free to use</p>
                 </div>
 
                 <div className="space-y-3 pt-2">

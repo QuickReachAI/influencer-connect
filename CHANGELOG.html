@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickConnects Changelog — March 10, 2026</title>
+  <style>
+    :root {
+      --emerald: #34d399;
+      --emerald-dark: #059669;
+      --blue: #0E61FF;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --purple: #8b5cf6;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    header h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    header .date {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+      margin-bottom: 16px;
+    }
+
+    header .overview {
+      font-size: 1rem;
+      color: var(--gray-700);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--emerald-dark);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .change-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      transition: box-shadow 0.2s;
+    }
+
+    .change-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .change-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .change-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .change-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .badge-security { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .badge-cleanup { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .badge-logic { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .badge-feature { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+    .badge-bugfix { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+
+    .bg-security { background: #dc2626; }
+    .bg-cleanup { background: #16a34a; }
+    .bg-logic { background: #2563eb; }
+    .bg-feature { background: #7c3aed; }
+    .bg-bugfix { background: #ea580c; }
+
+    .section-label {
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      color: var(--gray-600);
+    }
+
+    .layman {
+      color: var(--gray-700);
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .technical {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .technical ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .technical li {
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      color: var(--gray-700);
+    }
+
+    .technical li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gray-300);
+    }
+
+    .files-section {
+      margin-top: 12px;
+    }
+
+    .file-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .file-tag {
+      display: inline-block;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--gray-700);
+    }
+
+    .file-tag.deleted {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #dc2626;
+      text-decoration: line-through;
+    }
+
+    .file-tag.modified {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #2563eb;
+    }
+
+    pre {
+      background: var(--gray-900);
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin: 12px 0;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 32px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+
+    .summary-table th {
+      background: var(--gray-900);
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .summary-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      font-size: 0.88rem;
+    }
+
+    .summary-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .summary-table tr:hover td {
+      background: var(--gray-50);
+    }
+
+    .flow-diagram {
+      background: var(--gray-900);
+      color: #a5f3fc;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    .flow-diagram .arrow { color: #fbbf24; }
+    .flow-diagram .status { color: #34d399; }
+    .flow-diagram .action { color: #93c5fd; font-style: italic; }
+
+    footer {
+      text-align: center;
+      padding-top: 40px;
+      color: var(--gray-600);
+      font-size: 0.85rem;
+    }
+
+    footer strong {
+      color: var(--emerald-dark);
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 24px 16px 60px; }
+      header h1 { font-size: 1.6rem; }
+      .change-card { padding: 20px; }
+      .badge { display: none; }
+      .stats-bar { gap: 20px; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>QuickConnects Changelog</h1>
+      <p class="date">March 10, 2026</p>
+      <p class="overview">
+        Security hardening, dead code removal, deal lifecycle enforcement, and API improvements across the platform.
+      </p>
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-number">12</div>
+          <div class="stat-label">Changes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">~35</div>
+          <div class="stat-label">Files Modified</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">~15</div>
+          <div class="stat-label">Files Deleted</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">0</div>
+          <div class="stat-label">Build Errors</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Change 1 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-security">1</div>
+        <span class="change-title">Authentication Security Overhaul</span>
+        <span class="badge badge-security">Security</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Previously, anyone who could guess a user's ID number could pretend to be that user. Now, every login cookie is cryptographically signed &mdash; like adding a tamper-proof seal to an envelope. If someone tries to forge a cookie, the system rejects it immediately.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Added HMAC-SHA256 cookie signing using <code>crypto.createHmac</code> with <code>NEXTAUTH_SECRET</code></li>
+          <li>Cookie value format changed from <code>userId</code> to <code>userId.hmacSignature</code></li>
+          <li>Added <code>signCookie()</code>, <code>verifyCookie()</code>, and <code>getAuthUserId()</code> to auth helpers</li>
+          <li>Constant-time comparison to prevent timing attacks</li>
+          <li>Updated <strong>27 API route files</strong> to verify signatures before trusting user identity</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files touched</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/auth-helpers.ts</span>
+          <span class="file-tag modified">api/auth/login/route.ts</span>
+          <span class="file-tag modified">27 API routes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 2 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-cleanup">2</div>
+        <span class="change-title">Dead MVP Code Removed</span>
+        <span class="badge badge-cleanup">Cleanup</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        The app originally started as a Fiverr-style gig marketplace but evolved into a campaign/deal platform. The old gig pages (browse gigs, view a gig, track an order) were still sitting in the codebase doing nothing. They've been removed to reduce confusion.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Deleted 3 orphaned page directories from the Next.js app router</li>
+          <li>Deleted 2 legacy data files with types and sample data for the gig system</li>
+          <li>Verified via grep that no live code imported from any deleted files</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files deleted</div>
+        <div class="file-list">
+          <span class="file-tag deleted">app/browse/</span>
+          <span class="file-tag deleted">app/gig/[slug]/</span>
+          <span class="file-tag deleted">app/order/[id]/</span>
+          <span class="file-tag deleted">data/enhanced-types.ts</span>
+          <span class="file-tag deleted">data/enhanced-sample-data.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 3 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-cleanup">3</div>
+        <span class="change-title">Stale Documentation Cleaned Up</span>
+        <span class="badge badge-cleanup">Cleanup</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Five documentation files were describing the old gig-based MVP, not the current campaign/deal system. They were misleading for any developer reading them. Removed &mdash; the remaining docs (README, IMPLEMENTATION_PLAN, DEVELOPMENT, QUICKSTART) accurately describe the current system.
+      </p>
+      <div class="files-section">
+        <div class="section-label">Files deleted</div>
+        <div class="file-list">
+          <span class="file-tag deleted">BUILD_COMPLETE.md</span>
+          <span class="file-tag deleted">PROJECT_SUMMARY.md</span>
+          <span class="file-tag deleted">FEATURES.md</span>
+          <span class="file-tag deleted">PROGRESS.md</span>
+          <span class="file-tag deleted">PROJECT_CHECKLIST.md</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 4 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-cleanup">4</div>
+        <span class="change-title">Orphaned Validation Schemas Removed</span>
+        <span class="badge badge-cleanup">Cleanup</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        The form validation rules for creating gigs, gig packages, orders, and reviews were still in the codebase even though those features no longer exist. Cleaned out to avoid confusion.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Removed <code>gigSchema</code>, <code>gigPackageSchema</code>, <code>orderSchema</code>, <code>reviewSchema</code> from <code>lib/validations.ts</code></li>
+          <li>Removed corresponding exported types: <code>GigInput</code>, <code>GigPackageInput</code>, <code>OrderInput</code>, <code>ReviewInput</code></li>
+          <li>All campaign, deal, auth, chat, and file schemas remain untouched</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/validations.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 5 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-logic">5</div>
+        <span class="change-title">Deal State Machine Implemented</span>
+        <span class="badge badge-logic">Business Logic</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Deals go through many stages &mdash; from draft, to negotiation, to script approval, to payment, to production, to delivery, to completion. Previously, there was no central system enforcing which stage can follow which. A deal could theoretically jump from "draft" straight to "completed." Now there's a strict state machine that only allows valid transitions and logs every change.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Added <code>VALID_TRANSITIONS</code> map covering all 12 <code>DealStatus</code> enum values</li>
+          <li>Added <code>transitionDealStatus(dealId, targetStatus, actorId)</code> with transaction + audit logging</li>
+          <li>Refactored <code>lockDeal</code>, <code>acceptLock</code>, <code>rejectLock</code> to use the state machine</li>
+          <li>Uses Prisma's <code>DealStatus</code> enum for type safety</li>
+        </ul>
+      </div>
+      <div class="flow-diagram">
+        <span class="status">DRAFT</span> <span class="arrow">&rarr;</span> <span class="status">LOCKED</span> <span class="arrow">&rarr;</span> <span class="status">SCRIPT_PENDING</span> <span class="arrow">&rarr;</span> <span class="status">SCRIPT_APPROVED</span><br>
+        <span class="arrow">&rarr;</span> <span class="status">PAYMENT_50_PENDING</span> <span class="arrow">&rarr;</span> <span class="status">PRODUCTION</span> <span class="arrow">&rarr;</span> <span class="status">DELIVERY_PENDING</span><br>
+        <span class="arrow">&rarr;</span> <span class="status">PAYMENT_100_PENDING</span> <span class="arrow">&rarr;</span> <span class="status">COMPLETED</span><br>
+        <br>
+        <span class="action">Any active state</span> <span class="arrow">&rarr;</span> <span class="status">DISPUTED</span> or <span class="status">CANCELLED</span>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/services/deal.service.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 6 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-bugfix">6</div>
+        <span class="change-title">Escrow Approval Gate Fixed</span>
+        <span class="badge badge-bugfix">Bug Fix</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Previously, when a creator uploaded their deliverables, the system automatically started a 2-day countdown to release payment &mdash; even if the brand hadn't reviewed the work yet. Now, the brand must explicitly approve the deliverables before the payment countdown begins.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li><code>handleFileUploadTrigger</code> now transitions to <code>DELIVERY_PENDING</code> (was incorrectly going to <code>PAYMENT_100_PENDING</code>)</li>
+          <li>Added <code>approveDeliverables(dealId, brandId)</code> as the explicit brand approval gate</li>
+          <li>Only <code>approveDeliverables</code> can trigger <code>DELIVERY_PENDING &rarr; PAYMENT_100_PENDING</code></li>
+          <li>Payment route now checks <code>deal.status !== 'PAYMENT_100_PENDING'</code> instead of <code>!deal.filesUploaded</code></li>
+        </ul>
+      </div>
+      <div class="flow-diagram">
+        <span class="action">Creator uploads files</span> <span class="arrow">&rarr;</span> <span class="status">DELIVERY_PENDING</span><br>
+        <span class="action">Brand reviews &amp; approves</span> <span class="arrow">&rarr;</span> <span class="status">PAYMENT_100_PENDING</span><br>
+        <span class="action">Brand pays</span> <span class="arrow">&rarr;</span> <span class="action">T+2 timer</span> <span class="arrow">&rarr;</span> <span class="status">COMPLETED</span>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/services/escrow.service.ts</span>
+          <span class="file-tag modified">api/deals/[id]/payment/route.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 7 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-feature">7</div>
+        <span class="change-title">Campaign Full-Text Search</span>
+        <span class="badge badge-feature">Feature</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Creators can now type a search query like "skincare" or "tech review" to find matching campaigns. The search checks both campaign titles and descriptions, and is case-insensitive.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Added <code>search</code> parameter to <code>DiscoverFilters</code> interface</li>
+          <li>Uses Prisma's <code>contains</code> with <code>mode: 'insensitive'</code> on <code>title</code> and <code>description</code></li>
+          <li>No raw SQL &mdash; leverages PostgreSQL's built-in case-insensitive matching</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/services/campaign.service.ts</span>
+          <span class="file-tag modified">api/campaigns/route.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 8 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-feature">8</div>
+        <span class="change-title">Cursor-Based Pagination</span>
+        <span class="badge badge-feature">Feature</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Instead of loading all campaigns at once, the API now returns them in batches of 20 with a bookmark to get the next batch. This is faster, more reliable, and handles new campaigns being added without skipping or duplicating results.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Replaced <code>page</code>/<code>pageSize</code> with <code>cursor</code> (last campaign ID) and <code>limit</code> (default 20, max 50)</li>
+          <li>Uses Prisma's native <code>cursor</code>/<code>skip</code> pattern &mdash; fetches <code>limit + 1</code> to determine <code>hasMore</code></li>
+          <li>Response: <code>{ data: Campaign[], nextCursor: string | null, hasMore: boolean }</code></li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/services/campaign.service.ts</span>
+          <span class="file-tag modified">api/campaigns/route.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 9 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-feature">9</div>
+        <span class="change-title">Campaign Sorting Options</span>
+        <span class="badge badge-feature">Feature</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        Creators can now sort campaigns by newest first, highest budget, lowest budget, or closest deadline. Previously there was no sorting control.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Added <code>SortBy</code> type: <code>'newest' | 'budget_high' | 'budget_low' | 'deadline'</code></li>
+          <li><code>SORT_OPTIONS</code> lookup mapping each option to Prisma <code>orderBy</code> clauses with <code>id</code> as tiebreaker</li>
+          <li>Default: <code>newest</code> (by <code>publishedAt</code> descending)</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/services/campaign.service.ts</span>
+          <span class="file-tag modified">api/campaigns/route.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 10 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-bugfix">10</div>
+        <span class="change-title">Mock Database Fallback Removed</span>
+        <span class="badge badge-bugfix">Bug Fix</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        The app used to silently fall back to a fake in-memory database when no real database was configured. This meant the app could appear to work fine while actually not connecting to anything real &mdash; hiding bugs that would only surface in production. Now it fails immediately with a clear error message.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Rewrote <code>lib/prisma.ts</code> as a standard Prisma singleton</li>
+          <li>Throws <code>Error('DATABASE_URL environment variable is required')</code> if missing</li>
+          <li>Uses <code>globalThis</code> caching pattern for Next.js hot-reload compatibility</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files</div>
+        <div class="file-list">
+          <span class="file-tag modified">lib/prisma.ts</span>
+          <span class="file-tag deleted">lib/mock-db.ts</span>
+          <span class="file-tag deleted">lib/mock-data.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 11 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-cleanup">11</div>
+        <span class="change-title">Duplicate Type System Cleaned</span>
+        <span class="badge badge-cleanup">Cleanup</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        There were two competing sets of type definitions &mdash; hand-written ones and auto-generated ones from the database. The hand-written ones didn't match the actual database and were unused. They've been removed.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Deleted <code>data/types.ts</code> which defined manual <code>User</code>, <code>Brand</code>, <code>Influencer</code>, <code>Deal</code>, <code>Message</code> interfaces</li>
+          <li>Verified no source files imported from this path</li>
+          <li>Prisma-generated types from <code>@prisma/client</code> are the single source of truth</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files deleted</div>
+        <div class="file-list">
+          <span class="file-tag deleted">data/types.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 12 -->
+    <div class="change-card">
+      <div class="change-header">
+        <div class="change-number bg-bugfix">12</div>
+        <span class="change-title">Sample Data Import Fix</span>
+        <span class="badge badge-bugfix">Bug Fix</span>
+      </div>
+      <div class="section-label">In plain English</div>
+      <p class="layman">
+        After removing the old type definitions file, the sample data file (used by the brand discovery page) broke because it was importing from the deleted file. The types were added directly into the sample data file so everything keeps working.
+      </p>
+      <div class="section-label">Technical details</div>
+      <div class="technical">
+        <ul>
+          <li>Replaced <code>import { Brand, Influencer, Deal, Message } from "./types"</code> with inline interface declarations</li>
+          <li>Interfaces match the shape of the sample data exactly</li>
+          <li>No functional change to the data itself</li>
+        </ul>
+      </div>
+      <div class="files-section">
+        <div class="section-label">Files modified</div>
+        <div class="file-list">
+          <span class="file-tag modified">data/sample-data.ts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Table -->
+    <h2 style="font-family: Sora, sans-serif; font-size: 1.3rem; margin: 40px 0 16px; color: var(--gray-900);">Summary</h2>
+
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Change</th>
+          <th>Category</th>
+          <th>Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Cookie signing (HMAC-SHA256)</td><td><span class="badge badge-security">Security</span></td><td>28 files</td></tr>
+        <tr><td>2</td><td>Removed dead gig pages</td><td><span class="badge badge-cleanup">Cleanup</span></td><td>3 dirs deleted</td></tr>
+        <tr><td>3</td><td>Removed stale docs</td><td><span class="badge badge-cleanup">Cleanup</span></td><td>5 files deleted</td></tr>
+        <tr><td>4</td><td>Removed orphaned schemas</td><td><span class="badge badge-cleanup">Cleanup</span></td><td>1 file edited</td></tr>
+        <tr><td>5</td><td>Deal state machine</td><td><span class="badge badge-logic">Business Logic</span></td><td>1 file edited</td></tr>
+        <tr><td>6</td><td>Escrow approval gate</td><td><span class="badge badge-bugfix">Bug Fix</span></td><td>2 files edited</td></tr>
+        <tr><td>7</td><td>Campaign full-text search</td><td><span class="badge badge-feature">Feature</span></td><td>2 files edited</td></tr>
+        <tr><td>8</td><td>Cursor-based pagination</td><td><span class="badge badge-feature">Feature</span></td><td>2 files edited</td></tr>
+        <tr><td>9</td><td>Campaign sorting</td><td><span class="badge badge-feature">Feature</span></td><td>2 files edited</td></tr>
+        <tr><td>10</td><td>Removed mock DB fallback</td><td><span class="badge badge-bugfix">Bug Fix</span></td><td>1 edited, 2 deleted</td></tr>
+        <tr><td>11</td><td>Removed duplicate types</td><td><span class="badge badge-cleanup">Cleanup</span></td><td>1 file deleted</td></tr>
+        <tr><td>12</td><td>Fixed sample data imports</td><td><span class="badge badge-bugfix">Bug Fix</span></td><td>1 file edited</td></tr>
+      </tbody>
+    </table>
+
+    <footer>
+      <p><strong>Build: Passing</strong> &mdash; All routes compile with zero errors.</p>
+      <p style="margin-top: 8px;">~35 files modified &middot; ~15 files/directories deleted</p>
+    </footer>
+
+  </div>
+</body>
+</html>

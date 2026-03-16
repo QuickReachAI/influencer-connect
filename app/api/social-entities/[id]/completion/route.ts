@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { socialEntityService } from '@/lib/services/social-entity.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 /** GET /api/social-entities/:id/completion — Profile completion breakdown */
 export async function GET(
@@ -7,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id } = await params;

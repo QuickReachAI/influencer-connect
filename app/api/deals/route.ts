@@ -3,10 +3,11 @@ import prisma from "@/lib/prisma";
 import { dealCreateSchema } from "@/lib/validations";
 import { kycService } from "@/lib/services/kyc.service";
 import { apiLimiter } from "@/lib/rate-limit";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(
@@ -142,9 +143,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Calculate fees
-        const platformFee = totalAmount * 0.05;
-        const creatorPayout = totalAmount * 0.95;
+        // No platform fees — free platform for now
+        const platformFee = 0;
+        const creatorPayout = totalAmount;
 
         const deal = await prisma.deal.create({
             data: {

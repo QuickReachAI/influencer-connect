@@ -227,7 +227,7 @@ export default function InfluencerDealsPage() {
         <AnimatedSection animation="animate-fade-in">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">My Deals</h1>
-            <p className="text-gray-500 mt-1">Manage your active collaborations</p>
+            <p className="text-gray-500 mt-1">Your collabs, all in one place</p>
           </div>
         </AnimatedSection>
 
@@ -237,9 +237,9 @@ export default function InfluencerDealsPage() {
               <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-7 h-7 text-[#0E61FF]" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No active deals yet</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No deals yet — let's change that</h3>
               <p className="text-gray-500 max-w-md mx-auto mb-6">
-                Start by discovering posts and submitting proposals!
+                Browse brand posts and send your first pitch — you got this!
               </p>
               <button
                 onClick={() => router.push("/dashboard/influencer/discover")}
@@ -264,9 +264,9 @@ export default function InfluencerDealsPage() {
                     {/* Card Header — always visible */}
                     <button
                       onClick={() => setExpandedDeal(isExpanded ? null : deal.id)}
-                      className="w-full text-left px-6 py-5 focus:outline-none"
+                      className="w-full text-left px-4 sm:px-6 py-4 sm:py-5 focus:outline-none"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 flex-wrap mb-1.5">
                             <h3 className="text-base font-semibold text-gray-900 truncate">
@@ -298,7 +298,7 @@ export default function InfluencerDealsPage() {
                           </div>
                         </div>
 
-                        <div className="flex-shrink-0 mt-1">
+                        <div className="flex-shrink-0 mt-1 hidden sm:block">
                           {isExpanded ? (
                             <ChevronUp className="w-5 h-5 text-gray-400" />
                           ) : (
@@ -313,7 +313,7 @@ export default function InfluencerDealsPage() {
                       <div className="border-t border-gray-100">
                         <div className="grid lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
                           {/* Left panel — deal info */}
-                          <div className="lg:col-span-2 p-6 space-y-6">
+                          <div className="lg:col-span-2 p-4 sm:p-6 space-y-4 sm:space-y-6">
                             <div>
                               <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                                 Deal Details
@@ -348,13 +348,13 @@ export default function InfluencerDealsPage() {
 
                           {/* Right panel — chat */}
                           <div className="lg:col-span-3 flex flex-col">
-                            <div className="px-6 py-3 border-b border-gray-100">
+                            <div className="px-4 sm:px-6 py-3 border-b border-gray-100">
                               <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
                                 Messages
                               </h4>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto max-h-80 px-6 py-4 space-y-3">
+                            <div className="flex-1 overflow-y-auto max-h-60 sm:max-h-80 px-4 sm:px-6 py-3 sm:py-4 space-y-3">
                               {isChatLoading ? (
                                 <div className="flex justify-center py-8">
                                   <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
@@ -407,7 +407,7 @@ export default function InfluencerDealsPage() {
                             </div>
 
                             {/* Message input */}
-                            <div className="px-6 py-3 border-t border-gray-100">
+                            <div className="px-4 sm:px-6 py-3 border-t border-gray-100">
                               <div className="flex items-center gap-2">
                                 <input
                                   type="text"

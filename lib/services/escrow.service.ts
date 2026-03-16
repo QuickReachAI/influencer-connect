@@ -4,6 +4,7 @@ import Razorpay from 'razorpay';
 import { inngest } from '@/lib/inngest/client';
 import { walletService } from './wallet.service';
 import { notificationService } from './notification.service';
+import { dealService } from './deal.service';
 
 let _razorpay: Razorpay | null = null;
 
@@ -159,8 +160,10 @@ export class EscrowService {
     }
 
     /**
-     * Triggered when creator uploads files
-     * Automatically notifies brand to pay remaining 50%
+     * Triggered when creator uploads files.
+     * Moves deal to DELIVERY_PENDING so the brand can review deliverables.
+     * The T+2 escrow timer does NOT start here — it starts only after the
+     * brand explicitly approves via approveDeliverables().
      */
     async handleFileUploadTrigger(dealId: string): Promise<void> {
         const deal = await prisma.deal.findUnique({
@@ -172,35 +175,68 @@ export class EscrowService {
             throw new Error('Deal not found');
         }
 
-        // Update deal status
+        // Mark files as uploaded
         await prisma.deal.update({
             where: { id: dealId },
             data: {
-                status: 'PAYMENT_100_PENDING',
                 filesUploaded: true,
                 filesUploadedAt: new Date()
             }
         });
 
-        // Audit log
-        await prisma.auditLog.create({
-            data: {
-                entityType: 'deal',
-                entityId: dealId,
-                action: 'files_uploaded',
-                actorId: deal.creatorId,
-                changes: {
-                    status: 'PAYMENT_100_PENDING'
-                }
-            }
+        // Transition to DELIVERY_PENDING (brand review gate)
+        await dealService.transitionDealStatus(dealId, 'DELIVERY_PENDING', deal.creatorId);
+
+        // Notify brand to review deliverables
+        await notificationService.send({
+            userId: deal.brandId,
+            type: 'DELIVERY_UPLOADED',
+            title: 'Deliverables Uploaded — Review Required',
+            message: `Creator has delivered files for "${deal.title}". Please review and approve to proceed with final payment.`,
+            data: { dealId },
+        });
+    }
+
+    /**
+     * Brand explicitly approves deliverables.
+     * This is the gate that moves the deal to PAYMENT_100_PENDING and
+     * allows the final payment (and subsequent T+2 escrow release).
+     */
+    async approveDeliverables(dealId: string, brandId: string): Promise<void> {
+        const deal = await prisma.deal.findUnique({
+            where: { id: dealId }
         });
 
-        // Notify brand to complete payment
+        if (!deal) {
+            throw new Error('Deal not found');
+        }
+
+        if (deal.brandId !== brandId) {
+            throw new Error('Unauthorized');
+        }
+
+        if (deal.status !== 'DELIVERY_PENDING') {
+            throw new Error('Deal must be in DELIVERY_PENDING status to approve deliverables');
+        }
+
+        // Transition to PAYMENT_100_PENDING via state machine
+        await dealService.transitionDealStatus(dealId, 'PAYMENT_100_PENDING', brandId);
+
+        // Notify brand that they can now pay
         await notificationService.send({
             userId: deal.brandId,
             type: 'PAYMENT_REQUIRED',
-            title: 'Files Delivered — Payment Required',
-            message: `Creator has delivered files for "${deal.title}". Please review and complete the remaining payment.`,
+            title: 'Deliverables Approved — Payment Required',
+            message: `You approved deliverables for "${deal.title}". Please complete the remaining payment.`,
+            data: { dealId },
+        });
+
+        // Notify creator that deliverables were approved
+        await notificationService.send({
+            userId: deal.creatorId,
+            type: 'SCRIPT_APPROVED',
+            title: 'Deliverables Approved',
+            message: `Brand approved your deliverables for "${deal.title}". Final payment is pending.`,
             data: { dealId },
         });
     }
@@ -219,6 +255,10 @@ export class EscrowService {
 
         if (deal.brandId !== brandId) {
             throw new Error('Unauthorized');
+        }
+
+        if (deal.status !== 'PAYMENT_100_PENDING') {
+            throw new Error('Deliverables must be approved before final payment');
         }
 
         if (!deal.filesUploaded) {
@@ -334,12 +374,10 @@ export class EscrowService {
         }
 
         const totalAmount = Number(deal.totalAmount);
-        const platformFee = totalAmount * 0.10;  // 10% platform fee
-        const tdsRate = totalAmount > 5000000 ? 0.02 : 0.01; // 2% if > 50L, else 1%
-        const tdsAmount = totalAmount * tdsRate;
-        const netPayout = totalAmount - platformFee - tdsAmount;
+        // No platform fees — free platform for now
+        const netPayout = totalAmount;
 
-        // Record escrow transactions (gross -> net breakdown)
+        // Record escrow transaction
         await prisma.escrowTransaction.create({
             data: {
                 dealId,
@@ -349,21 +387,12 @@ export class EscrowService {
             },
         });
 
-        await prisma.escrowTransaction.create({
-            data: {
-                dealId,
-                transactionType: 'PLATFORM_FEE',
-                amount: platformFee,
-                status: 'COMPLETED',
-            },
-        });
-
-        // Credit creator's WALLET
+        // Credit creator's WALLET (full amount, no deductions)
         await walletService.credit(
             deal.creatorId,
             netPayout,
             dealId,
-            `Payout: ${deal.title} (Gross: ₹${totalAmount}, Fee: ₹${platformFee}, TDS: ₹${tdsAmount})`
+            `Payout: ${deal.title} — ₹${totalAmount}`
         );
 
         // Update deal status

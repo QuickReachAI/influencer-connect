@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { oauthService } from '@/lib/services/oauth.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) {
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }

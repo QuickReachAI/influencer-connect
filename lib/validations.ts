@@ -3,7 +3,7 @@ import { z } from "zod";
 // Auth Validation
 export const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    password: z.string().min(1, "Password is required"),
 });
 
 export const signupSchema = z.object({
@@ -58,49 +58,6 @@ export const socialPlatformSchema = z.object({
     platform: z.enum(["Instagram", "YouTube", "TikTok", "Twitter", "Facebook", "LinkedIn"]),
     handle: z.string().min(1, "Handle is required"),
     followers: z.number().min(0, "Followers must be a positive number"),
-});
-
-// Gig Creation Validation
-export const gigSchema = z.object({
-    title: z.string()
-        .min(10, "Title must be at least 10 characters")
-        .max(80, "Title must be less than 80 characters"),
-    category: z.string().min(1, "Please select a category"),
-    subcategory: z.string().min(1, "Please select a subcategory"),
-    description: z.string()
-        .min(100, "Description must be at least 100 characters")
-        .max(2000, "Description must be less than 2000 characters"),
-    tags: z.array(z.string()).min(1, "Add at least one tag").max(5, "Maximum 5 tags allowed"),
-    requirements: z.array(z.string()).optional(),
-});
-
-// Gig Package Validation
-export const gigPackageSchema = z.object({
-    tier: z.enum(["basic", "standard", "premium"]),
-    name: z.string().min(3, "Package name is required"),
-    description: z.string().min(20, "Description must be at least 20 characters"),
-    price: z.number().min(5, "Minimum price is $5").max(10000, "Maximum price is $10,000"),
-    deliveryDays: z.number().min(1, "Minimum delivery time is 1 day").max(90, "Maximum delivery time is 90 days"),
-    revisions: z.union([z.number().min(0), z.literal("unlimited")]),
-    features: z.array(z.string()).min(1, "Add at least one feature"),
-});
-
-// Order Creation Validation
-export const orderSchema = z.object({
-    gigId: z.string().min(1, "Gig ID is required"),
-    packageTier: z.enum(["basic", "standard", "premium"]),
-    requirements: z.array(z.object({
-        question: z.string(),
-        answer: z.string().min(1, "This field is required"),
-    })),
-});
-
-// Review Validation
-export const reviewSchema = z.object({
-    rating: z.number().min(1, "Please select a rating").max(5, "Maximum rating is 5"),
-    comment: z.string()
-        .min(20, "Review must be at least 20 characters")
-        .max(500, "Review must be less than 500 characters"),
 });
 
 // Message Validation
@@ -219,10 +176,6 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type BrandProfileInput = z.infer<typeof brandProfileSchema>;
 export type InfluencerProfileInput = z.infer<typeof influencerProfileSchema>;
-export type GigInput = z.infer<typeof gigSchema>;
-export type GigPackageInput = z.infer<typeof gigPackageSchema>;
-export type OrderInput = z.infer<typeof orderSchema>;
-export type ReviewInput = z.infer<typeof reviewSchema>;
 export type MessageInput = z.infer<typeof messageSchema>;
 export type DealProposalInput = z.infer<typeof dealProposalSchema>;
 export type SearchFiltersInput = z.infer<typeof searchFiltersSchema>;
@@ -248,6 +201,7 @@ export const socialEntityCreateSchema = z.object({
   engagementRate: z.number().min(0).max(100).optional(),
   niche: z.array(z.string()).max(10).optional(),
   categories: z.array(z.string()).max(10).optional(),
+  isVerified: z.boolean().optional(),
 });
 
 export const socialEntityUpdateSchema = z.object({
@@ -257,6 +211,7 @@ export const socialEntityUpdateSchema = z.object({
   categories: z.array(z.string()).max(10).optional(),
   audienceDemographics: z.record(z.string(), z.unknown()).optional(),
   portfolioItems: z.array(z.record(z.string(), z.unknown())).optional(),
+  isVerified: z.boolean().optional(),
 });
 
 // Campaign

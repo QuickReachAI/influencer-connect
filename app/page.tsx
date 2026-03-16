@@ -14,7 +14,7 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 export default function HomePage() {
   const comingSoon = (e: React.MouseEvent) => {
     e.preventDefault();
-    toast.info("Coming soon!");
+    toast.info("Hang tight — this is coming soon!");
   };
 
   const trustStats = [
@@ -90,7 +90,7 @@ export default function HomePage() {
       </header>
 
       {/* Hero — bold #0E61FF */}
-      <section className="relative overflow-hidden bg-[#0E61FF] py-24 md:py-36">
+      <section className="relative overflow-hidden bg-[#0E61FF] py-12 sm:py-16 md:py-36">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-20 w-80 h-80 bg-white rounded-full blur-3xl"></div>
@@ -122,14 +122,14 @@ export default function HomePage() {
             <AnimatedSection animation="animate-slide-up" delay={300}>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-14">
                 <Link href="/auth/signup?role=brand">
-                  <Button size="lg" className="bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-10 py-7 shadow-xl font-semibold">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-7 shadow-xl font-semibold">
                     <Target className="w-5 h-5 mr-2" />
                     I&apos;m a Brand
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
                 <Link href="/auth/signup?role=influencer">
-                  <Button size="lg" className="bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-10 py-7 shadow-xl font-semibold backdrop-blur-sm">
+                  <Button size="lg" className="w-full sm:w-auto bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-6 py-4 sm:px-8 sm:py-5 md:px-10 md:py-7 shadow-xl font-semibold backdrop-blur-sm">
                     <Play className="w-5 h-5 mr-2" />
                     I&apos;m a Creator
                     <ArrowRight className="w-4 h-4 ml-2" />
@@ -139,7 +139,7 @@ export default function HomePage() {
             </AnimatedSection>
 
             <AnimatedSection animation="animate-fade-in" delay={400}>
-              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm">
+              <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-8 gap-y-2 sm:gap-y-3 text-sm">
                 {["No upfront cost", "Escrow protection", "KYC verified", "24/7 support"].map((item) => (
                   <span key={item} className="flex items-center gap-2 text-white/80">
                     <CheckCircle2 className="w-4 h-4 text-emerald-300" />
@@ -153,13 +153,13 @@ export default function HomePage() {
       </section>
 
       {/* Trust Stats */}
-      <section className="py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {trustStats.map((stat, index) => (
               <AnimatedSection
                 key={index}
-                className="bg-[#0E61FF] rounded-2xl p-6 text-center shadow-lg hover-lift cursor-default"
+                className="bg-[#0E61FF] rounded-2xl p-4 sm:p-6 text-center shadow-lg hover-lift cursor-default"
                 animation="animate-slide-up"
                 delay={index * 80}
               >
@@ -177,7 +177,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 bg-gray-50">
+      <section id="features" className="py-12 sm:py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
             <span className="inline-block text-sm font-bold text-[#0E61FF] bg-blue-100 px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Platform Features</span>
@@ -187,7 +187,7 @@ export default function HomePage() {
             </p>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {features.map((feature, index) => (
               <AnimatedSection
                 key={index}
@@ -207,7 +207,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-24 bg-white">
+      <section id="how-it-works" className="py-12 sm:py-16 md:py-24 bg-white">
         <div className="container mx-auto px-4">
           <AnimatedSection className="text-center mb-16" animation="animate-fade-in">
             <span className="inline-block text-sm font-bold text-white bg-[#0E61FF] px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">Simple Process</span>
@@ -258,7 +258,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-[#0E61FF] relative overflow-hidden">
+      <section className="py-12 sm:py-16 md:py-24 bg-[#0E61FF] relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-52 h-52 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
@@ -276,14 +276,14 @@ export default function HomePage() {
           </AnimatedSection>
           <AnimatedSection className="flex flex-col sm:flex-row gap-4 justify-center" animation="animate-slide-up" delay={300}>
             <Link href="/auth/signup?role=brand">
-              <Button size="lg" className="bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-10 font-semibold shadow-xl">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-[#0E61FF] hover:bg-gray-100 text-lg px-6 sm:px-10 font-semibold shadow-xl">
                 <Target className="w-5 h-5 mr-2" />
                 Start as Brand
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
             <Link href="/auth/signup?role=influencer">
-              <Button size="lg" className="bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-10 font-semibold backdrop-blur-sm">
+              <Button size="lg" className="w-full sm:w-auto bg-white/15 text-white hover:bg-white/25 border-2 border-white/30 text-lg px-6 sm:px-10 font-semibold backdrop-blur-sm">
                 <Users className="w-5 h-5 mr-2" />
                 Join as Creator
                 <ArrowRight className="w-4 h-4 ml-2" />

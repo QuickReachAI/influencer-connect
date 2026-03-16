@@ -90,7 +90,7 @@ export default function BrandMessagesPage() {
       const data = await res.json();
       setDeals(data.deals ?? []);
     } catch {
-      toast.error("Failed to load conversations");
+      toast.error("Couldn't load your chats — try refreshing");
     } finally {
       setLoadingDeals(false);
     }
@@ -103,7 +103,7 @@ export default function BrandMessagesPage() {
       const data = await res.json();
       setMessages(data.messages ?? []);
     } catch {
-      toast.error("Failed to load messages");
+      toast.error("Couldn't load messages — try refreshing");
     } finally {
       setLoadingMessages(false);
     }
@@ -130,7 +130,7 @@ export default function BrandMessagesPage() {
     });
 
     const unbindFlagged = bind<{ messageId: string; reason: string }>("message-flagged", (data) => {
-      toast.warning(`PII detected: ${data.reason}`, { duration: 4000 });
+      toast.warning(`Heads up — personal info detected: ${data.reason}`, { duration: 4000 });
     });
 
     return () => {
@@ -179,7 +179,7 @@ export default function BrandMessagesPage() {
         await fetchMessages(selectedDealId);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to send message");
+      toast.error(err instanceof Error ? err.message : "Message didn't go through — give it another try");
     } finally {
       setSending(false);
     }
@@ -230,7 +230,7 @@ export default function BrandMessagesPage() {
           </div>
         </AnimatedSection>
 
-        <div className="grid md:grid-cols-12 gap-0 h-[calc(100vh-200px)] rounded-xl border border-gray-200 overflow-hidden bg-white shadow-md">
+        <div className="grid md:grid-cols-12 gap-0 h-[calc(100dvh-200px)] min-h-[400px] rounded-xl border border-gray-200 overflow-hidden bg-white shadow-md">
           {/* Sidebar */}
           <div
             className={`md:col-span-4 border-r border-gray-200 flex flex-col ${
@@ -255,9 +255,9 @@ export default function BrandMessagesPage() {
               ) : deals.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                   <MessageSquare className="h-12 w-12 text-gray-300 mb-3" />
-                  <p className="text-sm font-medium text-gray-500">No conversations yet</p>
+                  <p className="text-sm font-medium text-gray-500">No chats yet</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    Create a deal to start messaging creators
+                    Start a deal with a creator to unlock messaging
                   </p>
                 </div>
               ) : (
@@ -355,7 +355,7 @@ export default function BrandMessagesPage() {
                   ) : messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <MessageSquare className="h-10 w-10 text-gray-300 mb-2" />
-                      <p className="text-sm text-gray-500">No messages yet</p>
+                      <p className="text-sm text-gray-500">No messages yet — say hi!</p>
                     </div>
                   ) : (
                     messages.map((msg) => {

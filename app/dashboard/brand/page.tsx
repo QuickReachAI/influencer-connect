@@ -98,10 +98,10 @@ export default function BrandDashboard() {
         <AnimatedSection animation="animate-fade-in" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {companyName}!</h1>
-            <p className="text-gray-500">Manage your posts and track creator collaborations</p>
+            <p className="text-gray-500">Your posts, your creators, your dashboard — all in one place</p>
           </div>
           <Link href={createPostHref}>
-            <Button className="bg-[#0E61FF] text-white hover:bg-[#0B4FD9] gap-2">
+            <Button className="w-full sm:w-auto bg-[#0E61FF] text-white hover:bg-[#0B4FD9] gap-2">
               <Plus className="w-4 h-4" />
               Create New Post
             </Button>
@@ -118,8 +118,8 @@ export default function BrandDashboard() {
                     <ShieldCheck className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-amber-800">Complete KYC verification to unlock all features</p>
-                    <p className="text-xs text-amber-600">Verify your identity to create campaigns and lock deals with creators.</p>
+                    <p className="text-sm font-semibold text-amber-800">Quick KYC check to unlock everything</p>
+                    <p className="text-xs text-amber-600">Verify your identity so you can create posts and lock deals with creators.</p>
                   </div>
                 </div>
                 <Link href="/dashboard/brand/profile">
@@ -134,7 +134,7 @@ export default function BrandDashboard() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
           <AnimatedSection animation="animate-slide-up" delay={0}>
             <div className="rounded-xl bg-[#0E61FF] p-6 shadow-lg hover-lift">
               <div className="flex items-center justify-between mb-3">
@@ -192,7 +192,7 @@ export default function BrandDashboard() {
             <AnimatedSection animation="animate-slide-up" delay={100}>
               <Card className="shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Ongoing Posts</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl text-gray-900">Ongoing Posts</CardTitle>
                   <CardDescription className="text-gray-500">Your active creator posts</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -201,7 +201,7 @@ export default function BrandDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {campaigns.filter(c => c.status === "ACTIVE").slice(0, 3).map((campaign) => (
-                        <div key={campaign.id} className="flex items-start justify-between border-b pb-4 last:border-0 rounded-lg p-2 -mx-2 hover:bg-gray-50 transition-all">
+                        <div key={campaign.id} className="flex flex-wrap items-start justify-between border-b pb-4 last:border-0 rounded-lg p-2 -mx-2 hover:bg-gray-50 transition-all">
                           <div className="flex-1">
                             <h4 className="font-medium text-gray-900 mb-1">{campaign.title}</h4>
                             <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -233,7 +233,7 @@ export default function BrandDashboard() {
             <AnimatedSection animation="animate-slide-up" delay={200}>
               <Card className="shadow-md">
                 <CardHeader>
-                  <CardTitle className="text-gray-900">Ongoing Deals</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl text-gray-900">Ongoing Deals</CardTitle>
                   <CardDescription className="text-gray-500">Active collaborations with creators</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -242,7 +242,7 @@ export default function BrandDashboard() {
                   ) : (
                     <div className="space-y-4">
                       {deals.slice(0, 3).map((deal) => (
-                        <div key={deal.id} className="flex items-start justify-between border-b pb-4 last:border-0 rounded-lg p-2 -mx-2 hover:bg-gray-50 transition-all">
+                        <div key={deal.id} className="flex flex-wrap items-start justify-between border-b pb-4 last:border-0 rounded-lg p-2 -mx-2 hover:bg-gray-50 transition-all">
                           <div className="flex-1">
                             <h4 className="font-medium text-gray-900 mb-1">{deal.title}</h4>
                             <p className="text-sm text-gray-500 mb-2">with {deal.creator?.creatorProfile?.name || "Creator"}</p>

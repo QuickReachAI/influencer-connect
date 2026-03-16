@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { campaignService } from '@/lib/services/campaign.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 /** PATCH /api/campaigns/:id/applications/:appId — Accept/reject application */
 export async function PATCH(
@@ -8,7 +9,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string; appId: string }> }
 ) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const user = await prisma.user.findUnique({

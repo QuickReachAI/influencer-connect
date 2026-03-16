@@ -83,7 +83,7 @@ export default function FinanceAuditPage() {
           setSummary(data.summary ?? summary);
         }
       } catch {
-        toast.error("Failed to load financial data");
+        toast.error("Couldn't load finance data — try refreshing");
       } finally {
         setLoading(false);
       }
@@ -124,7 +124,7 @@ export default function FinanceAuditPage() {
     a.download = `finance-audit-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("CSV exported!");
+    toast.success("CSV downloaded — check your downloads folder");
   };
 
   const formatCurrency = (amount: number) =>
@@ -133,7 +133,7 @@ export default function FinanceAuditPage() {
   const statCards = [
     { label: "Escrow Deposits", value: formatCurrency(summary.totalEscrowDeposits), icon: <ArrowDownToLine className="w-5 h-5" />, bg: "bg-[#0E61FF]" },
     { label: "Escrow Releases", value: formatCurrency(summary.totalEscrowReleases), icon: <ArrowUpFromLine className="w-5 h-5" />, bg: "bg-emerald-600" },
-    { label: "Platform Fees", value: formatCurrency(summary.totalPlatformFees), icon: <TrendingUp className="w-5 h-5" />, bg: "bg-amber-500" },
+    { label: "Platform Fees", value: "Free", icon: <TrendingUp className="w-5 h-5" />, bg: "bg-amber-500" },
     { label: "Wallet Withdrawals", value: formatCurrency(summary.totalWalletWithdrawals), icon: <Wallet className="w-5 h-5" />, bg: "bg-gray-900" },
   ];
 
@@ -190,7 +190,7 @@ export default function FinanceAuditPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((card, idx) => (
             <AnimatedSection key={card.label} animation="animate-slide-up" delay={idx * 80}>
               <Card className={`${card.bg} border-none`}>
@@ -210,8 +210,8 @@ export default function FinanceAuditPage() {
         <AnimatedSection animation="animate-fade-in" delay={400}>
           <Card className="mb-6 bg-white shadow-md">
             <CardContent className="py-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative flex-1 min-w-[200px]">
+              <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+                <div className="relative flex-1 min-w-0">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search by deal, user, or description..."
@@ -276,11 +276,11 @@ export default function FinanceAuditPage() {
                     <thead>
                       <tr className="text-left text-xs text-gray-500 border-b border-gray-100">
                         <th className="pb-2 pr-4">Date</th>
-                        <th className="pb-2 pr-4">Source</th>
-                        <th className="pb-2 pr-4">Type</th>
+                        <th className="pb-2 pr-4 hidden sm:table-cell">Source</th>
+                        <th className="pb-2 pr-4 hidden sm:table-cell">Type</th>
                         <th className="pb-2 pr-4">Amount</th>
-                        <th className="pb-2 pr-4">Status</th>
-                        <th className="pb-2 pr-4">Deal / User</th>
+                        <th className="pb-2 pr-4 hidden sm:table-cell">Status</th>
+                        <th className="pb-2 pr-4 hidden md:table-cell">Deal / User</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -293,7 +293,7 @@ export default function FinanceAuditPage() {
                               year: "numeric",
                             })}
                           </td>
-                          <td className="py-2.5 pr-4">
+                          <td className="py-2.5 pr-4 hidden sm:table-cell">
                             <Badge
                               variant={entry.source === "ESCROW" ? "default" : "outline"}
                               className="text-[10px]"
@@ -301,7 +301,7 @@ export default function FinanceAuditPage() {
                               {entry.source}
                             </Badge>
                           </td>
-                          <td className="py-2.5 pr-4 text-gray-700 text-xs">
+                          <td className="py-2.5 pr-4 text-gray-700 text-xs hidden sm:table-cell">
                             {entry.type.replace(/_/g, " ")}
                           </td>
                           <td className="py-2.5 pr-4">
@@ -312,7 +312,7 @@ export default function FinanceAuditPage() {
                               {formatCurrency(entry.amount)}
                             </span>
                           </td>
-                          <td className="py-2.5 pr-4">
+                          <td className="py-2.5 pr-4 hidden sm:table-cell">
                             {entry.status === "COMPLETED" ? (
                               <Badge variant="default" className="gap-0.5 text-[10px]">
                                 <CheckCircle className="w-2.5 h-2.5" />
@@ -329,7 +329,7 @@ export default function FinanceAuditPage() {
                               </Badge>
                             )}
                           </td>
-                          <td className="py-2.5 text-xs text-gray-500 max-w-[200px] truncate">
+                          <td className="py-2.5 text-xs text-gray-500 max-w-[200px] truncate hidden md:table-cell">
                             {entry.dealTitle || entry.userEmail || entry.description || "—"}
                           </td>
                         </tr>

@@ -1,14 +1,36 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Briefcase, Video, Mail, Lock, User, Phone, CheckCircle2 } from "lucide-react";
+import { Zap, Briefcase, Video, Mail, Lock, User, Phone, CheckCircle2, Eye, EyeOff, ArrowLeft, Check, X } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
+
+function PasswordChecklist({ password }: { password: string }) {
+  const checks = useMemo(() => [
+    { label: "8+ characters", met: password.length >= 8 },
+    { label: "One uppercase", met: /[A-Z]/.test(password) },
+    { label: "One lowercase", met: /[a-z]/.test(password) },
+    { label: "One number", met: /[0-9]/.test(password) },
+  ], [password]);
+
+  if (!password) return null;
+
+  return (
+    <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-1 sm:gap-y-2 mt-1.5">
+      {checks.map((check) => (
+        <span key={check.label} className={`flex items-center gap-1 text-xs ${check.met ? "text-green-600" : "text-gray-400"}`}>
+          {check.met ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+          {check.label}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function SignupPageContent() {
   const router = useRouter();
@@ -18,6 +40,7 @@ function SignupPageContent() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -26,23 +49,46 @@ function SignupPageContent() {
     if (roleParam === "influencer") setRole("CREATOR");
   }, [searchParams]);
 
+  const isPasswordValid = useMemo(() => {
+    return password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password);
+  }, [password]);
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!role) return;
+
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      toast.error(role === "BRAND" ? "Company name needs to be at least 2 characters" : "Your name needs at least 2 characters — we gotta call you something!");
+      return;
+    }
+
+    if (phone.length !== 10) {
+      toast.error("We need a valid 10-digit phone number to keep your account secure");
+      return;
+    }
+
+    if (!isPasswordValid) {
+      toast.error("Almost there — your password needs a few more tweaks");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const payload: Record<string, string> = {
-        email,
+        email: trimmedEmail,
         password,
         phone,
         role,
       };
 
       if (role === "CREATOR") {
-        payload.name = name;
+        payload.name = trimmedName;
       } else {
-        payload.companyName = name;
+        payload.companyName = trimmedName;
         payload.industry = "General";
       }
 
@@ -64,10 +110,24 @@ function SignupPageContent() {
         return;
       }
 
-      toast.success("Account created! Please log in.");
-      router.push("/auth/login");
+      // Signup API now sets the session cookie automatically
+      const userRole = data.user.role === "CREATOR" ? "influencer"
+        : data.user.role === "BRAND" ? "brand"
+        : "admin";
+
+      localStorage.setItem("userRole", userRole);
+      localStorage.setItem("userId", data.user.id);
+
+      if (userRole === "brand" && data.user.brandProfile) {
+        const bp = data.user.brandProfile;
+        const hasRequired = bp.companyName && bp.industry && bp.description && bp.website;
+        localStorage.setItem("brandProfileComplete", hasRequired ? "true" : "false");
+      }
+
+      toast.success("You're in! Welcome to QuickConnects — let's build something great");
+      router.push(`/dashboard/${userRole}`);
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something broke on our end — try again in a bit");
     } finally {
       setLoading(false);
     }
@@ -75,7 +135,7 @@ function SignupPageContent() {
 
   if (!role) {
     return (
-      <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center px-4 sm:px-6 py-4">
         <div className="w-full max-w-4xl">
           <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -89,7 +149,7 @@ function SignupPageContent() {
             <p className="text-center text-white/70 mb-8">Choose how you want to get started</p>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <AnimatedSection animation="animate-slide-up" delay={0}>
               <Card
                 className="cursor-pointer border-2 border-transparent hover:border-[#0E61FF] transition-all duration-200 hover:shadow-2xl group"
@@ -144,7 +204,7 @@ function SignupPageContent() {
           <div className="mt-6 text-center">
             <p className="text-sm text-white/70">
               Already have an account?{" "}
-              <Link href="/auth/login" className="text-white font-semibold hover:underline">
+              <Link href="/auth/login" className="text-white font-semibold hover:underline py-2 inline-block">
                 Sign in
               </Link>
             </p>
@@ -155,7 +215,7 @@ function SignupPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center px-4 sm:px-6 py-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8">
           <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -167,6 +227,14 @@ function SignupPageContent() {
         <AnimatedSection animation="animate-slide-up">
           <Card className="shadow-2xl border-0">
             <CardHeader className="pb-2">
+              <button
+                type="button"
+                onClick={() => setRole(null)}
+                className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-2 -ml-1 min-h-[44px]"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Change role
+              </button>
               <CardTitle className="text-2xl text-gray-900">
                 Create your {role === "BRAND" ? "Brand" : "Creator"} Account
               </CardTitle>
@@ -185,11 +253,12 @@ function SignupPageContent() {
                     <Input
                       id="name"
                       type="text"
-                      placeholder={role === "BRAND" ? "Acme Inc." : "Priya Sharma"}
+                      placeholder={role === "BRAND" ? "e.g. Acme Inc." : "e.g. Priya Sharma"}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-base"
                       required
+                      autoComplete={role === "BRAND" ? "organization" : "name"}
                     />
                   </div>
                 </div>
@@ -202,11 +271,12 @@ function SignupPageContent() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="you@example.com"
+                      placeholder="e.g. you@company.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-base"
                       required
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -219,15 +289,24 @@ function SignupPageContent() {
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="9876543210"
+                      placeholder="e.g. 9876543210"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      className="pl-10"
+                      className="pl-10 text-base"
                       maxLength={10}
                       required
+                      autoComplete="tel-national"
                     />
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">10-digit Indian mobile number</p>
+                  {phone.length > 0 && phone.length < 10 && (
+                    <p className="text-xs text-amber-500 mt-1">{10 - phone.length} more digit{10 - phone.length !== 1 ? "s" : ""} needed</p>
+                  )}
+                  {phone.length === 0 && (
+                    <p className="text-xs text-gray-400 mt-1">10-digit Indian mobile number</p>
+                  )}
+                  {phone.length === 10 && (
+                    <p className="text-xs text-green-600 mt-1 flex items-center gap-1"><Check className="w-3 h-3" /> Valid phone number</p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-700">
@@ -237,37 +316,34 @@ function SignupPageContent() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       id="password"
-                      type="password"
-                      placeholder="••••••••"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10 text-base"
                       required
+                      autoComplete="new-password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors w-11 h-11 flex items-center justify-center"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Min 8 chars, 1 uppercase, 1 lowercase, 1 number</p>
+                  <PasswordChecklist password={password} />
                 </div>
-                <Button type="submit" className="w-full" loading={loading}>
+                <Button type="submit" className="w-full" loading={loading} disabled={loading || !isPasswordValid}>
                   Create Account
                 </Button>
               </form>
 
-              <div className="mt-4">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setRole(null)}
-                  className="text-gray-500"
-                >
-                  ← Back to role selection
-                </Button>
-              </div>
-
               <div className="mt-4 text-center">
                 <p className="text-sm text-gray-500">
                   Already have an account?{" "}
-                  <Link href="/auth/login" className="text-[#0E61FF] font-semibold hover:underline">
+                  <Link href="/auth/login" className="text-[#0E61FF] font-semibold hover:underline py-2 inline-block">
                     Sign in
                   </Link>
                 </p>

@@ -152,8 +152,8 @@ export default function UsersPage() {
 
                 {/* Filters */}
                 <AnimatedSection animation="animate-fade-in" className="bg-white rounded-lg shadow-md p-4 mb-6">
-                    <div className="flex flex-wrap gap-4 items-center">
-                        <div className="flex items-center gap-2 flex-1 min-w-[250px]">
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 items-stretch sm:items-center">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Search className="h-5 w-5 text-gray-500" />
                             <input
                                 type="text"
@@ -164,8 +164,8 @@ export default function UsersPage() {
                             />
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <Filter className="h-5 w-5 text-gray-500" />
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <Filter className="h-5 w-5 text-gray-500 hidden sm:block" />
                             <select
                                 value={filters.role}
                                 onChange={(e) => setFilters({ ...filters, role: e.target.value })}
@@ -207,13 +207,13 @@ export default function UsersPage() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-900">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     User
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     Role
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
+                                <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
                                     KYC Status
                                 </th>
                                 <th className="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-white/80 uppercase">
@@ -230,8 +230,8 @@ export default function UsersPage() {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredUsers.map((user) => (
                                 <tr key={user.id} className={`hover:bg-gray-50 transition-all ${user.isBanned ? 'bg-red-50' : ''}`}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-3">
+                                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2 sm:gap-3">
                                             <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                                                 user.role === 'CREATOR' ? 'bg-amber-500' : 'bg-[#0E61FF]'
                                             }`}>
@@ -251,7 +251,7 @@ export default function UsersPage() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                         <span className={`px-2 py-1 text-xs rounded font-medium ${
                                             user.role === 'CREATOR'
                                                 ? 'bg-amber-500 text-white'
@@ -262,7 +262,7 @@ export default function UsersPage() {
                                             {user.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                         <div className="flex items-center gap-1">
                                             {user.kycStatus === 'VERIFIED' ? (
                                                 <CheckCircle className="h-4 w-4 text-emerald-600" />

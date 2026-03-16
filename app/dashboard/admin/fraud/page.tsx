@@ -94,7 +94,7 @@ export default function FraudDetectionPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-md p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
@@ -146,38 +146,38 @@ export default function FraudDetectionPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-gray-500">
                 <tr>
-                  <th className="px-4 py-3 text-left">Platform</th>
-                  <th className="px-4 py-3 text-left">Handle</th>
-                  <th className="px-4 py-3 text-left">Owner</th>
-                  <th className="px-4 py-3 text-right">Followers</th>
-                  <th className="px-4 py-3 text-right">Engagement</th>
-                  <th className="px-4 py-3 text-left">Anomaly</th>
-                  <th className="px-4 py-3 text-left">Reason</th>
-                  <th className="px-4 py-3 text-left">Actions</th>
+                  <th className="px-3 sm:px-4 py-3 text-left">Platform</th>
+                  <th className="px-3 sm:px-4 py-3 text-left">Handle</th>
+                  <th className="px-3 sm:px-4 py-3 text-left hidden sm:table-cell">Owner</th>
+                  <th className="px-3 sm:px-4 py-3 text-right hidden md:table-cell">Followers</th>
+                  <th className="px-3 sm:px-4 py-3 text-right hidden md:table-cell">Engagement</th>
+                  <th className="px-3 sm:px-4 py-3 text-left">Anomaly</th>
+                  <th className="px-3 sm:px-4 py-3 text-left hidden lg:table-cell">Reason</th>
+                  <th className="px-3 sm:px-4 py-3 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {allSuspicious.map((entity) => (
                   <tr key={entity.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium">{entity.platform}</td>
-                    <td className="px-4 py-3">@{entity.handle}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 font-medium">{entity.platform}</td>
+                    <td className="px-3 sm:px-4 py-3">@{entity.handle}</td>
+                    <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                       {entity.master?.email}
                       {entity.master?.isBanned && (
                         <span className="ml-1 text-xs text-red-500">(banned)</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono">
+                    <td className="px-3 sm:px-4 py-3 text-right font-mono hidden md:table-cell">
                       {entity.followerCount.toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono">{Number(entity.engagementRate).toFixed(2)}%</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 text-right font-mono hidden md:table-cell">{Number(entity.engagementRate).toFixed(2)}%</td>
+                    <td className="px-3 sm:px-4 py-3">
                       <span className={`px-2 py-0.5 rounded text-xs ${anomalyColors[entity.anomaly] || 'bg-gray-200'}`}>
                         {entity.anomaly.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{entity.reason}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 text-gray-500 text-xs max-w-xs truncate hidden lg:table-cell">{entity.reason}</td>
+                    <td className="px-3 sm:px-4 py-3">
                       <div className="flex gap-2">
                         <button
                           className="p-1 text-gray-400 hover:text-gray-600"

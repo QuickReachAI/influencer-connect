@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { campaignService } from '@/lib/services/campaign.service';
 import { campaignCreateSchema } from '@/lib/validations';
 import { apiLimiter } from '@/lib/rate-limit';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 /**
  * POST /api/campaigns — Create a campaign (brand only)
@@ -10,7 +11,7 @@ import { apiLimiter } from '@/lib/rate-limit';
  */
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -107,7 +108,7 @@ const MOCK_CAMPAIGNS = [
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -143,16 +144,25 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'entityId required for discovery' }, { status: 400 });
       }
 
+      const sortBy = searchParams.get('sortBy') as 'newest' | 'budget_high' | 'budget_low' | 'deadline' | null;
+
       const filters = {
+        search: searchParams.get('search') || undefined,
         niche: searchParams.getAll('niche'),
         minBudget: searchParams.get('minBudget') ? Number(searchParams.get('minBudget')) : undefined,
         maxBudget: searchParams.get('maxBudget') ? Number(searchParams.get('maxBudget')) : undefined,
-        page: searchParams.get('page') ? Number(searchParams.get('page')) : 1,
-        pageSize: searchParams.get('pageSize') ? Number(searchParams.get('pageSize')) : 20,
+        contentFormat: searchParams.getAll('contentFormat'),
+        cursor: searchParams.get('cursor') || undefined,
+        limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined,
+        sortBy: sortBy || undefined,
       };
 
       const result = await campaignService.discover(entityId, filters);
-      return NextResponse.json(result);
+      return NextResponse.json({
+        data: result.campaigns,
+        nextCursor: result.nextCursor,
+        hasMore: result.hasMore,
+      });
     }
 
     // Admin: all campaigns

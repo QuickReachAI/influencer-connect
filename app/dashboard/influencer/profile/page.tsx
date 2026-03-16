@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelect } from "@/components/ui/dropdown-select";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import {
   ArrowLeft,
@@ -24,14 +25,12 @@ import {
   AlertTriangle,
   CheckCircle,
   ShieldCheck,
-  Image,
   Instagram,
   Youtube,
   Facebook,
   Link2,
   Users,
   Zap,
-  ChevronDown,
   Megaphone,
   Lock,
   Unlink,
@@ -136,12 +135,19 @@ function InfluencerProfileInner() {
   const [oauthToast, setOauthToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [kycModalOpen, setKycModalOpen] = useState(false);
 
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+  const [name, setNameRaw] = useState("");
+  const [bio, setBioRaw] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [niches, setNiches] = useState<string[]>([]);
-  const [nicheDropdownOpen, setNicheDropdownOpen] = useState(false);
+  const [niches, setNichesRaw] = useState<string[]>([]);
   const [privacyConsent, setPrivacyConsent] = useState(false);
+
+  // Wrap setters to mark form as dirty on user edits
+  const setName = (v: string) => { setNameRaw(v); setIsDirty(true); };
+  const setBio = (v: string) => { setBioRaw(v); setIsDirty(true); };
+  const setNiches = (v: string[]) => { setNichesRaw(v); setIsDirty(true); };
+
+  const [privacyConsentLocked, setPrivacyConsentLocked] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [entities, setEntities] = useState<SocialEntity[]>([
     { platform: "Instagram", handle: "", followers: 0, engagementRate: 0, connected: false },
@@ -183,7 +189,10 @@ function InfluencerProfileInner() {
     } catch { /* ignore */ }
     try {
       const stored = localStorage.getItem("infPrivacyConsent");
-      if (stored === "true") setPrivacyConsent(true);
+      if (stored === "true") {
+        setPrivacyConsent(true);
+        setPrivacyConsentLocked(true);
+      }
     } catch { /* ignore */ }
   }, []);
 
@@ -202,30 +211,35 @@ function InfluencerProfileInner() {
       const user = profileData.user;
       setProfile(user);
       if (user.creatorProfile) {
-        setName(user.creatorProfile.name || "");
-        setBio(user.creatorProfile.bio || "");
+        setNameRaw(user.creatorProfile.name || "");
+        setBioRaw(user.creatorProfile.bio || "");
         setAvatar(user.creatorProfile.avatar || "");
+        if (user.creatorProfile.niche) {
+          const parsed = user.creatorProfile.niche.split(",").map((s: string) => s.trim()).filter(Boolean);
+          if (parsed.length > 0) setNichesRaw(parsed);
+        }
       }
 
       if (entitiesRes.ok) {
         const entitiesData = await entitiesRes.json();
         const apiEntities = entitiesData.entities ?? [];
         if (apiEntities.length > 0) {
-          setEntities(
-            apiEntities.map((e: Record<string, unknown>) => ({
-              id: e.id as string,
-              platform:
-                e.platform === "INSTAGRAM" ? "Instagram"
-                  : e.platform === "YOUTUBE" ? "YouTube"
-                    : "Facebook",
-              handle: (e.handle as string) || "",
-              followers: (e.followerCount as number) || 0,
-              engagementRate: Number(e.engagementRate) || 0,
-              connected: (e.isVerified as boolean) || false,
-            }))
-          );
+          const mapped = apiEntities.map((e: Record<string, unknown>) => ({
+            id: e.id as string,
+            platform:
+              e.platform === "INSTAGRAM" ? "Instagram"
+                : e.platform === "YOUTUBE" ? "YouTube"
+                  : "Facebook",
+            handle: (e.handle as string) || "",
+            followers: (e.followerCount as number) || 0,
+            engagementRate: Number(e.engagementRate) || 0,
+            connected: (e.isVerified as boolean) || false,
+          }));
+          setEntities(mapped);
         }
       }
+
+      setIsDirty(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -237,21 +251,22 @@ function InfluencerProfileInner() {
     fetchProfile();
   }, [fetchProfile]);
 
+  // Clear success banner when user starts editing again
+  useEffect(() => {
+    if (isDirty && success) setSuccess(false);
+  }, [isDirty, success]);
+
   const completionItems: CompletionItem[] = [
     { label: "Name", weight: 15, done: name.trim().length >= 2 },
     { label: "Bio", weight: 15, done: bio.trim().length >= 20 },
     { label: "Niche Categories", weight: 15, done: niches.length > 0 },
     { label: "Social Accounts Connected", weight: 30, done: entities.some(e => e.connected && e.handle.trim().length > 0) },
-    { label: "KYC Verification", weight: 10, done: profile?.kycStatus === "VERIFIED" },
+    { label: "KYC Verification", weight: 15, done: profile?.kycStatus === "VERIFIED" },
     { label: "Privacy Consent", weight: 10, done: privacyConsent },
-    { label: "Avatar", weight: 5, done: avatar.trim().length > 0 },
   ];
 
   const completionScore = completionItems.reduce((sum, item) => sum + (item.done ? item.weight : 0), 0);
 
-  const toggleNiche = (n: string) => {
-    setNiches(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n]);
-  };
 
   const addEntity = () => {
     setEntities(prev => [
@@ -260,8 +275,23 @@ function InfluencerProfileInner() {
     ]);
   };
 
-  const removeEntity = (idx: number) => {
+  const removeEntity = async (idx: number) => {
     if (entities.length <= 1) return;
+    const entity = entities[idx];
+    // If entity has a DB id, call DELETE API to remove it
+    if (entity.id) {
+      try {
+        const res = await fetch(`/api/social-entities/${entity.id}`, { method: "DELETE" });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setError(data.error || "Failed to remove social account");
+          return;
+        }
+      } catch {
+        setError("Failed to remove social account");
+        return;
+      }
+    }
     setEntities(prev => prev.filter((_, i) => i !== idx));
   };
 
@@ -271,6 +301,8 @@ function InfluencerProfileInner() {
       (updated[idx] as unknown as Record<string, unknown>)[field] = value;
       return updated;
     });
+    // Mark dirty for user-editable fields (not internal flags)
+    if (field === "handle" || field === "platform") setIsDirty(true);
   };
 
   const handleOAuthConnect = async (idx: number) => {
@@ -294,23 +326,73 @@ function InfluencerProfileInner() {
           throw new Error(data.error || "Failed to look up Instagram profile");
         }
 
-        const profile: InstagramLookupResult = data.profile;
+        const igProfile: InstagramLookupResult = data.profile;
+        const normalizedHandle = igProfile.username.replace(/^@/, "");
+
+        // Auto-save entity to DB immediately
+        const entityPayload = {
+          platform: "INSTAGRAM" as const,
+          handle: normalizedHandle,
+          followerCount: igProfile.followerCount,
+          engagementRate: 0,
+          isVerified: true,
+        };
+
+        let savedEntityId = entity.id;
+        try {
+          if (entity.id) {
+            await fetch(`/api/social-entities/${entity.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(entityPayload),
+            });
+          } else {
+            const saveRes = await fetch("/api/social-entities", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(entityPayload),
+            });
+            if (saveRes.ok) {
+              const saved = await saveRes.json();
+              savedEntityId = saved.id;
+            }
+          }
+        } catch {
+          // Non-fatal — entity will still show as connected in UI
+        }
+
+        // Auto-save avatar from Instagram profile picture
+        if (igProfile.profilePicUrl) {
+          setAvatar(igProfile.profilePicUrl);
+          try {
+            await fetch("/api/auth/me", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ avatar: igProfile.profilePicUrl }),
+            });
+          } catch { /* non-fatal */ }
+        }
+
         setEntities(prev => {
           const updated = [...prev];
           updated[idx] = {
             ...updated[idx],
-            handle: `@${profile.username}`,
-            followers: profile.followerCount,
+            id: savedEntityId,
+            handle: normalizedHandle,
+            followers: igProfile.followerCount,
             connected: true,
             connecting: false,
-            lookupData: profile,
+            lookupData: igProfile,
           };
           return updated;
         });
 
+        // Entity was auto-saved to DB, so this isn't an unsaved change
+        setIsDirty(false);
+
         setOauthToast({
           type: "success",
-          message: `@${profile.username}: ${profile.followerCount.toLocaleString()} followers`,
+          message: `@${igProfile.username}: ${igProfile.followerCount.toLocaleString()} followers — saved`,
         });
         setTimeout(() => setOauthToast(null), 6000);
       } catch (err) {
@@ -346,8 +428,18 @@ function InfluencerProfileInner() {
 
     updateEntity(idx, "disconnecting", true);
 
-    // For Instagram (Apify-based), just reset locally — no OAuth token to revoke
+    // For Instagram (Apify-based), reset locally and persist to DB
     if (entity.platform === "Instagram") {
+      // Persist disconnection to DB
+      if (entity.id) {
+        try {
+          await fetch(`/api/social-entities/${entity.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isVerified: false, followerCount: 0 }),
+          });
+        } catch { /* non-fatal */ }
+      }
       setEntities(prev => {
         const updated = [...prev];
         updated[idx] = {
@@ -359,6 +451,7 @@ function InfluencerProfileInner() {
         };
         return updated;
       });
+      setIsDirty(false);
       setOauthToast({ type: "success", message: "Instagram account disconnected" });
       setTimeout(() => setOauthToast(null), 4000);
       return;
@@ -443,6 +536,7 @@ function InfluencerProfileInner() {
               body: JSON.stringify({
                 followerCount: Number(entity.followers) || 0,
                 engagementRate: Number(entity.engagementRate) || 0,
+                isVerified: entity.connected,
               }),
             });
           }
@@ -452,9 +546,10 @@ function InfluencerProfileInner() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               platform: platformMap[entity.platform] || entity.platform,
-              handle: entity.handle.trim(),
+              handle: entity.handle.trim().replace(/^@/, ""),
               followerCount: Number(entity.followers) || 0,
               engagementRate: Number(entity.engagementRate) || 0,
+              isVerified: entity.connected,
             }),
           });
         });
@@ -473,14 +568,17 @@ function InfluencerProfileInner() {
       const scoreAfterSave = completionItems.reduce((sum, item) => sum + (item.done ? item.weight : 0), 0);
       localStorage.setItem("infProfileComplete", scoreAfterSave >= 100 ? "true" : "false");
 
+      // Mark as clean after successful save
+      setIsDirty(false);
+
+      // Lock privacy consent after save
+      if (privacyConsent) setPrivacyConsentLocked(true);
+
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
 
       if (redirectToDiscover && scoreAfterSave >= 100) {
         setTimeout(() => router.push("/dashboard/influencer/discover"), 1000);
       }
-
-      await fetchProfile();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -642,7 +740,7 @@ function InfluencerProfileInner() {
 
         <form onSubmit={handleSave}>
           {/* ── Basic Information ── */}
-          <AnimatedSection animation="animate-slide-up" delay={100} className="mb-6">
+          <AnimatedSection animation="animate-slide-up" delay={100} className="mb-6 relative z-10">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900">
@@ -659,7 +757,7 @@ function InfluencerProfileInner() {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Your display name (min 2 characters)"
-                    className="rounded-xl"
+                    className="rounded-xl text-base sm:text-sm"
                   />
                   {name.length > 0 && name.length < 2 && (
                     <p className="text-xs text-amber-500 mt-1">{2 - name.length} more character{2 - name.length > 1 ? "s" : ""} needed</p>
@@ -669,7 +767,7 @@ function InfluencerProfileInner() {
                 <div>
                   <label className="text-sm font-medium text-gray-900 mb-1.5 block">Bio *</label>
                   <textarea
-                    className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E61FF] focus:border-[#0E61FF] min-h-[100px] resize-y transition-all"
+                    className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-base sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E61FF] focus:border-[#0E61FF] min-h-[100px] resize-y transition-all"
                     value={bio}
                     onChange={e => setBio(e.target.value)}
                     placeholder="Tell brands about yourself, your content style, and your audience... (min 20 characters)"
@@ -687,69 +785,50 @@ function InfluencerProfileInner() {
                 {/* Niche Categories */}
                 <div>
                   <label className="text-sm font-medium text-gray-900 mb-1.5 block">Niche Categories *</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setNicheDropdownOpen(!nicheDropdownOpen)}
-                      className="w-full flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm text-left hover:border-gray-300 transition-colors"
-                    >
-                      <span className={niches.length > 0 ? "text-gray-900" : "text-gray-400"}>
-                        {niches.length > 0 ? niches.join(", ") : "Select niches..."}
-                      </span>
-                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${nicheDropdownOpen ? "rotate-180" : ""}`} />
-                    </button>
-
-                    {nicheDropdownOpen && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto animate-slide-down">
-                        {NICHE_OPTIONS.map(niche => (
-                          <label key={niche} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={niches.includes(niche)}
-                              onChange={() => toggleNiche(niche)}
-                              className="w-4 h-4 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF]"
-                            />
-                            <span className="text-sm text-gray-700">{niche}</span>
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  {niches.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {niches.map(n => (
-                        <Badge key={n} variant="info" className="gap-1">
-                          {n}
-                          <button type="button" onClick={() => toggleNiche(n)} className="ml-1 hover:text-red-500">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <MultiSelect
+                    values={niches}
+                    onChange={setNiches}
+                    options={NICHE_OPTIONS}
+                    placeholder="Select niches..."
+                  />
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-900 mb-1.5 flex items-center gap-1">
-                    <Image className="w-4 h-4" /> Avatar URL
-                  </label>
-                  <Input
-                    type="url"
-                    value={avatar}
-                    onChange={e => setAvatar(e.target.value)}
-                    placeholder="https://example.com/avatar.png"
-                    className="rounded-xl"
-                  />
-                  {avatar && (
-                    <div className="mt-2 w-16 h-16 rounded-full border border-gray-200 overflow-hidden">
-                      <img
-                        src={avatar}
-                        alt="Avatar preview"
-                        className="w-full h-full object-cover"
-                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
+                {/* Profile Picture — auto-fetched from Instagram */}
+                {avatar && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-900 mb-1.5 block">Profile Picture</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-full border-2 border-gray-200 overflow-hidden flex-shrink-0">
+                        <img
+                          src={avatar}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                          onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400">Fetched from your connected Instagram account</p>
                     </div>
-                  )}
+                  </div>
+                )}
+
+                {/* Account Info — read-only */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900 mb-1.5 block">Email</label>
+                    <Input
+                      value={profile?.email || ""}
+                      disabled
+                      className="rounded-xl bg-gray-50 text-gray-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-900 mb-1.5 block">Phone</label>
+                    <Input
+                      value={profile?.phone || ""}
+                      disabled
+                      className="rounded-xl bg-gray-50 text-gray-500"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -759,7 +838,7 @@ function InfluencerProfileInner() {
           <AnimatedSection animation="animate-slide-up" delay={200} className="mb-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <CardTitle className="flex items-center gap-2 text-gray-900">
                       <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -776,7 +855,7 @@ function InfluencerProfileInner() {
                     variant="outline"
                     size="sm"
                     onClick={addEntity}
-                    className="gap-1 flex-shrink-0"
+                    className="gap-1 flex-shrink-0 w-full sm:w-auto"
                   >
                     <Plus className="w-4 h-4" />
                     Add Another Account
@@ -794,15 +873,15 @@ function InfluencerProfileInner() {
                   const isVerifiablePlatform = entity.platform === "Instagram" || entity.platform === "YouTube";
 
                   return (
-                    <div key={idx} className="rounded-xl border border-gray-200 overflow-hidden">
+                    <div key={idx} className="rounded-xl border border-gray-200">
                       {/* Entity Header */}
-                      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100 gap-2 sm:gap-0">
                         <div className="flex items-center gap-3">
                           <div className={`w-9 h-9 rounded-lg ${config.bg} flex items-center justify-center text-white`}>
                             {config.icon}
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <select
                                 value={entity.platform}
                                 onChange={e => updateEntity(idx, "platform", e.target.value)}
@@ -864,7 +943,7 @@ function InfluencerProfileInner() {
 
                       {/* Entity Body */}
                       <div className="p-4 space-y-3">
-                        <div className="grid sm:grid-cols-2 gap-3">
+                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3">
                           <div>
                             <label className="text-xs text-gray-500 mb-1 block">Handle</label>
                             <Input
@@ -879,7 +958,7 @@ function InfluencerProfileInner() {
                                 }
                               }}
                               placeholder="@yourhandle"
-                              className="rounded-xl"
+                              className="rounded-xl text-base sm:text-sm"
                               disabled={entity.connected && isVerifiablePlatform}
                             />
                           </div>
@@ -948,15 +1027,17 @@ function InfluencerProfileInner() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <label className="flex items-start gap-3 cursor-pointer group">
+                <label className={`flex items-start gap-3 group ${privacyConsentLocked ? "cursor-default" : "cursor-pointer"}`}>
                   <input
                     type="checkbox"
                     checked={privacyConsent}
-                    onChange={e => setPrivacyConsent(e.target.checked)}
-                    className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0"
+                    onChange={e => !privacyConsentLocked && setPrivacyConsent(e.target.checked)}
+                    disabled={privacyConsentLocked}
+                    className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0 disabled:opacity-60"
                   />
                   <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
                     I consent to QuickConnects accessing my public social media data (followers, posts) for deal matching purposes.
+                    {privacyConsentLocked && <span className="block text-xs text-emerald-600 mt-1">Consent recorded</span>}
                   </span>
                 </label>
                 <button
@@ -980,9 +1061,9 @@ function InfluencerProfileInner() {
           <AnimatedSection animation="animate-slide-up" delay={350} className="mb-6">
             <Card>
               <CardContent className="py-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                       <ShieldCheck className="w-5 h-5 text-[#0E61FF]" />
                     </div>
                     <div>
@@ -990,7 +1071,7 @@ function InfluencerProfileInner() {
                       <p className="text-xs text-gray-500">Identity verification status</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
                     {(profile?.kycStatus === "PENDING" || profile?.kycStatus === "REJECTED") && (
                       <Button
                         type="button"
@@ -1019,11 +1100,11 @@ function InfluencerProfileInner() {
           </AnimatedSection>
 
           {/* ── Submit ── */}
-          <div className="flex justify-end gap-3 pb-8">
-            <Link href="/dashboard/influencer">
-              <Button type="button" variant="outline">Cancel</Button>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pb-8">
+            <Link href="/dashboard/influencer" className="w-full sm:w-auto">
+              <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={saving} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90">
+            <Button type="submit" disabled={saving || !privacyConsent || !isDirty} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 w-full sm:w-auto">
               {saving ? (
                 <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
               ) : (

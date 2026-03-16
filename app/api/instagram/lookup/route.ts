@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { lookupInstagramProfile, apifyLimiter, apifyGlobalLimiter } from '@/lib/services/apify.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

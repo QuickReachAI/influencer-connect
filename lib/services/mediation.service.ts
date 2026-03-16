@@ -292,15 +292,15 @@ export class MediationService {
 
         const creatorShare = totalAmount * (creatorPercent / 100);
         const brandShare = totalAmount * (brandPercent / 100);
-        const platformFee = creatorShare * 0.10; // 10% platform fee on creator's share
-        const creatorPayout = creatorShare - platformFee;
+        // No platform fees — free platform for now
+        const creatorPayout = creatorShare;
 
-        // Credit creator's wallet (net of platform fee)
+        // Credit creator's wallet (full share, no deductions)
         await walletService.credit(
             deal.creatorId,
             creatorPayout,
             deal.id,
-            `Partial resolution: ${creatorPercent}% of ₹${totalAmount} (Fee: ₹${platformFee.toFixed(2)})`
+            `Partial resolution: ${creatorPercent}% of ₹${totalAmount}`
         );
 
         // Record brand refund as escrow transaction
@@ -309,16 +309,6 @@ export class MediationService {
                 dealId: deal.id,
                 transactionType: 'REFUND_TO_BRAND',
                 amount: brandShare,
-                status: 'COMPLETED',
-            },
-        });
-
-        // Record platform fee
-        await prisma.escrowTransaction.create({
-            data: {
-                dealId: deal.id,
-                transactionType: 'PLATFORM_FEE',
-                amount: platformFee,
                 status: 'COMPLETED',
             },
         });

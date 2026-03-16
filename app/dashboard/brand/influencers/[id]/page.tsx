@@ -98,7 +98,7 @@ export default function ViewInfluencerProfilePage() {
         <DashboardNav role="brand" />
         <div className="container mx-auto px-4 py-8 animate-fade-in">
           <div className="skeleton h-6 w-36 mb-6 rounded" />
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
               <div className="skeleton h-80 rounded-xl" />
             </div>
@@ -144,7 +144,7 @@ export default function ViewInfluencerProfilePage() {
           Back to Discover
         </Link>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Sidebar Profile Card */}
           <div className="lg:col-span-1 space-y-6">
             <AnimatedSection animation="animate-fade-in">
@@ -253,7 +253,7 @@ export default function ViewInfluencerProfilePage() {
               <CardContent>
                 <div className="space-y-3">
                   {profile.platforms.map((platform) => (
-                    <div key={platform.platform} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
+                    <div key={platform.platform} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-3 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-3">
                         {platformIcon(platform.platform)}
                         <div>

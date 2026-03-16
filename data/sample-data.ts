@@ -1,4 +1,50 @@
-import { Brand, Influencer, Deal, Message } from "./types";
+interface Brand {
+  id: string;
+  userId: string;
+  companyName: string;
+  industry: string;
+  description: string;
+  website: string;
+  budgetRange: string;
+  requirements: string[];
+  pastCampaigns: { id: string; brandName: string; description: string; results: string }[];
+}
+
+interface Influencer {
+  id: string;
+  userId: string;
+  name: string;
+  bio: string;
+  niches: string[];
+  platforms: { platform: string; handle: string; followers: number }[];
+  location: string;
+  engagementRate: number;
+  rateCard: { postPrice: number; storyPrice: number; videoPrice: number };
+  portfolio: { id: string; brandName: string; description: string; date: string }[];
+}
+
+interface Deal {
+  id: string;
+  brandId: string;
+  influencerId: string;
+  status: string;
+  title: string;
+  description: string;
+  deliverables: string[];
+  compensation: number;
+  timeline: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Message {
+  id: string;
+  dealId: string;
+  senderId: string;
+  senderRole: string;
+  content: string;
+  timestamp: string;
+}
 
 export const sampleBrands: Brand[] = [
   {

@@ -16,14 +16,25 @@ interface CreateCampaignInput {
   expiresAt?: Date;
 }
 
+type SortBy = 'newest' | 'budget_high' | 'budget_low' | 'deadline';
+
 interface DiscoverFilters {
+  search?: string;
   niche?: string[];
   minBudget?: number;
   maxBudget?: number;
   contentFormat?: string[];
-  page?: number;
-  pageSize?: number;
+  cursor?: string;
+  limit?: number;
+  sortBy?: SortBy;
 }
+
+const SORT_OPTIONS: Record<SortBy, object[]> = {
+  newest: [{ publishedAt: 'desc' }, { id: 'asc' }],
+  budget_high: [{ budget: 'desc' }, { id: 'asc' }],
+  budget_low: [{ budget: 'asc' }, { id: 'asc' }],
+  deadline: [{ expiresAt: 'asc' }, { id: 'asc' }],
+};
 
 export class CampaignService {
   /** Create a new campaign (brand only). Status starts as DRAFT. */
@@ -124,8 +135,8 @@ export class CampaignService {
       minPublishedBefore = new Date(now.getTime() - 2 * 60 * 60 * 1000);
     }
 
-    const page = filters.page ?? 1;
-    const pageSize = filters.pageSize ?? 20;
+    const limit = Math.min(Math.max(filters.limit ?? 20, 1), 50);
+    const sortBy = filters.sortBy ?? 'newest';
 
     const where: any = {
       status: 'ACTIVE',
@@ -133,6 +144,14 @@ export class CampaignService {
       minFollowers: { lte: entity.followerCount },
       maxFollowers: { gte: entity.followerCount },
     };
+
+    // Full-text search on title and description
+    if (filters.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
 
     if (filters.niche && filters.niche.length > 0) {
       where.niche = { hasSome: filters.niche };
@@ -147,21 +166,22 @@ export class CampaignService {
       where.contentFormat = { hasSome: filters.contentFormat };
     }
 
-    const [campaigns, total] = await Promise.all([
-      prisma.campaign.findMany({
-        where,
-        include: {
-          brand: { include: { user: { select: { email: true } } } },
-          _count: { select: { applications: true } },
-        },
-        orderBy: [{ publishedAt: 'desc' }],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-      prisma.campaign.count({ where }),
-    ]);
+    const campaigns = await prisma.campaign.findMany({
+      where,
+      include: {
+        brand: { include: { user: { select: { email: true } } } },
+        _count: { select: { applications: true } },
+      },
+      orderBy: SORT_OPTIONS[sortBy],
+      ...(filters.cursor ? { cursor: { id: filters.cursor }, skip: 1 } : {}),
+      take: limit + 1, // fetch one extra to determine hasMore
+    });
 
-    return { campaigns, total, page, pageSize };
+    const hasMore = campaigns.length > limit;
+    if (hasMore) campaigns.pop();
+    const nextCursor = hasMore ? campaigns[campaigns.length - 1].id : null;
+
+    return { campaigns, nextCursor, hasMore };
   }
 
   /** Creator applies to a campaign with a specific social entity. */
@@ -251,8 +271,8 @@ export class CampaignService {
           title: `${application.campaign.title} - ${application.entity.handle}`,
           description: application.campaign.description,
           totalAmount: amount,
-          platformFee: amount * 0.05,
-          creatorPayout: amount * 0.95,
+          platformFee: 0,
+          creatorPayout: amount,
           status: 'LOCKED',
         },
       });

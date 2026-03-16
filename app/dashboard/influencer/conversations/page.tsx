@@ -97,7 +97,7 @@ export default function InfluencerConversationsPage() {
       const data = await res.json();
       setMessages(data.messages || []);
     } catch {
-      toast.error("Failed to load messages");
+      toast.error("Couldn't load messages — try refreshing");
     } finally {
       setLoadingMessages(false);
     }
@@ -126,7 +126,7 @@ export default function InfluencerConversationsPage() {
       setNewMessage("");
       await fetchMessages(selectedDealId);
     } catch {
-      toast.error("Failed to send message");
+      toast.error("Message didn't go through — give it another try");
     } finally {
       setSending(false);
     }
@@ -197,8 +197,8 @@ export default function InfluencerConversationsPage() {
           <AnimatedSection animation="animate-fade-in">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
               <Inbox className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 font-medium mb-1">No conversations yet</p>
-              <p className="text-gray-400 text-sm">Your deal conversations will appear here once brands reach out.</p>
+              <p className="text-gray-500 font-medium mb-1">No chats yet</p>
+              <p className="text-gray-400 text-sm">When brands reach out or you land a deal, your chats will show up here.</p>
               <Button
                 className="mt-4 bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white"
                 onClick={() => router.push("/dashboard/influencer/discover")}
@@ -210,8 +210,7 @@ export default function InfluencerConversationsPage() {
         ) : (
           <AnimatedSection animation="animate-slide-up" delay={100}>
             <div
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-              style={{ height: "calc(100vh - 280px)", minHeight: "500px" }}
+              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden h-[calc(100dvh-280px)] min-h-[400px] sm:min-h-[500px]"
             >
               <div className="flex h-full">
                 {/* Deal list */}
@@ -295,7 +294,7 @@ export default function InfluencerConversationsPage() {
                         ) : messages.length === 0 ? (
                           <div className="flex flex-col items-center justify-center h-full text-center">
                             <MessageSquare className="w-10 h-10 text-gray-300 mb-3" />
-                            <p className="text-gray-400 text-sm">No messages yet. Start the conversation!</p>
+                            <p className="text-gray-400 text-sm">No messages yet — say hi and get things rolling!</p>
                           </div>
                         ) : (
                           messages.map((msg) => {
@@ -303,7 +302,7 @@ export default function InfluencerConversationsPage() {
                             return (
                               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                                 <div
-                                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                                  className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2.5 ${
                                     isMe
                                       ? "bg-[#0E61FF] text-white rounded-br-md"
                                       : "bg-gray-100 text-gray-800 rounded-bl-md"

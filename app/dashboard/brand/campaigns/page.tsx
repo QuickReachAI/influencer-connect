@@ -124,7 +124,7 @@ function CampaignsContent() {
         const data = await res.json();
         setCampaigns(data.campaigns || []);
       } catch {
-        toast.error("Failed to load posts");
+        toast.error("Couldn't load your posts — try refreshing");
       } finally {
         setLoading(false);
       }
@@ -159,11 +159,11 @@ function CampaignsContent() {
   }, [selectedCampaignId]);
 
   async function handleCreate() {
-    if (!newTitle.trim()) { toast.error("Title is required"); return; }
-    if (!newDescription.trim()) { toast.error("Description is required"); return; }
-    if (newNiches.length === 0) { toast.error("Select at least one niche"); return; }
-    if (!newBudget || Number(newBudget) <= 0) { toast.error("Enter a valid budget"); return; }
-    if (newContentFormats.length === 0) { toast.error("Select at least one content format"); return; }
+    if (!newTitle.trim()) { toast.error("Your post needs a title"); return; }
+    if (!newDescription.trim()) { toast.error("Add a description so creators know what you're looking for"); return; }
+    if (newNiches.length === 0) { toast.error("Pick at least one niche to target the right creators"); return; }
+    if (!newBudget || Number(newBudget) <= 0) { toast.error("Set a budget — creators want to know what you're offering"); return; }
+    if (newContentFormats.length === 0) { toast.error("Choose at least one content format"); return; }
 
     setCreating(true);
     try {
@@ -191,7 +191,7 @@ function CampaignsContent() {
       setCampaigns(prev => [campaign, ...prev]);
       setShowCreateForm(false);
       resetForm();
-      toast.success("Post created as draft!");
+      toast.success("Draft saved! Publish it when you're ready to go live");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to create post");
     } finally {
@@ -220,7 +220,7 @@ function CampaignsContent() {
       });
       if (!res.ok) throw new Error("Failed to publish");
       setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: "ACTIVE", publishedAt: new Date().toISOString() } : c));
-      toast.success("Post published!");
+      toast.success("Your post is live! Creators can now discover it");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to publish");
     } finally {
@@ -238,7 +238,7 @@ function CampaignsContent() {
       });
       if (!res.ok) throw new Error("Failed to pause");
       setCampaigns(prev => prev.map(c => c.id === campaignId ? { ...c, status: "PAUSED" } : c));
-      toast.success("Post paused");
+      toast.success("Post paused — you can unpause it anytime");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to pause");
     } finally {
@@ -258,10 +258,10 @@ function CampaignsContent() {
       const result = await res.json();
       setApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
       if (status === "ACCEPTED" && result.deal) {
-        toast.success(`Application accepted! Deal created. Redirecting...`);
+        toast.success("Nice pick! Deal created — taking you there now...");
         setTimeout(() => router.push(`/dashboard/brand/deals/${result.deal.id}`), 1500);
       } else {
-        toast.success(`Application ${status.toLowerCase()}`);
+        toast.success(status === "ACCEPTED" ? "Application accepted!" : "Application declined");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Action failed");
@@ -301,7 +301,7 @@ function CampaignsContent() {
                 <CardDescription className="text-gray-500">{selectedCampaign.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                   <div>
                     <span className="text-sm text-gray-500">Budget</span>
                     <p className="font-semibold text-gray-900">Up to {formatINR(Number(selectedCampaign.budget))}</p>
@@ -372,15 +372,15 @@ function CampaignsContent() {
                   </div>
                 ) : applications.length === 0 ? (
                   <p className="text-gray-500 text-sm text-center py-8">
-                    No applications yet. {selectedCampaign.status === "DRAFT" && "Publish this post to start receiving applications."}
+                    No applications yet. {selectedCampaign.status === "DRAFT" && "Hit publish and creators will start rolling in."}
                   </p>
                 ) : (
                   <div className="space-y-4">
                     {applications.map((app) => (
                       <div key={app.id} className="border rounded-xl p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
                               <h4 className="font-semibold text-gray-900">
                                 {app.applicant?.creatorProfile?.name || app.applicant?.email || "Creator"}
                               </h4>
@@ -409,7 +409,7 @@ function CampaignsContent() {
                           </div>
 
                           {app.status === "PENDING" && (
-                            <div className="flex gap-2 shrink-0">
+                            <div className="flex gap-2 shrink-0 w-full sm:w-auto">
                               <Button
                                 size="sm"
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1"
@@ -457,7 +457,7 @@ function CampaignsContent() {
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="text-gray-900">Create New Post</CardTitle>
-                <CardDescription>Define your campaign requirements to find the perfect creators</CardDescription>
+                <CardDescription>Tell creators exactly what you need — the more detail, the better pitches you get</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 {/* Title */}
@@ -472,7 +472,7 @@ function CampaignsContent() {
                   <textarea
                     value={newDescription}
                     onChange={e => setNewDescription(e.target.value)}
-                    placeholder="Describe what you're looking for..."
+                    placeholder="What's the collab about? Be specific — creators love knowing exactly what you need..."
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0E61FF]/20 focus:border-[#0E61FF] min-h-[100px] resize-y"
                   />
                 </div>
@@ -549,7 +549,7 @@ function CampaignsContent() {
                 </div>
 
                 {/* Follower Range */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1.5 block">Min Followers</label>
                     <Input type="number" value={newMinFollowers} onChange={e => setNewMinFollowers(e.target.value)} className="rounded-xl" placeholder="0" min="0" />
@@ -603,7 +603,7 @@ function CampaignsContent() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Posts</h1>
             <p className="text-gray-500">Create and manage your brand campaigns</p>
           </div>
-          <Button className="bg-[#0E61FF] text-white hover:bg-[#0B4FD9] gap-2" onClick={() => setShowCreateForm(true)}>
+          <Button className="w-full sm:w-auto bg-[#0E61FF] text-white hover:bg-[#0B4FD9] gap-2" onClick={() => setShowCreateForm(true)}>
             <Plus className="w-4 h-4" /> Create New Post
           </Button>
         </AnimatedSection>
@@ -621,7 +621,7 @@ function CampaignsContent() {
                 <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Megaphone className="w-7 h-7 text-[#0E61FF]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet — time to create your first one!</h3>
                 <p className="text-gray-500 mb-6">Create your first post to start finding creators</p>
                 <Button className="bg-[#0E61FF] text-white hover:bg-[#0B4FD9] gap-2" onClick={() => setShowCreateForm(true)}>
                   <Plus className="w-4 h-4" /> Create Post

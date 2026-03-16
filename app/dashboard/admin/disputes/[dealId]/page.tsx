@@ -97,7 +97,7 @@ export default function DisputeDetailPage() {
       const data = await res.json();
       setDeal(data.deal);
     } catch {
-      toast.error("Failed to load dispute details");
+      toast.error("Couldn't load dispute details — try refreshing");
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export default function DisputeDetailPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Resolution failed");
       }
-      toast.success("Dispute resolved successfully");
+      toast.success("Dispute resolved — both parties have been notified");
       router.push("/dashboard/admin/disputes");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Resolution failed");
@@ -134,10 +134,10 @@ export default function DisputeDetailPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="animate-pulse max-w-7xl mx-auto">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-8" />
-          <div className="grid grid-cols-3 gap-6">
-            <div className="h-[600px] bg-gray-200 rounded-xl" />
-            <div className="h-[600px] bg-gray-200 rounded-xl" />
-            <div className="h-[600px] bg-gray-200 rounded-xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="h-[300px] lg:h-[600px] bg-gray-200 rounded-xl" />
+            <div className="h-[300px] lg:h-[600px] bg-gray-200 rounded-xl" />
+            <div className="h-[300px] lg:h-[600px] bg-gray-200 rounded-xl" />
           </div>
         </div>
       </div>
@@ -175,21 +175,21 @@ export default function DisputeDetailPage() {
             Back to Disputes
           </Link>
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{deal.title}</h1>
-              <p className="text-sm text-gray-500 mt-1">Deal ID: {deal.id}</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{deal.title}</h1>
+              <p className="text-sm text-gray-500 mt-1 break-all">Deal ID: {deal.id}</p>
             </div>
-            <div className="flex gap-3">
-              <div className="text-center p-3 bg-[#0E61FF] rounded-lg">
+            <div className="flex gap-2 sm:gap-3 flex-shrink-0">
+              <div className="text-center p-2 sm:p-3 bg-[#0E61FF] rounded-lg">
                 <Building2 className="w-4 h-4 text-white mx-auto mb-1" />
-                <p className="text-xs text-white font-medium">
+                <p className="text-[10px] sm:text-xs text-white font-medium">
                   {deal.brand.brandProfile?.companyName || deal.brand.email}
                 </p>
               </div>
-              <div className="text-center p-3 bg-amber-500 rounded-lg">
+              <div className="text-center p-2 sm:p-3 bg-amber-500 rounded-lg">
                 <User className="w-4 h-4 text-white mx-auto mb-1" />
-                <p className="text-xs text-white font-medium">
+                <p className="text-[10px] sm:text-xs text-white font-medium">
                   {deal.creator.creatorProfile?.name || deal.creator.email}
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function DisputeDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Pane: Chat & Script */}
           <AnimatedSection animation="animate-slide-up" delay={0}>
-            <Card className="bg-white shadow-md h-[600px] flex flex-col">
+            <Card className="bg-white shadow-md h-auto lg:h-[600px] flex flex-col">
               <CardHeader className="border-b border-gray-100 py-3 flex-shrink-0">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <MessageSquare className="w-4 h-4" />
@@ -281,7 +281,7 @@ export default function DisputeDetailPage() {
 
           {/* Center Pane: Video & Revisions */}
           <AnimatedSection animation="animate-slide-up" delay={100}>
-            <Card className="bg-white shadow-md h-[600px] flex flex-col">
+            <Card className="bg-white shadow-md h-auto lg:h-[600px] flex flex-col">
               <CardHeader className="border-b border-gray-100 py-3 flex-shrink-0">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Play className="w-4 h-4" />
@@ -359,7 +359,7 @@ export default function DisputeDetailPage() {
 
           {/* Right Pane: Financial Context & Resolution */}
           <AnimatedSection animation="animate-slide-up" delay={200}>
-            <Card className="bg-white shadow-md h-[600px] flex flex-col">
+            <Card className="bg-white shadow-md h-auto lg:h-[600px] flex flex-col">
               <CardHeader className="border-b border-gray-100 py-3 flex-shrink-0">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <DollarSign className="w-4 h-4" />
@@ -427,7 +427,7 @@ export default function DisputeDetailPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1.5 mb-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 mb-3">
                     {[
                       { value: "FAVOR_CREATOR", label: "Favor Creator", icon: <User className="w-4 h-4" />, active: "bg-amber-500 border-amber-500 text-white" },
                       { value: "FAVOR_BRAND", label: "Favor Brand", icon: <Building2 className="w-4 h-4" />, active: "bg-[#0E61FF] border-[#0E61FF] text-white" },

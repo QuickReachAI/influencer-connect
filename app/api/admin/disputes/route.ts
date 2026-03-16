@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { mediationService } from "@/lib/services/mediation.service";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 // Get all active disputes
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(

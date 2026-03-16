@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { socialEntityService } from '@/lib/services/social-entity.service';
 import { socialEntityCreateSchema } from '@/lib/validations';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 /** GET /api/social-entities — List creator's entities */
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const entities = await socialEntityService.listByUser(userId);
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 /** POST /api/social-entities — Add social entity (creator only) */
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const user = await prisma.user.findUnique({

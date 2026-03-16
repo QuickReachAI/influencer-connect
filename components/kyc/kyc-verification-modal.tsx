@@ -207,7 +207,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
         </div>
       )}
 
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
 
             {/* Consent */}
             <div>
-              <label className="flex items-start gap-3 cursor-pointer group">
+              <label className="flex items-start gap-3 cursor-pointer group min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={agreed}
@@ -307,7 +307,7 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
                     setAgreed(e.target.checked);
                     if (formErrors.agreed) setFormErrors(prev => ({ ...prev, agreed: "" }));
                   }}
-                  className="w-4 h-4 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0"
+                  className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0"
                 />
                 <span className="text-xs text-gray-600 group-hover:text-gray-900 transition-colors">
                   By submitting, I agree to the identity verification terms and consent to my Aadhaar and PAN details being verified through authorized government APIs.
@@ -380,8 +380,8 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
           <div className="p-4 sm:p-6 text-center">
             {result.success ? (
               <>
-                <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-10 h-10 text-emerald-500" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Identity Verified Successfully</h3>
                 <p className="text-gray-500 mb-2">
@@ -394,8 +394,8 @@ export function KYCVerificationModal({ userPhone, onClose }: KYCVerificationModa
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-                  <XCircle className="w-10 h-10 text-red-500" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                  <XCircle className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h3>
                 <p className="text-gray-500 mb-2">{result.error || "Please check your details and try again."}</p>

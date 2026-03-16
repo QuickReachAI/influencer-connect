@@ -44,7 +44,7 @@ export function ChatMessage({
   if (sender === "system") {
     return (
       <div className="flex justify-center px-4 py-2">
-        <div className="w-full max-w-lg rounded-xl bg-amber-50 px-4 py-2.5 text-center">
+        <div className="w-full max-w-[90%] sm:max-w-lg rounded-xl bg-amber-50 px-4 py-2.5 text-center">
           <div className="flex items-center justify-center gap-1.5">
             <ShieldAlert className="h-3.5 w-3.5 text-amber-600" />
             <span className="text-sm font-medium text-amber-700">
@@ -61,13 +61,13 @@ export function ChatMessage({
 
   return (
     <div
-      className={cn("flex flex-col gap-1 px-4 py-1.5", isSelf ? "items-end" : "items-start")}
+      className={cn("flex flex-col gap-1 px-3 sm:px-4 py-1.5", isSelf ? "items-end" : "items-start")}
     >
       <span className="text-xs font-medium text-gray-500">{senderName}</span>
 
       <div
         className={cn(
-          "relative max-w-[75%] break-words px-4 py-2.5 text-sm leading-relaxed",
+          "relative max-w-[85%] sm:max-w-[75%] break-words px-4 py-2.5 text-sm leading-relaxed",
           isSelf
             ? "rounded-2xl rounded-br-sm bg-[#0E61FF] text-white"
             : "rounded-2xl rounded-bl-sm bg-gray-100 text-gray-900",

@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import { escrowService } from "@/lib/services/escrow.service";
 import { taxService } from "@/lib/services/tax.service";
 import { paymentLimiter } from "@/lib/rate-limit";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 const paymentConfirmationSchema = z.object({
     razorpayPaymentId: z.string().min(1),
@@ -24,7 +25,7 @@ export async function POST(
             return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -63,10 +64,10 @@ export async function POST(
 
             order = await escrowService.initiateFirstPayment(dealId, userId);
         } else if (phase === '100') {
-            // Final 50% payment
-            if (!deal.filesUploaded) {
+            // Final 50% payment — brand must have approved deliverables first
+            if (deal.status !== 'PAYMENT_100_PENDING') {
                 return NextResponse.json(
-                    { error: 'Creator must upload files before final payment' },
+                    { error: 'Deliverables must be approved before final payment' },
                     { status: 400 }
                 );
             }
@@ -117,7 +118,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -205,7 +206,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {

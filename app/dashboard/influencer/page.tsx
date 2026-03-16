@@ -109,11 +109,11 @@ export default function InfluencerDashboard() {
         {/* Welcome Header */}
         <AnimatedSection animation="animate-fade-in">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-1 text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 text-gray-900">
               Welcome back, {displayName}!
             </h1>
             <p className="text-gray-500">
-              Here&apos;s an overview of your collaborations and earnings
+              Here&apos;s what&apos;s happening with your collabs and earnings
             </p>
           </div>
         </AnimatedSection>
@@ -128,8 +128,8 @@ export default function InfluencerDashboard() {
                     <ShieldCheck className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-amber-800">Complete KYC verification to unlock all features</p>
-                    <p className="text-xs text-amber-600">Verify your identity to start accepting deals and receiving payments.</p>
+                    <p className="text-sm font-semibold text-amber-800">Quick KYC check to unlock everything</p>
+                    <p className="text-xs text-amber-600">Verify your identity so you can start accepting deals and getting paid.</p>
                   </div>
                 </div>
                 <Link href="/dashboard/influencer/profile">
@@ -144,7 +144,7 @@ export default function InfluencerDashboard() {
         )}
 
         {/* Stat Cards Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <AnimatedSection animation="animate-slide-up" delay={0}>
             <Card className="shadow-sm hover:shadow-md transition-shadow border-none bg-[#0E61FF]">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -224,7 +224,7 @@ export default function InfluencerDashboard() {
 
         {/* Quick Actions Row */}
         <AnimatedSection animation="animate-slide-up" delay={320}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-8">
             <Link href="/dashboard/influencer/discover" className="group">
               <Card className="shadow-sm hover:shadow-md transition-all border-none bg-blue-50 group-hover:bg-blue-100">
                 <CardContent className="flex items-center gap-4 py-5">
@@ -292,14 +292,14 @@ export default function InfluencerDashboard() {
                 </div>
               ) : activeOrPendingDeals.length === 0 ? (
                 <p className="text-gray-500 text-sm py-4 text-center">
-                  No active or pending deals right now.
+                  No deals cooking right now — go discover some brand posts!
                 </p>
               ) : (
                 <div className="space-y-4">
                   {activeOrPendingDeals.map((deal) => (
                     <div
                       key={deal.id}
-                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border p-4 hover:bg-gray-50 transition-colors gap-3"
                     >
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-gray-900 truncate">
@@ -316,11 +316,11 @@ export default function InfluencerDashboard() {
                           </span>
                         </div>
                       </div>
-                      <Link href={`/dashboard/influencer/deals`}>
+                      <Link href={`/dashboard/influencer/deals`} className="w-full sm:w-auto">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="ml-4 shrink-0"
+                          className="w-full sm:w-auto sm:ml-4 shrink-0"
                         >
                           View Deal
                         </Button>
@@ -362,8 +362,7 @@ export default function InfluencerDashboard() {
               ) : (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <p className="text-sm text-gray-500">
-                    No accounts connected yet. Link your social profiles to
-                    attract more brands.
+                    No socials linked yet — connect your profiles to get on brands&apos; radar.
                   </p>
                   <Link href="/dashboard/influencer/profile">
                     <Button

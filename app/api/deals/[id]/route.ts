@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { dealUpdateSchema } from "@/lib/validations";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -85,7 +86,7 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -160,7 +161,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {

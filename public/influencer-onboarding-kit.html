@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickConnects — Influencer Onboarding Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;700;900&family=General+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0E61FF;
+    --blue-dark: #0A4FD4;
+    --blue-light: #E8F0FF;
+    --blue-glow: rgba(14, 97, 255, 0.15);
+    --ink: #0f1729;
+    --ink-soft: #3d4663;
+    --ink-muted: #6b7394;
+    --surface: #ffffff;
+    --surface-raised: #f6f8fc;
+    --surface-hover: #eef2f9;
+    --border: #e2e7f1;
+    --border-light: #f0f3f9;
+    --green: #10b981;
+    --green-bg: #ecfdf5;
+    --amber: #f59e0b;
+    --amber-bg: #fffbeb;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 1px 3px rgba(15,23,41,0.04), 0 1px 2px rgba(15,23,41,0.06);
+    --shadow-md: 0 4px 16px rgba(15,23,41,0.06), 0 1px 3px rgba(15,23,41,0.08);
+    --shadow-lg: 0 12px 40px rgba(15,23,41,0.08), 0 4px 12px rgba(15,23,41,0.05);
+    --shadow-blue: 0 4px 20px rgba(14,97,255,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'General Sans', -apple-system, sans-serif;
+    background: var(--surface-raised);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    background: var(--blue);
+    position: relative;
+    overflow: hidden;
+    padding: 60px 24px 80px;
+    text-align: center;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -80px;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    filter: blur(60px);
+  }
+  .hero-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    animation: fadeDown 0.6s ease;
+  }
+  .hero-logo-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .hero-logo-icon svg { width: 24px; height: 24px; }
+  .hero-logo-text {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    animation: fadeDown 0.6s ease 0.1s both;
+  }
+  .hero p {
+    font-size: 17px;
+    color: rgba(255,255,255,0.8);
+    max-width: 540px;
+    margin: 0 auto;
+    animation: fadeDown 0.6s ease 0.2s both;
+  }
+
+  /* ─── Navigation Tabs ─── */
+  .tab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    animation: fadeDown 0.5s ease 0.3s both;
+  }
+  .tab-btn {
+    font-family: 'General Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    background: none;
+    border: none;
+    padding: 16px 20px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--ink); }
+  .tab-btn.active { color: var(--blue); }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 12px; right: 12px;
+    height: 2.5px;
+    background: var(--blue);
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* ─── Main Layout ─── */
+  .main {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.35s ease; }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #d4dbed;
+  }
+  .card-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .card-label.reel { background: #fef3c7; color: #92400e; }
+  .card-label.story { background: #fce7f3; color: #9d174d; }
+  .card-label.post { background: #dbeafe; color: #1e40af; }
+  .card-label.form { background: var(--green-bg); color: #065f46; }
+  .card-label.whatsapp { background: #dcfce7; color: #166534; }
+  .card-label.tip { background: var(--amber-bg); color: #92400e; }
+
+  .card h3 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .card .subtitle {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin-bottom: 20px;
+  }
+
+  /* ─── Script Blocks ─── */
+  .script-block {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .script-block:last-child { margin-bottom: 0; }
+  .script-direction {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--blue);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .script-direction .dot {
+    width: 6px; height: 6px;
+    background: var(--blue);
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .script-text {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .script-text em {
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .on-screen {
+    display: inline-block;
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin: 3px 4px 3px 0;
+  }
+
+  /* ─── Form Questions ─── */
+  .form-question {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .form-question:last-child { border-bottom: none; }
+  .form-q-number {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+  .form-q-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .form-q-meta {
+    font-size: 13px;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .form-q-meta .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+  }
+  .form-q-meta .badge.required { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+  .form-q-options {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .form-q-options span {
+    font-size: 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: var(--ink-soft);
+  }
+
+  /* ─── WhatsApp Messages ─── */
+  .wa-message {
+    background: #dcf8c6;
+    border-radius: 12px 12px 12px 4px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    max-width: 92%;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .wa-message::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: -8px;
+    width: 0; height: 0;
+    border: 8px solid transparent;
+    border-right-color: #dcf8c6;
+    border-bottom-color: #dcf8c6;
+  }
+  .wa-message .wa-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #166534;
+    margin-bottom: 8px;
+  }
+  .wa-message .wa-text {
+    font-size: 14px;
+    color: #1a2e05;
+    line-height: 1.65;
+    white-space: pre-line;
+  }
+  .wa-message .wa-time {
+    font-size: 11px;
+    color: rgba(0,0,0,0.35);
+    text-align: right;
+    margin-top: 6px;
+  }
+  .wa-trigger {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    background: var(--surface-raised);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--green);
+  }
+
+  /* ─── Copy Button ─── */
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'General Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: 1px solid rgba(14,97,255,0.15);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+  }
+  .copy-btn:hover {
+    background: var(--blue);
+    color: #fff;
+    box-shadow: var(--shadow-blue);
+    transform: translateY(-1px);
+  }
+  .copy-btn.copied {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+  }
+  .copy-btn svg { width: 15px; height: 15px; }
+
+  /* ─── Tips Section ─── */
+  .tip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .tip-item {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .tip-item strong {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+  .tip-item p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── Section Headers ─── */
+  .section-header {
+    margin-bottom: 24px;
+  }
+  .section-header h2 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .section-header p {
+    font-size: 15px;
+    color: var(--ink-muted);
+  }
+
+  /* ─── Hashtags ─── */
+  .hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .hashtag {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: all;
+  }
+  .hashtag:hover {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  /* ─── Confirmation Card ─── */
+  .confirmation-box {
+    background: linear-gradient(135deg, var(--green-bg), #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .confirmation-box strong {
+    font-size: 13px;
+    color: #065f46;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .confirmation-box p {
+    font-size: 13px;
+    color: #047857;
+    line-height: 1.5;
+  }
+
+  /* ─── Animations ─── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 640px) {
+    .hero { padding: 44px 20px 60px; }
+    .tab-btn { padding: 14px 14px; font-size: 13px; }
+    .card { padding: 22px 18px; }
+    .main { padding: 24px 16px 60px; }
+    .wa-message { max-width: 100%; }
+  }
+
+  /* ─── Print ─── */
+  @media print {
+    .tab-bar { display: none; }
+    .section { display: block !important; page-break-inside: avoid; }
+    .hero { padding: 30px; }
+    .copy-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-logo">
+    <div class="hero-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <span class="hero-logo-text">QuickConnects</span>
+  </div>
+  <h1>Influencer Onboarding Kit</h1>
+  <p>Scripts, form questions, and WhatsApp templates — everything your partner influencers need to promote QuickConnects.</p>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('scripts')">Instagram Scripts</button>
+  <button class="tab-btn" onclick="switchTab('form')">Google Form</button>
+  <button class="tab-btn" onclick="switchTab('whatsapp')">WhatsApp Messages</button>
+  <button class="tab-btn" onclick="switchTab('tips')">Guidelines</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- ═══════════ SCRIPTS ═══════════ -->
+  <div id="scripts" class="section active">
+    <div class="section-header">
+      <h2>Instagram Scripts</h2>
+      <p>Three formats — Reel, Story series, and Post caption. Influencers pick what fits their style.</p>
+    </div>
+
+    <!-- Reel Script -->
+    <div class="card">
+      <div class="card-label reel">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Reel
+      </div>
+      <h3>30-45 Second Reel Script</h3>
+      <p class="subtitle">Best for reach and discovery — hook-driven format</p>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Hook — First 2 Seconds</div>
+        <p class="script-text">"Brands are literally paying creators right now — and most of you don't know where to find them."</p>
+      </div>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Main Body — Talking Head</div>
+        <p class="script-text">"So I found this platform called QuickConnects — it's basically where brands come to find creators like you and me for UGC, reels, product videos, reviews… all types of content.<br><br>Here's what's different though — your money goes into escrow the moment a deal is locked. That means you don't chase payments. You deliver, they approve, you get paid. Done.<br><br>Oh and they verify everyone — Aadhaar, PAN, the whole thing — so no fake brands, no scams.<br><br>Whether you have 1K followers or 100K, they're onboarding creators right now."</p>
+      </div>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>CTA — Text on Screen</div>
+        <p class="script-text">"I've got a link in my stories — fill out the form if you want in. They'll reach out to get you set up."</p>
+        <div style="margin-top: 10px;">
+          <span class="on-screen">Escrow-protected payments</span>
+          <span class="on-screen">KYC-verified brands</span>
+          <span class="on-screen">All niches welcome</span>
+          <span class="on-screen">Link in stories</span>
+        </div>
+      </div>
+
+      <button class="copy-btn" onclick="copyScript(this, 'reel')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Script
+      </button>
+    </div>
+
+    <!-- Story Script -->
+    <div class="card">
+      <div class="card-label story">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="20" rx="5"/></svg>
+        Story Series
+      </div>
+      <h3>3-4 Slide Story Series</h3>
+      <p class="subtitle">Best for engagement — interactive stickers and polls</p>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Story 1 — Poll Sticker</div>
+        <p class="script-text">"Be honest — have you ever made content for a brand and then had to BEG for payment?"<br><em>[Poll: Yes / Too many times]</em></p>
+      </div>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Story 2 — Talking Head or Text</div>
+        <p class="script-text">"QuickConnects fixes that. It's a creator-brand platform where your payment is locked in escrow BEFORE you start working. Brands post campaigns, you apply, and everything — chat, briefs, payments — happens on one platform. No DM negotiations. No ghosting."</p>
+      </div>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Story 3 — Link Sticker</div>
+        <p class="script-text">"They're onboarding new creators right now — every niche, every size. If you make content and want to get paid properly for it, fill out the form. They'll personally reach out to set you up."<br><em>[Link sticker → Google Form]</em></p>
+      </div>
+
+      <div class="script-block">
+        <div class="script-direction"><span class="dot"></span>Story 4 — Share Sticker</div>
+        <p class="script-text">"Send this to a creator friend who deserves to get paid on time."</p>
+      </div>
+
+      <button class="copy-btn" onclick="copyScript(this, 'story')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Script
+      </button>
+    </div>
+
+    <!-- Post Caption -->
+    <div class="card">
+      <div class="card-label post">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Post / Carousel
+      </div>
+      <h3>Post Caption</h3>
+      <p class="subtitle">Best for detail — carousel or single image with long-form caption</p>
+
+      <div class="script-block">
+        <p class="script-text">stopped chasing brands in DMs. here's what I'm doing instead.<br><br>found a platform called @quickconnects that actually makes brand deals simple — and safe.<br><br>here's how it works:<br>→ brands post campaigns on the platform<br>→ you browse and apply to ones that fit your vibe<br>→ deal gets locked, payment goes into escrow (yes, before you start)<br>→ you create, they approve, money hits your account<br><br>no more "we'll pay you in exposure." no more invoices on read.<br><br>they verify every brand and creator (Aadhaar + PAN) so you know who you're working with. plus built-in chat, contracts, everything in one place.<br><br>they're onboarding creators right now — doesn't matter if you're a nano creator or have a massive audience. UGC, reels, reviews, unboxings — all of it.<br><br>if you've been wanting to work with brands but didn't know where to start, this is it.<br><br>link in my bio to fill out the form — they'll reach out to get you started.</p>
+      </div>
+
+      <button class="copy-btn" onclick="copyScript(this, 'post')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Caption
+      </button>
+    </div>
+
+    <!-- Hashtags -->
+    <div class="card">
+      <h3>Suggested Hashtags</h3>
+      <p class="subtitle">Click to select — influencers can mix and match</p>
+      <div class="hashtags">
+        <span class="hashtag">#QuickConnects</span>
+        <span class="hashtag">#CreatorEconomy</span>
+        <span class="hashtag">#UGC</span>
+        <span class="hashtag">#BrandDeals</span>
+        <span class="hashtag">#GetPaidToCreate</span>
+        <span class="hashtag">#ContentCreator</span>
+        <span class="hashtag">#InfluencerLife</span>
+        <span class="hashtag">#UGCCreator</span>
+        <span class="hashtag">#BrandCollabs</span>
+        <span class="hashtag">#CreatorTools</span>
+      </div>
+      <button class="copy-btn" onclick="copyHashtags(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy All Hashtags
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ GOOGLE FORM ═══════════ -->
+  <div id="form" class="section">
+    <div class="section-header">
+      <h2>Google Form Questions</h2>
+      <p>Create your Google Form with these questions. Copy the full structure or individual questions.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label form">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        Form Setup
+      </div>
+      <h3>Join QuickConnects — Get Paid to Create Content for Brands</h3>
+      <p class="subtitle">Takes 2 minutes. We're onboarding creators of all sizes — UGC, reels, reviews, unboxings, you name it. Fill this out and we'll reach out to get you started.</p>
+
+      <div class="form-question">
+        <div class="form-q-number">Q1</div>
+        <div class="form-q-title">What's your name?</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Short answer</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q2</div>
+        <div class="form-q-title">Your Instagram handle</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Short answer</span>
+          <span style="font-size:12px; color:var(--ink-muted)">Placeholder: @yourhandle</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q3</div>
+        <div class="form-q-title">Do you have a YouTube channel?</div>
+        <div class="form-q-meta">
+          <span class="badge">Optional</span>
+          <span class="badge">Short answer</span>
+          <span style="font-size:12px; color:var(--ink-muted)">Placeholder: Channel name or link</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q4</div>
+        <div class="form-q-title">How many followers do you have across platforms?</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Dropdown</span>
+        </div>
+        <div class="form-q-options">
+          <span>Under 1K</span><span>1K – 5K</span><span>5K – 10K</span><span>10K – 50K</span><span>50K – 1L</span><span>1L – 5L</span><span>5L+</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q5</div>
+        <div class="form-q-title">What type of content do you create?</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Checkboxes</span>
+        </div>
+        <div class="form-q-options">
+          <span>UGC / Product reviews</span><span>Reels / Short-form</span><span>Unboxings</span><span>Tutorials</span><span>Lifestyle / Vlogs</span><span>Fashion & Beauty</span><span>Tech</span><span>Food</span><span>Fitness & Health</span><span>Other</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q6</div>
+        <div class="form-q-title">Have you done paid brand collaborations before?</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Multiple choice</span>
+        </div>
+        <div class="form-q-options">
+          <span>Yes, regularly</span><span>A few times</span><span>No, but I want to start</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q7</div>
+        <div class="form-q-title">What's your biggest challenge with brand deals right now?</div>
+        <div class="form-q-meta">
+          <span class="badge">Optional</span>
+          <span class="badge">Checkboxes</span>
+        </div>
+        <div class="form-q-options">
+          <span>Finding brands</span><span>Getting paid on time</span><span>Negotiating rates</span><span>Brands ghosting</span><span>Don't know where to start</span><span>Other</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q8</div>
+        <div class="form-q-title">Your WhatsApp number</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Short answer</span>
+          <span style="font-size:12px; color:var(--ink-muted)">We'll reach out here. Your number stays private.</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q9</div>
+        <div class="form-q-title">Your email address</div>
+        <div class="form-q-meta">
+          <span class="badge required">Required</span>
+          <span class="badge">Short answer</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q10</div>
+        <div class="form-q-title">How did you hear about QuickConnects?</div>
+        <div class="form-q-meta">
+          <span class="badge">Optional</span>
+          <span class="badge">Dropdown</span>
+        </div>
+        <div class="form-q-options">
+          <span>Instagram (from a creator)</span><span>YouTube</span><span>Friend / Word of mouth</span><span>Twitter / X</span><span>Other</span>
+        </div>
+      </div>
+
+      <div class="form-question">
+        <div class="form-q-number">Q11</div>
+        <div class="form-q-title">Anything else you want us to know?</div>
+        <div class="form-q-meta">
+          <span class="badge">Optional</span>
+          <span class="badge">Long answer</span>
+        </div>
+      </div>
+
+      <div class="confirmation-box">
+        <strong>Confirmation Message (after submit):</strong>
+        <p>"You're in. We'll reach out on WhatsApp within 24-48 hours to get you set up. In the meantime, follow @quickconnects on Instagram."</p>
+      </div>
+
+      <button class="copy-btn" onclick="copyScript(this, 'form')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy All Questions
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ WHATSAPP ═══════════ -->
+  <div id="whatsapp" class="section">
+    <div class="section-header">
+      <h2>WhatsApp Messages</h2>
+      <p>Copy-paste templates for each stage of the onboarding journey. Replace [Name] and personalize.</p>
+    </div>
+
+    <!-- Message 1 -->
+    <div class="card">
+      <div class="card-label whatsapp">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Message 1
+      </div>
+      <h3>Initial Outreach</h3>
+      <div class="wa-trigger">Send within 24-48 hours of form submission</div>
+      <div class="wa-message">
+        <div class="wa-label">You</div>
+        <div class="wa-text">Hey [Name]! This is [Your Name] from QuickConnects.
+
+Thanks for signing up — saw your profile and love your content.
+
+Quick intro: QuickConnects is where brands come to find creators for paid collabs — UGC, reels, reviews, all of it. Payments are escrow-protected so you always get paid, and every brand on the platform is verified.
+
+To get you started I just need 2 things:
+1. Sign up on quickconnects.in (choose "Creator" account)
+2. Complete the KYC verification (Aadhaar + PAN — takes 2 min)
+
+Once that's done, you can start browsing and applying to brand campaigns right away.
+
+Any questions? Happy to walk you through it.</div>
+        <div class="wa-time">Just now</div>
+      </div>
+      <button class="copy-btn" onclick="copyWA(this, 0)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Message
+      </button>
+    </div>
+
+    <!-- Message 2 -->
+    <div class="card">
+      <div class="card-label whatsapp">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Message 2
+      </div>
+      <h3>Follow-up (No Response)</h3>
+      <div class="wa-trigger">Send after 2 days if no reply</div>
+      <div class="wa-message">
+        <div class="wa-label">You</div>
+        <div class="wa-text">Hey [Name] — just following up. Did you get a chance to sign up?
+
+No rush — just wanted to make sure you don't miss out. We've got brands posting campaigns this week and creators are already picking them up.
+
+Here's the link again: quickconnects.in
+
+Let me know if you need help with anything.</div>
+        <div class="wa-time">Just now</div>
+      </div>
+      <button class="copy-btn" onclick="copyWA(this, 1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Message
+      </button>
+    </div>
+
+    <!-- Message 3 -->
+    <div class="card">
+      <div class="card-label whatsapp">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Message 3
+      </div>
+      <h3>Post-Signup Welcome</h3>
+      <div class="wa-trigger">Send after they complete KYC</div>
+      <div class="wa-message">
+        <div class="wa-label">You</div>
+        <div class="wa-text">You're all set [Name]! Your profile is live on QuickConnects.
+
+Here's what to do next:
+→ Complete your profile — add your best work, bio, and rates
+→ Head to "Discover" to browse active brand campaigns
+→ Apply to anything that fits your vibe — brands typically respond within 24-48 hours
+
+Pro tip: Creators with complete profiles and portfolio samples get 3x more brand interest.
+
+Welcome to QuickConnects — let's get you your first deal.</div>
+        <div class="wa-time">Just now</div>
+      </div>
+      <button class="copy-btn" onclick="copyWA(this, 2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Message
+      </button>
+    </div>
+
+    <!-- Message 4 -->
+    <div class="card">
+      <div class="card-label whatsapp">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        Message 4
+      </div>
+      <h3>Nudge for Inactive Creators</h3>
+      <div class="wa-trigger">7 days after signup, no applications submitted</div>
+      <div class="wa-message">
+        <div class="wa-label">You</div>
+        <div class="wa-text">Hey [Name]! Noticed you haven't applied to any campaigns yet.
+
+There are active campaigns right now that match your niche. Want me to send you a few that fit your profile?
+
+Sometimes the first one feels weird — but once you land your first paid collab through the platform, it clicks.</div>
+        <div class="wa-time">Just now</div>
+      </div>
+      <button class="copy-btn" onclick="copyWA(this, 3)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy Message
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ TIPS ═══════════ -->
+  <div id="tips" class="section">
+    <div class="section-header">
+      <h2>Guidelines & Tips</h2>
+      <p>Share these pointers with your influencer partners so they get the best results.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label tip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        For Influencers
+      </div>
+      <h3>Key Points to Always Hit</h3>
+      <p class="subtitle">No matter which format, these 3 things must come through:</p>
+      <div class="tip-grid">
+        <div class="tip-item">
+          <strong>1. Escrow-Protected Payments</strong>
+          <p>Money is locked before work begins — creators always get paid.</p>
+        </div>
+        <div class="tip-item">
+          <strong>2. All Creator Sizes Welcome</strong>
+          <p>1K or 100K — doesn't matter. Every niche, every audience size.</p>
+        </div>
+        <div class="tip-item">
+          <strong>3. Fill Out the Form</strong>
+          <p>Clear CTA — link in bio/stories to the Google Form.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label tip">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        WhatsApp Outreach
+      </div>
+      <h3>WhatsApp Best Practices</h3>
+      <div class="tip-grid">
+        <div class="tip-item">
+          <strong>Personalize</strong>
+          <p>Mention something specific about their content — "loved your recent skincare reel"</p>
+        </div>
+        <div class="tip-item">
+          <strong>Keep it Short</strong>
+          <p>WhatsApp is not email. 4-5 lines max per message.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Respond Fast</strong>
+          <p>If they reply, respond within a few hours. Speed = trust.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Don't Spam</strong>
+          <p>2 follow-ups max. If no response after that, let it go.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Match Their Language</strong>
+          <p>If they respond in Hindi or Hinglish, match that energy.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Be Human</strong>
+          <p>Don't sound like a template. Adapt the messages to feel natural.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label post">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Tone
+      </div>
+      <h3>Script Tone & Adaptation</h3>
+      <p class="subtitle">These scripts are written casual and Gen-Z friendly. Influencers should:</p>
+      <div class="tip-grid">
+        <div class="tip-item">
+          <strong>Use Their Own Voice</strong>
+          <p>Reword to match how they naturally talk on camera. The message stays, the delivery is theirs.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Keep It Authentic</strong>
+          <p>Don't read from a script — understand the points and speak naturally.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Add Personal Touch</strong>
+          <p>If they've had bad brand deal experiences, sharing that makes it more relatable.</p>
+        </div>
+        <div class="tip-item">
+          <strong>Stay Platform-Native</strong>
+          <p>Use trending audio for Reels, interactive stickers for Stories, carousel slides for Posts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Tab Switching ───
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Script Content for Copy ───
+const scripts = {
+  reel: `[HOOK — first 2 seconds, text on screen + spoken]
+
+"Brands are literally paying creators right now — and most of you don't know where to find them."
+
+[Cut to talking head or screen recording]
+
+"So I found this platform called QuickConnects — it's basically where brands come to find creators like you and me for UGC, reels, product videos, reviews… all types of content.
+
+Here's what's different though — your money goes into escrow the moment a deal is locked. That means you don't chase payments. You deliver, they approve, you get paid. Done.
+
+Oh and they verify everyone — Aadhaar, PAN, the whole thing — so no fake brands, no scams.
+
+Whether you have 1K followers or 100K, they're onboarding creators right now."
+
+[CTA — text on screen]
+
+"I've got a link in my stories — fill out the form if you want in. They'll reach out to get you set up."
+
+On-screen text overlays:
+• Escrow-protected payments
+• KYC-verified brands
+• All niches welcome
+• Link in stories`,
+
+  story: `STORY 1 (Poll sticker):
+"Be honest — have you ever made content for a brand and then had to BEG for payment?"
+[Poll: Yes / Too many times]
+
+STORY 2 (Talking head or text slide):
+"QuickConnects fixes that. It's a creator-brand platform where your payment is locked in escrow BEFORE you start working. Brands post campaigns, you apply, and everything — chat, briefs, payments — happens on one platform. No DM negotiations. No ghosting."
+
+STORY 3 (Key info + link sticker):
+"They're onboarding new creators right now — every niche, every size. If you make content and want to get paid properly for it, fill out the form. They'll personally reach out to set you up."
+[Link sticker → Google Form]
+
+STORY 4 (Share sticker):
+"Send this to a creator friend who deserves to get paid on time."`,
+
+  post: `stopped chasing brands in DMs. here's what I'm doing instead.
+
+found a platform called @quickconnects that actually makes brand deals simple — and safe.
+
+here's how it works:
+→ brands post campaigns on the platform
+→ you browse and apply to ones that fit your vibe
+→ deal gets locked, payment goes into escrow (yes, before you start)
+→ you create, they approve, money hits your account
+
+no more "we'll pay you in exposure." no more invoices on read.
+
+they verify every brand and creator (Aadhaar + PAN) so you know who you're working with. plus built-in chat, contracts, everything in one place.
+
+they're onboarding creators right now — doesn't matter if you're a nano creator or have a massive audience. UGC, reels, reviews, unboxings — all of it.
+
+if you've been wanting to work with brands but didn't know where to start, this is it.
+
+link in my bio to fill out the form — they'll reach out to get you started.`,
+
+  form: `GOOGLE FORM: Join QuickConnects — Get Paid to Create Content for Brands
+
+Description: Takes 2 minutes. We're onboarding creators of all sizes — UGC, reels, reviews, unboxings, you name it. Fill this out and we'll reach out to get you started.
+
+Q1. What's your name? [Required, Short answer]
+
+Q2. Your Instagram handle [Required, Short answer, Placeholder: @yourhandle]
+
+Q3. Do you have a YouTube channel? [Optional, Short answer, Placeholder: Channel name or link]
+
+Q4. How many followers do you have across platforms? [Required, Dropdown]
+  - Under 1K
+  - 1K – 5K
+  - 5K – 10K
+  - 10K – 50K
+  - 50K – 1 Lakh
+  - 1 Lakh – 5 Lakh
+  - 5 Lakh+
+
+Q5. What type of content do you create? [Required, Checkboxes]
+  - UGC / Product reviews
+  - Reels / Short-form video
+  - Unboxings
+  - Tutorials / How-to
+  - Lifestyle / Vlogs
+  - Fashion & Beauty
+  - Tech
+  - Food
+  - Fitness & Health
+  - Other
+
+Q6. Have you done paid brand collaborations before? [Required, Multiple choice]
+  - Yes, regularly
+  - A few times
+  - No, but I want to start
+
+Q7. What's your biggest challenge with brand deals right now? [Optional, Checkboxes]
+  - Finding brands to work with
+  - Getting paid on time
+  - Negotiating fair rates
+  - Brands ghosting after delivery
+  - Don't know where to start
+  - Other
+
+Q8. Your WhatsApp number [Required, Short answer]
+  Helper text: We'll reach out here to get you onboarded. Your number stays private.
+
+Q9. Your email address [Required, Short answer]
+
+Q10. How did you hear about QuickConnects? [Optional, Dropdown]
+  - Instagram (from a creator)
+  - YouTube
+  - Friend / Word of mouth
+  - Twitter / X
+  - Other
+
+Q11. Anything else you want us to know? [Optional, Long answer]
+
+CONFIRMATION MESSAGE: "You're in. We'll reach out on WhatsApp within 24-48 hours to get you set up. In the meantime, follow @quickconnects on Instagram."`
+};
+
+// ─── WhatsApp Messages ───
+const waMessages = [
+  `Hey [Name]! This is [Your Name] from QuickConnects.
+
+Thanks for signing up — saw your profile and love your content.
+
+Quick intro: QuickConnects is where brands come to find creators for paid collabs — UGC, reels, reviews, all of it. Payments are escrow-protected so you always get paid, and every brand on the platform is verified.
+
+To get you started I just need 2 things:
+1. Sign up on quickconnects.in (choose "Creator" account)
+2. Complete the KYC verification (Aadhaar + PAN — takes 2 min)
+
+Once that's done, you can start browsing and applying to brand campaigns right away.
+
+Any questions? Happy to walk you through it.`,
+
+  `Hey [Name] — just following up. Did you get a chance to sign up?
+
+No rush — just wanted to make sure you don't miss out. We've got brands posting campaigns this week and creators are already picking them up.
+
+Here's the link again: quickconnects.in
+
+Let me know if you need help with anything.`,
+
+  `You're all set [Name]! Your profile is live on QuickConnects.
+
+Here's what to do next:
+→ Complete your profile — add your best work, bio, and rates
+→ Head to "Discover" to browse active brand campaigns
+→ Apply to anything that fits your vibe — brands typically respond within 24-48 hours
+
+Pro tip: Creators with complete profiles and portfolio samples get 3x more brand interest.
+
+Welcome to QuickConnects — let's get you your first deal.`,
+
+  `Hey [Name]! Noticed you haven't applied to any campaigns yet.
+
+There are active campaigns right now that match your niche. Want me to send you a few that fit your profile?
+
+Sometimes the first one feels weird — but once you land your first paid collab through the platform, it clicks.`
+];
+
+// ─── Copy Functions ───
+function copyScript(btn, key) {
+  navigator.clipboard.writeText(scripts[key]).then(() => showCopied(btn));
+}
+
+function copyWA(btn, index) {
+  navigator.clipboard.writeText(waMessages[index]).then(() => showCopied(btn));
+}
+
+function copyHashtags(btn) {
+  const tags = '#QuickConnects #CreatorEconomy #UGC #BrandDeals #GetPaidToCreate #ContentCreator #InfluencerLife #UGCCreator #BrandCollabs #CreatorTools';
+  navigator.clipboard.writeText(tags).then(() => showCopied(btn));
+}
+
+function showCopied(btn) {
+  const original = btn.innerHTML;
+  btn.classList.add('copied');
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied`;
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = original;
+  }, 2000);
+}
+</script>
+</body>
+</html>

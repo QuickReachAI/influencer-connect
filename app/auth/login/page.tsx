@@ -7,30 +7,44 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Zap, Mail, Lock } from "lucide-react";
+import { Zap, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
+      toast.error("Oops, we need both email and password to let you in");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: trimmedEmail, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Login failed");
+        if (res.status === 429) {
+          toast.error("Whoa, slow down! Too many attempts — give it a sec and try again");
+        } else if (res.status === 401) {
+          toast.error("Hmm, that email or password doesn't match. Give it another shot?");
+        } else {
+          toast.error(data.error || "Login failed");
+        }
         return;
       }
 
@@ -47,17 +61,17 @@ export default function LoginPage() {
         localStorage.setItem("brandProfileComplete", hasRequired ? "true" : "false");
       }
 
-      toast.success("Welcome back!");
+      toast.success("You're back! Let's get to it");
       router.push(`/dashboard/${role}`);
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something broke on our end — try again in a bit");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0E61FF] flex items-center justify-center px-4 sm:px-6 py-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex items-center justify-center gap-2.5 mb-8 animate-fade-in">
           <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -86,8 +100,9 @@ export default function LoginPage() {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-base"
                       required
+                      autoComplete="email"
                     />
                   </div>
                 </div>
@@ -99,13 +114,22 @@ export default function LoginPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       id="password"
-                      type="password"
-                      placeholder="••••••••"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10 text-base"
                       required
+                      autoComplete="current-password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors w-11 h-11 flex items-center justify-center"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
                 <Button type="submit" className="w-full" loading={loading}>
@@ -116,7 +140,7 @@ export default function LoginPage() {
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-500">
                   Don&apos;t have an account?{" "}
-                  <Link href="/auth/signup" className="text-[#0E61FF] font-semibold hover:underline">
+                  <Link href="/auth/signup" className="text-[#0E61FF] font-semibold hover:underline py-2 inline-block">
                     Sign up
                   </Link>
                 </p>

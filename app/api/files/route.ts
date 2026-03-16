@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { fileService } from "@/lib/services/file.service";
 import { apiLimiter } from "@/lib/rate-limit";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 // Upload file for a deal
 export async function POST(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
 // Get files for a deal
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(

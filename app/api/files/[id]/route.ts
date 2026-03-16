@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fileService } from "@/lib/services/file.service";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 // Get download link for a file
 export async function GET(
@@ -7,7 +8,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: fileId } = await params;
 
         if (!userId) {

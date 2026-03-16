@@ -213,9 +213,9 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                   onClick={toggleNotifications}
                   aria-label="Notifications"
                 >
-                  <Bell className="w-4 h-4" />
+                  <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}
@@ -224,17 +224,26 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                 {notifOpen && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setNotifOpen(false)} />
-                    <div className="absolute right-0 top-full mt-2 z-40 w-[calc(100vw-2rem)] sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
-                      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                    {/* Mobile: fixed bottom-sheet style, Desktop: absolute dropdown */}
+                    <div className="fixed inset-x-4 top-[4.5rem] z-40 sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-xl">
                         <span className="text-sm font-semibold text-gray-900">Notifications</span>
-                        {unreadCount > 0 && (
+                        <div className="flex items-center gap-3">
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={markAllRead}
+                              className="text-xs text-[#0E61FF] hover:underline font-medium"
+                            >
+                              Mark all read
+                            </button>
+                          )}
                           <button
-                            onClick={markAllRead}
-                            className="text-xs text-[#0E61FF] hover:underline font-medium"
+                            onClick={() => setNotifOpen(false)}
+                            className="sm:hidden p-1 rounded-lg hover:bg-gray-100 text-gray-400"
                           >
-                            Mark all read
+                            <X className="w-4 h-4" />
                           </button>
-                        )}
+                        </div>
                       </div>
 
                       {notifLoading ? (
@@ -286,7 +295,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
           </div>
 
           {mobileOpen && (
-            <nav className="md:hidden pb-4 flex flex-col gap-1 animate-slide-down">
+            <nav className="md:hidden pb-4 pb-[env(safe-area-inset-bottom)] flex flex-col gap-1 animate-slide-down">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -296,7 +305,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start gap-2",
+                      "w-full justify-start gap-2 min-h-[44px] py-3",
                       pathname === item.href
                         ? "bg-[#0E61FF] text-white hover:bg-[#0B4FD9] hover:text-white"
                         : "text-gray-600"
@@ -319,8 +328,8 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
             <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3">
-                <p className="text-sm font-medium text-amber-800 truncate">
-                  Your profile is incomplete ({profileCompletion}%)
+                <p className="text-xs sm:text-sm font-medium text-amber-800 truncate">
+                  Profile {profileCompletion}% done — almost there!
                 </p>
                 <div className="hidden sm:flex items-center gap-2 flex-1 max-w-xs">
                   <div className="flex-1 h-2 bg-amber-200 rounded-full overflow-hidden">
@@ -332,7 +341,7 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
                   <span className="text-xs font-semibold text-amber-700 tabular-nums">{profileCompletion}%</span>
                 </div>
               </div>
-              <p className="text-xs text-amber-600 mt-0.5">Complete your profile to 100% to start {role === "brand" ? "posting and getting deals" : "discovering posts and getting deals"}.</p>
+              <p className="text-xs text-amber-600 mt-0.5">Finish setting up to {role === "brand" ? "start posting and landing deals" : "discover posts and land deals"}.</p>
             </div>
             {!isOnProfile && (
               <Link href={profileHref}>

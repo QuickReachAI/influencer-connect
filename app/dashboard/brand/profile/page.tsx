@@ -8,11 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SingleSelect, MultiSelect } from "@/components/ui/dropdown-select";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import {
   ArrowLeft, Building2, Globe, Save, Loader2,
   AlertTriangle, CheckCircle, ShieldCheck, Image,
-  FileCheck, Clock, Info, ChevronDown, X, Megaphone,
+  FileCheck, Clock, Info, X, Megaphone, Lock,
 } from "lucide-react";
 import { KYCVerificationModal } from "@/components/kyc/kyc-verification-modal";
 
@@ -35,6 +36,7 @@ const INDUSTRY_OPTIONS = [
 interface BrandProfileData {
   id: string;
   email: string;
+  phone?: string;
   role: string;
   kycStatus?: string;
   brandProfile?: {
@@ -66,14 +68,20 @@ function BrandProfileInner() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const [companyName, setCompanyName] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [description, setDescription] = useState("");
-  const [website, setWebsite] = useState("");
-  const [logo, setLogo] = useState("");
-  const [niches, setNiches] = useState<string[]>([]);
-  const [nicheDropdownOpen, setNicheDropdownOpen] = useState(false);
-  const [industryDropdownOpen, setIndustryDropdownOpen] = useState(false);
+  const [companyName, setCompanyNameRaw] = useState("");
+  const [industry, setIndustryRaw] = useState("");
+  const [description, setDescriptionRaw] = useState("");
+  const [website, setWebsiteRaw] = useState("");
+  const [logo, setLogoRaw] = useState("");
+  const [niches, setNichesRaw] = useState<string[]>([]);
+
+  // Wrap setters to mark form as dirty on user edits
+  const setCompanyName = (v: string) => { setCompanyNameRaw(v); setIsDirty(true); };
+  const setIndustry = (v: string) => { setIndustryRaw(v); setIsDirty(true); };
+  const setDescription = (v: string) => { setDescriptionRaw(v); setIsDirty(true); };
+  const setWebsite = (v: string) => { setWebsiteRaw(v); setIsDirty(true); };
+  const setLogo = (v: string) => { setLogoRaw(v); setIsDirty(true); };
+  const setNiches = (v: string[]) => { setNichesRaw(v); setIsDirty(true); };
   const [useCustomLogo, setUseCustomLogo] = useState(false);
 
   const [gstin, setGstin] = useState("");
@@ -81,6 +89,9 @@ function BrandProfileInner() {
   const [kybSubmitting, setKybSubmitting] = useState(false);
   const [kybToast, setKybToast] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [privacyConsentLocked, setPrivacyConsentLocked] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -98,20 +109,32 @@ function BrandProfileInner() {
       const user = data.user;
       setProfile(user);
       if (user.brandProfile) {
-        setCompanyName(user.brandProfile.companyName || "");
-        setIndustry(user.brandProfile.industry || "");
-        setDescription(user.brandProfile.description || "");
-        setWebsite(user.brandProfile.website || "");
+        setCompanyNameRaw(user.brandProfile.companyName || "");
+        setIndustryRaw(user.brandProfile.industry || "");
+        setDescriptionRaw(user.brandProfile.description || "");
+        setWebsiteRaw(user.brandProfile.website || "");
         const savedLogo = user.brandProfile.logo || "";
-        setLogo(savedLogo);
+        setLogoRaw(savedLogo);
         if (savedLogo && user.brandProfile.website) {
           const isAutoUrl = savedLogo.includes("logo.clearbit.com/") || savedLogo.includes("logo.dev/") || savedLogo.includes("google.com/s2/favicons");
           if (!isAutoUrl) setUseCustomLogo(true);
         }
-        if (user.brandProfile.niches) setNiches(user.brandProfile.niches);
+        const fetchedNiches = user.brandProfile.niches || [];
+        if (fetchedNiches.length > 0) setNichesRaw(fetchedNiches);
         if (user.brandProfile.gstin) setGstin(user.brandProfile.gstin);
         if (user.brandProfile.gstinVerified) setKybStatus("VERIFIED");
       }
+
+      // Load privacy consent from localStorage (lock if previously saved)
+      try {
+        const stored = localStorage.getItem("brandPrivacyConsent");
+        if (stored === "true") {
+          setPrivacyConsent(true);
+          setPrivacyConsentLocked(true);
+        }
+      } catch { /* ignore */ }
+
+      setIsDirty(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -179,6 +202,11 @@ function BrandProfileInner() {
   const effectiveLogo = useCustomLogo ? logo : (autoLogoStatus === "found" && autoLogoUrl ? autoLogoUrl : logo);
 
   // ── Completion score ──────────────────────────────────────
+  // Clear success banner when user starts editing again
+  useEffect(() => {
+    if (isDirty && success) setSuccess(false);
+  }, [isDirty, success]);
+
   const completionItems: CompletionItem[] = [
     { label: "Company Name", weight: 15, done: companyName.trim().length > 0 },
     { label: "Industry", weight: 10, done: industry.trim().length > 0 },
@@ -193,9 +221,6 @@ function BrandProfileInner() {
   const completionScore = completionItems.reduce((sum, item) => sum + (item.done ? item.weight : 0), 0);
   const isProfileComplete = completionScore >= 100;
 
-  const toggleNiche = (n: string) => {
-    setNiches(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n]);
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -211,6 +236,7 @@ function BrandProfileInner() {
       const w = website.trim();
       body.website = (w && w.includes(".") && !w.startsWith("http")) ? `https://${w}` : w;
       if (effectiveLogo) body.logo = effectiveLogo;
+      if (niches.length > 0) body.niches = niches;
 
       const res = await fetch("/api/auth/me", {
         method: "PUT",
@@ -225,9 +251,15 @@ function BrandProfileInner() {
 
       localStorage.setItem("brandNiches", JSON.stringify(niches));
       localStorage.setItem("brandProfileComplete", completionScore >= 100 ? "true" : "false");
+      localStorage.setItem("brandPrivacyConsent", privacyConsent ? "true" : "false");
+
+      // Mark as clean after successful save
+      setIsDirty(false);
+
+      // Lock privacy consent after save
+      if (privacyConsent) setPrivacyConsentLocked(true);
 
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
 
       if (redirectToCreate && completionScore >= 100) {
         setTimeout(() => router.push("/dashboard/brand/campaigns?create=true"), 1000);
@@ -286,8 +318,8 @@ function BrandProfileInner() {
               <CardContent className="py-4 flex items-center gap-3">
                 <Megaphone className="w-5 h-5 text-amber-600 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-amber-800">Complete your profile to create a post</p>
-                  <p className="text-xs text-amber-600">Fill in all required fields below. Complete your profile to 100% to start posting and getting deals.</p>
+                  <p className="text-sm font-semibold text-amber-800">Finish your profile to unlock posting</p>
+                  <p className="text-xs text-amber-600">Fill in the fields below to hit 100% — then you can create posts and start getting deals.</p>
                 </div>
               </CardContent>
             </Card>
@@ -296,7 +328,7 @@ function BrandProfileInner() {
 
         <AnimatedSection animation="animate-fade-in">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-          <p className="text-gray-500 mb-6">Manage your brand profile information</p>
+          <p className="text-gray-500 mb-6">Make your brand look good — this is what creators see</p>
         </AnimatedSection>
 
         {/* Profile Completion Score */}
@@ -321,7 +353,7 @@ function BrandProfileInner() {
               </div>
 
               {/* Checklist */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {completionItems.map(item => (
                   <div key={item.label} className="flex items-center gap-2">
                     {item.done ? (
@@ -339,7 +371,7 @@ function BrandProfileInner() {
               {completionScore < 100 && (
                 <p className="text-xs text-amber-600 mt-3 flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  Complete your profile to 100% to start posting and getting deals
+                  Almost there — hit 100% to start posting and getting deals
                 </p>
               )}
             </CardContent>
@@ -487,7 +519,7 @@ function BrandProfileInner() {
 
         <form onSubmit={handleSave}>
           {/* Company Info */}
-          <AnimatedSection animation="animate-slide-up" delay={200} className="mb-6">
+          <AnimatedSection animation="animate-slide-up" delay={200} className="mb-6 relative z-10">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-gray-900">
@@ -504,32 +536,12 @@ function BrandProfileInner() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-900 mb-1.5 block">Industry *</label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIndustryDropdownOpen(!industryDropdownOpen)}
-                      className="w-full flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm text-left hover:border-gray-300 transition-colors"
-                    >
-                      <span className={industry ? "text-gray-900" : "text-gray-400"}>
-                        {industry || "Select industry..."}
-                      </span>
-                      <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${industryDropdownOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    {industryDropdownOpen && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto animate-slide-down">
-                        {INDUSTRY_OPTIONS.map(opt => (
-                          <button
-                            key={opt}
-                            type="button"
-                            onClick={() => { setIndustry(opt); setIndustryDropdownOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${industry === opt ? "bg-blue-50 text-[#0E61FF] font-medium" : "text-gray-700"}`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <SingleSelect
+                    value={industry}
+                    onChange={setIndustry}
+                    options={INDUSTRY_OPTIONS}
+                    placeholder="Select industry..."
+                  />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-900 mb-1.5 block">Description *</label>
@@ -635,61 +647,58 @@ function BrandProfileInner() {
           </AnimatedSection>
 
           {/* Niche Categories */}
-          <AnimatedSection animation="animate-slide-up" delay={250} className="mb-6">
+          <AnimatedSection animation="animate-slide-up" delay={250} className="mb-6 relative z-10">
             <Card>
               <CardHeader>
                 <CardTitle className="text-gray-900">Niche Categories *</CardTitle>
                 <p className="text-sm text-gray-500">Select the categories relevant to your brand</p>
               </CardHeader>
               <CardContent>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setNicheDropdownOpen(!nicheDropdownOpen)}
-                    className="w-full flex items-center justify-between rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm text-left hover:border-gray-300 transition-colors"
-                  >
-                    <span className={niches.length > 0 ? "text-gray-900" : "text-gray-400"}>
-                      {niches.length > 0 ? niches.join(", ") : "Select niches..."}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${nicheDropdownOpen ? "rotate-180" : ""}`} />
-                  </button>
+                <MultiSelect
+                  values={niches}
+                  onChange={setNiches}
+                  options={NICHE_OPTIONS}
+                  placeholder="Select niches..."
+                />
+              </CardContent>
+            </Card>
+          </AnimatedSection>
 
-                  {nicheDropdownOpen && (
-                    <div className="absolute z-20 w-full mt-1 bg-white border-2 border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto animate-slide-down">
-                      {NICHE_OPTIONS.map(niche => (
-                        <label key={niche} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={niches.includes(niche)}
-                            onChange={() => toggleNiche(niche)}
-                            className="w-4 h-4 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF]"
-                          />
-                          <span className="text-sm text-gray-700">{niche}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {niches.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {niches.map(n => (
-                      <Badge key={n} variant="info" className="gap-1">
-                        {n}
-                        <button type="button" onClick={() => toggleNiche(n)} className="ml-1 hover:text-red-500"><X className="w-3 h-3" /></button>
-                      </Badge>
-                    ))}
+          {/* Privacy & Data Consent */}
+          <AnimatedSection animation="animate-slide-up" delay={300} className="mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-900">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-[#0E61FF]" />
                   </div>
-                )}
+                  Privacy & Data Consent
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <label className={`flex items-start gap-3 group ${privacyConsentLocked ? "cursor-default" : "cursor-pointer"}`}>
+                  <input
+                    type="checkbox"
+                    checked={privacyConsent}
+                    onChange={e => !privacyConsentLocked && setPrivacyConsent(e.target.checked)}
+                    disabled={privacyConsentLocked}
+                    className="w-5 h-5 rounded border-gray-300 text-[#0E61FF] focus:ring-[#0E61FF] mt-0.5 flex-shrink-0 disabled:opacity-60"
+                  />
+                  <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                    I consent to QuickConnects processing brand data and connecting with creators for campaign purposes.
+                    {privacyConsentLocked && <span className="block text-xs text-emerald-600 mt-1">Consent recorded</span>}
+                  </span>
+                </label>
               </CardContent>
             </Card>
           </AnimatedSection>
 
           {/* Submit */}
-          <div className="flex justify-end gap-3 pb-8">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pb-8">
             <Link href="/dashboard/brand">
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={saving} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90">
+            <Button type="submit" disabled={saving || !companyName.trim() || !privacyConsent || !isDirty} className="w-full sm:w-auto gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : <><Save className="w-4 h-4" />Save Changes</>}
             </Button>
           </div>
@@ -699,6 +708,7 @@ function BrandProfileInner() {
       {/* KYC Modal */}
       {kycModalOpen && (
         <KYCVerificationModal
+          userPhone={profile?.phone}
           onClose={() => {
             setKycModalOpen(false);
             fetchProfile();

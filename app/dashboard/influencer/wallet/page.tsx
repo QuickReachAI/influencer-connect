@@ -24,7 +24,6 @@ import {
   Clock,
   CheckCircle,
   IndianRupee,
-  FileText,
   ArrowLeft,
   Filter,
   X,
@@ -103,7 +102,7 @@ export default function WalletPage() {
           setTransactions(data.transactions ?? []);
         }
       } catch {
-        toast.error("Failed to load wallet data");
+        toast.error("Couldn't load your wallet — try refreshing");
       } finally {
         setLoading(false);
       }
@@ -121,11 +120,11 @@ export default function WalletPage() {
   const handleWithdraw = async () => {
     const amount = parseFloat(withdrawAmount);
     if (!amount || amount <= 0) {
-      toast.error("Please enter a valid amount.");
+      toast.error("Enter a valid amount to withdraw");
       return;
     }
     if (amount > wallet.balance) {
-      toast.error("Insufficient balance.");
+      toast.error("Not enough balance for that — check your available funds");
       return;
     }
     setWithdrawing(true);
@@ -139,7 +138,7 @@ export default function WalletPage() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Withdrawal failed");
       }
-      toast.success(`Withdrawal of ${formatCurrency(amount)} requested via Razorpay!`);
+      toast.success(`${formatCurrency(amount)} withdrawal initiated — money's on its way!`);
       setShowWithdraw(false);
       setWithdrawAmount("");
       setWallet((w) => ({ ...w, balance: w.balance - amount }));
@@ -197,7 +196,7 @@ export default function WalletPage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in">
           <div className="h-6 w-36 mb-6 rounded bg-gray-200 animate-pulse" />
           <div className="h-12 w-64 mb-8 rounded bg-gray-200 animate-pulse" />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-24 rounded-xl bg-gray-200 animate-pulse" />
             ))}
@@ -249,9 +248,9 @@ export default function WalletPage() {
         </Link>
 
         <AnimatedSection animation="animate-fade-in">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 Wallet & Earnings
               </h1>
               <p className="text-gray-500 mt-1">
@@ -260,7 +259,7 @@ export default function WalletPage() {
             </div>
             <Button
               onClick={() => setShowWithdraw(true)}
-              className="gap-2 bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white btn-premium"
+              className="gap-2 bg-[#0E61FF] hover:bg-[#0E61FF]/90 text-white btn-premium w-full sm:w-auto"
             >
               <ArrowUpFromLine className="w-4 h-4" />
               Withdraw Funds
@@ -269,7 +268,7 @@ export default function WalletPage() {
         </AnimatedSection>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {statCards.map((card, idx) => (
             <AnimatedSection
               key={card.label}
@@ -314,7 +313,7 @@ export default function WalletPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
                       ₹
@@ -324,7 +323,7 @@ export default function WalletPage() {
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       placeholder="Enter amount"
-                      className="pl-7"
+                      className="pl-7 text-base sm:text-sm"
                       min="1"
                       max={wallet.balance}
                     />
@@ -346,54 +345,16 @@ export default function WalletPage() {
           </AnimatedSection>
         )}
 
-        {/* Fee Breakdown */}
-        <AnimatedSection animation="animate-fade-in" delay={400} className="mb-8">
-          <Card className="bg-white shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-900 text-base">
-                <FileText className="w-4 h-4 text-gray-500" />
-                Fee Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Platform Fee
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Deducted from each deal
-                    </p>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">10%</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      TDS Deduction
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Tax deducted at source
-                    </p>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">1-2%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </AnimatedSection>
-
         {/* Transaction History */}
-        <AnimatedSection animation="animate-slide-up" delay={500}>
+        <AnimatedSection animation="animate-slide-up" delay={400}>
           <Card className="bg-white shadow-md">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <CardTitle className="flex items-center gap-2 text-gray-900">
                   <IndianRupee className="w-5 h-5" />
                   Transaction History
                 </CardTitle>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <Filter className="w-3.5 h-3.5 text-gray-400 mr-1" />
                   {(["ALL", "CREDIT", "WITHDRAWAL"] as FilterType[]).map(
                     (f) => (
@@ -430,7 +391,7 @@ export default function WalletPage() {
                   {filteredTransactions.map((txn, idx) => (
                     <div
                       key={txn.id}
-                      className={`flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors stagger-${Math.min(idx + 1, 6)}`}
+                      className={`flex items-center gap-2 sm:gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors stagger-${Math.min(idx + 1, 6)}`}
                     >
                       {transactionIcon(txn)}
                       <div className="flex-1 min-w-0">
@@ -441,7 +402,7 @@ export default function WalletPage() {
                           {formatDate(txn.createdAt)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                         {statusBadge(txn.status)}
                         <span
                           className={`text-sm font-bold tabular-nums ${

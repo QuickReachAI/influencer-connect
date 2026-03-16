@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { authService } from '@/lib/services/auth.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 const creatorUpdateSchema = z.object({
     name: z.string().min(2).max(100).optional(),
     bio: z.string().max(500).optional(),
-    avatar: z.string().url().optional(),
+    avatar: z.string().optional(),
     niche: z.string().max(500).optional(),
     socialPlatforms: z.array(z.object({
         platform: z.string(),
@@ -21,11 +22,12 @@ const brandUpdateSchema = z.object({
     description: z.string().max(1000).optional(),
     website: z.string().url().optional().or(z.literal('')),
     logo: z.string().url().optional(),
+    niches: z.array(z.string()).optional(),
 }).strict();
 
 export async function GET(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
 
         if (!userId) {
             return NextResponse.json(

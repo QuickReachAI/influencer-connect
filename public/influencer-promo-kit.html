@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuickConnects — Influencer Promo Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;700;900&family=General+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  :root {
+    --blue: #0E61FF;
+    --blue-dark: #0A4FD4;
+    --blue-light: #E8F0FF;
+    --ink: #0f1729;
+    --ink-soft: #3d4663;
+    --ink-muted: #6b7394;
+    --border: #e2e7f1;
+    --border-light: #f0f3f9;
+    --surface-raised: #f6f8fc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'General Sans', -apple-system, sans-serif;
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    background: #fff;
+  }
+
+  /* ─── Cover Page ─── */
+  .cover {
+    width: 100%;
+    height: 100vh;
+    min-height: 1120px;
+    background: var(--blue);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -150px; right: -100px;
+    width: 500px; height: 500px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+    filter: blur(100px);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -60px;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+  .cover-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-logo-icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .cover-logo-icon svg { width: 28px; height: 28px; }
+  .cover-logo-text {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .cover h1 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    margin-bottom: 20px;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+  }
+  .cover p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.75);
+    max-width: 440px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+  }
+  .cover-footer {
+    position: absolute;
+    bottom: 48px;
+    left: 0; right: 0;
+    text-align: center;
+    z-index: 1;
+  }
+  .cover-footer span {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.04em;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 20px;
+    border-radius: 30px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Content Pages ─── */
+  .page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 56px 64px;
+    page-break-after: always;
+    position: relative;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .page-header-logo {
+    width: 28px; height: 28px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-header-logo svg { width: 16px; height: 16px; }
+  .page-header-brand {
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .page-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  /* ─── Section Title ─── */
+  .section-title {
+    margin-bottom: 32px;
+  }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .section-label.reel { background: #fef3c7; color: #92400e; }
+  .section-label.story { background: #fce7f3; color: #9d174d; }
+  .section-label.post { background: #dbeafe; color: #1e40af; }
+  .section-label.guide { background: var(--blue-light); color: var(--blue-dark); }
+
+  .section-title h2 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: -0.025em;
+    margin-bottom: 6px;
+  }
+  .section-title p {
+    font-size: 15px;
+    color: var(--ink-muted);
+    max-width: 480px;
+  }
+
+  /* ─── Script Block ─── */
+  .script-block {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+  }
+  .script-direction {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--blue);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .script-direction .dot {
+    width: 6px; height: 6px;
+    background: var(--blue);
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .script-text {
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.75;
+  }
+  .script-text em {
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .on-screen {
+    display: inline-block;
+    background: var(--blue-light);
+    color: var(--blue-dark);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin: 3px 4px 3px 0;
+  }
+
+  /* ─── Tips Grid ─── */
+  .tip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .tip-item {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .tip-item strong {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+  .tip-item p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+  .tip-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  /* ─── Hashtags ─── */
+  .hashtags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .hashtag {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--blue);
+    background: var(--blue-light);
+    padding: 5px 14px;
+    border-radius: 20px;
+  }
+
+  /* ─── Key Points Box ─── */
+  .key-points {
+    background: linear-gradient(135deg, var(--blue-light), #dbeafe);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-top: 20px;
+  }
+  .key-points h4 {
+    font-family: 'Satoshi', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--blue-dark);
+    margin-bottom: 12px;
+  }
+  .key-points ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .key-points li {
+    font-size: 14px;
+    color: var(--ink-soft);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .key-points li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px;
+    width: 8px; height: 8px;
+    background: var(--blue);
+    border-radius: 50%;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  /* ─── Intro Text ─── */
+  .intro-block {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.75;
+    max-width: 520px;
+    margin-bottom: 32px;
+  }
+
+  /* ─── Footer ─── */
+  .page-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 64px; right: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+  }
+  .page-footer span {
+    font-size: 11px;
+    color: var(--ink-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COVER ═══════════ -->
+<div class="cover">
+  <div class="cover-logo">
+    <div class="cover-logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <span class="cover-logo-text">QuickConnects</span>
+  </div>
+  <div class="cover-badge">Influencer Partner Kit</div>
+  <h1>Instagram Promo Scripts</h1>
+  <p>Ready-to-use scripts for Reels, Stories, and Posts — plus guidelines to make every promo hit.</p>
+  <div class="cover-footer">
+    <span>Confidential — For Partner Influencers Only</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 1: INTRO + OVERVIEW ═══════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="page-header-brand">QuickConnects</span>
+    </div>
+    <span class="page-number">01</span>
+  </div>
+
+  <div class="section-title">
+    <h2>What You're Promoting</h2>
+  </div>
+
+  <p class="intro-block">
+    QuickConnects is a creator-brand collaboration platform built for India. Brands post campaigns, creators apply, and everything — negotiations, briefs, payments — happens in one place. No DMs, no chasing invoices, no scams.
+  </p>
+
+  <div class="key-points">
+    <h4>Three Things to Always Mention</h4>
+    <ul>
+      <li><strong>Escrow-Protected Payments</strong> — Money is locked the moment a deal is confirmed. Creators deliver, brands approve, payment is released. No chasing.</li>
+      <li><strong>Every Creator Size Welcome</strong> — 1K followers or 1 Lakh+, nano or macro — all niches, all audience sizes. If you make content, you're in.</li>
+      <li><strong>Clear CTA</strong> — Always direct people to the sign-up form link in your bio or stories. We'll handle the rest.</li>
+    </ul>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title" style="margin-bottom: 18px;">
+    <h2>What's Inside</h2>
+  </div>
+
+  <div class="tip-grid tip-grid-3">
+    <div class="tip-item">
+      <strong>Reel Script</strong>
+      <p>30-45 second hook-driven script optimized for reach and discovery.</p>
+    </div>
+    <div class="tip-item">
+      <strong>Story Series</strong>
+      <p>4-slide interactive story with polls, link stickers, and share prompts.</p>
+    </div>
+    <div class="tip-item">
+      <strong>Post Caption</strong>
+      <p>Long-form caption for carousel or single image posts.</p>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>QuickConnects — Influencer Promo Kit</span>
+    <span>Page 1</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 2: REEL SCRIPT ═══════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="page-header-brand">QuickConnects</span>
+    </div>
+    <span class="page-number">02</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-label reel">Reel Script</div>
+    <h2>30-45 Second Reel</h2>
+    <p>Hook-driven format — best for reach and discovery on Explore.</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Hook — First 2 Seconds</div>
+    <p class="script-text">"Brands are literally paying creators right now — and most of you don't know where to find them."</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Main Body — Talking Head or Screen Recording</div>
+    <p class="script-text">"So I found this platform called QuickConnects — it's basically where brands come to find creators like you and me for UGC, reels, product videos, reviews… all types of content.<br><br>Here's what's different though — your money goes into escrow the moment a deal is locked. That means you don't chase payments. You deliver, they approve, you get paid. Done.<br><br>Oh and they verify everyone — Aadhaar, PAN, the whole thing — so no fake brands, no scams.<br><br>Whether you have 1K followers or 100K, they're onboarding creators right now."</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>CTA — Text on Screen</div>
+    <p class="script-text">"I've got a link in my stories — fill out the form if you want in. They'll reach out to get you set up."</p>
+    <div style="margin-top: 10px;">
+      <span class="on-screen">Escrow-protected payments</span>
+      <span class="on-screen">KYC-verified brands</span>
+      <span class="on-screen">All niches welcome</span>
+      <span class="on-screen">Link in stories</span>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>QuickConnects — Influencer Promo Kit</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 3: STORY SCRIPT ═══════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="page-header-brand">QuickConnects</span>
+    </div>
+    <span class="page-number">03</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-label story">Story Series</div>
+    <h2>4-Slide Instagram Story</h2>
+    <p>Interactive format with polls and stickers — best for engagement.</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Story 1 — Poll Sticker</div>
+    <p class="script-text">"Be honest — have you ever made content for a brand and then had to BEG for payment?"<br><br><em>[Add Poll Sticker: Yes / Too many times]</em></p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Story 2 — Talking Head or Text Slide</div>
+    <p class="script-text">"QuickConnects fixes that. It's a creator-brand platform where your payment is locked in escrow BEFORE you start working. Brands post campaigns, you apply, and everything — chat, briefs, payments — happens on one platform. No DM negotiations. No ghosting."</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Story 3 — Link Sticker to Sign-up Form</div>
+    <p class="script-text">"They're onboarding new creators right now — every niche, every size. If you make content and want to get paid properly for it, fill out the form. They'll personally reach out to set you up."<br><br><em>[Add Link Sticker → Sign-up Form URL]</em></p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Story 4 — Share Prompt</div>
+    <p class="script-text">"Send this to a creator friend who deserves to get paid on time."<br><br><em>[Add Share Sticker / "Send to" prompt]</em></p>
+  </div>
+
+  <div class="page-footer">
+    <span>QuickConnects — Influencer Promo Kit</span>
+    <span>Page 3</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 4: POST CAPTION ═══════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="page-header-brand">QuickConnects</span>
+    </div>
+    <span class="page-number">04</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-label post">Post / Carousel</div>
+    <h2>Post Caption</h2>
+    <p>Long-form caption for carousel or single image posts — best for detail.</p>
+  </div>
+
+  <div class="script-block">
+    <div class="script-direction"><span class="dot"></span>Caption — Copy as-is or Adapt to Your Voice</div>
+    <p class="script-text">
+      stopped chasing brands in DMs. here's what I'm doing instead.<br><br>
+      found a platform called @quickconnects that actually makes brand deals simple — and safe.<br><br>
+      here's how it works:<br>
+      → brands post campaigns on the platform<br>
+      → you browse and apply to ones that fit your vibe<br>
+      → deal gets locked, payment goes into escrow (yes, before you start)<br>
+      → you create, they approve, money hits your account<br><br>
+      no more "we'll pay you in exposure." no more invoices on read.<br><br>
+      they verify every brand and creator (Aadhaar + PAN) so you know who you're working with. plus built-in chat, contracts, everything in one place.<br><br>
+      they're onboarding creators right now — doesn't matter if you're a nano creator or have a massive audience. UGC, reels, reviews, unboxings — all of it.<br><br>
+      if you've been wanting to work with brands but didn't know where to start, this is it.<br><br>
+      link in my bio to fill out the form — they'll reach out to get you started.
+    </p>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <strong style="font-size: 14px; color: var(--ink); display: block; margin-bottom: 10px;">Suggested Hashtags</strong>
+    <div class="hashtags">
+      <span class="hashtag">#QuickConnects</span>
+      <span class="hashtag">#CreatorEconomy</span>
+      <span class="hashtag">#UGC</span>
+      <span class="hashtag">#BrandDeals</span>
+      <span class="hashtag">#GetPaidToCreate</span>
+      <span class="hashtag">#ContentCreator</span>
+      <span class="hashtag">#InfluencerLife</span>
+      <span class="hashtag">#UGCCreator</span>
+      <span class="hashtag">#BrandCollabs</span>
+      <span class="hashtag">#CreatorTools</span>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>QuickConnects — Influencer Promo Kit</span>
+    <span>Page 4</span>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE 5: GUIDELINES ═══════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <span class="page-header-brand">QuickConnects</span>
+    </div>
+    <span class="page-number">05</span>
+  </div>
+
+  <div class="section-title">
+    <div class="section-label guide">Guidelines</div>
+    <h2>How to Deliver These Scripts</h2>
+    <p>Make it yours. Here's how to get the best results from each format.</p>
+  </div>
+
+  <div class="tip-grid">
+    <div class="tip-item">
+      <strong>Use Your Own Voice</strong>
+      <p>These are starting points, not teleprompter scripts. Reword everything to match how you naturally talk on camera. The message stays — the delivery is yours.</p>
+    </div>
+    <div class="tip-item">
+      <strong>Keep It Authentic</strong>
+      <p>Don't read from a script on camera. Understand the 3 key points and speak naturally. If you've had bad brand deal experiences, sharing that makes it more relatable.</p>
+    </div>
+    <div class="tip-item">
+      <strong>Stay Platform-Native</strong>
+      <p>Use trending audio for Reels. Use interactive stickers (polls, questions, links) for Stories. Use carousel slides with clear visuals for Posts.</p>
+    </div>
+    <div class="tip-item">
+      <strong>Always Include the CTA</strong>
+      <p>Every piece of content must direct people to the sign-up form — either via link in bio, link sticker in stories, or a clear verbal call-to-action.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section-title" style="margin-bottom: 18px;">
+    <h2>Format Cheat Sheet</h2>
+  </div>
+
+  <div class="tip-grid tip-grid-3">
+    <div class="tip-item" style="border-left: 3px solid #f59e0b;">
+      <strong>Reel</strong>
+      <p>30-45 seconds. Hook in first 2 sec. Talking head + text overlays. Use trending audio. Best for: reach.</p>
+    </div>
+    <div class="tip-item" style="border-left: 3px solid #ec4899;">
+      <strong>Story Series</strong>
+      <p>3-4 slides. Start with poll. End with link + share sticker. Best for: engagement + direct sign-ups.</p>
+    </div>
+    <div class="tip-item" style="border-left: 3px solid var(--blue);">
+      <strong>Post / Carousel</strong>
+      <p>Long caption with detail. Pair with carousel slides or screenshot. Best for: saves + shares.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="key-points" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #fcd34d;">
+    <h4 style="color: #92400e;">Do's and Don'ts</h4>
+    <ul>
+      <li style="color: #78350f;"><strong>Do</strong> mention escrow payments — it's the #1 thing that resonates with creators</li>
+      <li style="color: #78350f;"><strong>Do</strong> emphasize that all creator sizes are welcome (nano to macro)</li>
+      <li style="color: #78350f;"><strong>Do</strong> share your own brand deal frustrations if you have them — relatability wins</li>
+      <li style="color: #78350f;"><strong>Don't</strong> make it sound like an ad — keep it conversational and genuine</li>
+      <li style="color: #78350f;"><strong>Don't</strong> overpromise earnings or guaranteed brand deals</li>
+      <li style="color: #78350f;"><strong>Don't</strong> skip the CTA — every post must point to the sign-up form</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>QuickConnects — Influencer Promo Kit</span>
+    <span>Page 5</span>
+  </div>
+</div>
+
+</body>
+</html>

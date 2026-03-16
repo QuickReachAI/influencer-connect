@@ -74,7 +74,7 @@ export function VideoPlayer({
 
       {watermarked && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-          <span className="select-none text-3xl font-bold tracking-widest text-white/20 sm:text-5xl">
+          <span className="select-none text-xl font-bold tracking-widest text-white/20 sm:text-3xl md:text-5xl">
             DRAFT — WATERMARKED
           </span>
         </div>
@@ -91,7 +91,7 @@ export function VideoPlayer({
         </button>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 z-20 translate-y-full bg-gradient-to-t from-black/80 to-transparent px-4 pb-3 pt-8 transition-transform group-hover:translate-y-0">
+      <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 to-transparent px-4 pb-3 pt-8 transition-transform translate-y-0 [@media(hover:hover)]:translate-y-full [@media(hover:hover)]:group-hover:translate-y-0">
         {/* Progress bar */}
         <div
           className="mb-3 h-1 cursor-pointer rounded-full bg-white/30"

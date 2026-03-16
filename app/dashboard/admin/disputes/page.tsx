@@ -130,7 +130,7 @@ export default function DisputesPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Disputes List */}
                     <div className="space-y-4">
                         {disputes.map((dispute, index) => (
@@ -144,8 +144,8 @@ export default function DisputesPage() {
                                             : 'hover:shadow-lg'
                                     }`}
                                 >
-                                    <div className="flex justify-between items-start mb-3">
-                                        <h3 className="font-semibold text-lg text-gray-900">{dispute.title}</h3>
+                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
+                                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 break-words">{dispute.title}</h3>
                                         <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded font-medium">
                                             Disputed
                                         </span>
@@ -167,7 +167,7 @@ export default function DisputesPage() {
                                         <span className="text-gray-700">{dispute.disputeReason?.slice(0, 100)}...</span>
                                     </div>
 
-                                    <div className="mt-3 flex items-center justify-between text-sm text-gray-500">
+                                    <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-gray-500">
                                         <span>
                                             Deal Value: {new Intl.NumberFormat('en-IN', {
                                                 style: 'currency',
@@ -202,7 +202,7 @@ export default function DisputesPage() {
 
                     {/* Dispute Details & Resolution */}
                     {selectedDispute && (
-                        <AnimatedSection animation="animate-slide-up" className="bg-white rounded-lg shadow-md sticky top-8 overflow-hidden">
+                        <AnimatedSection animation="animate-slide-up" className="bg-white rounded-lg shadow-md lg:sticky lg:top-8 overflow-hidden">
                             <div className="p-6 bg-gray-900">
                                 <h2 className="text-xl font-bold text-white">{selectedDispute.title}</h2>
                                 <p className="text-white/60 text-sm">Deal ID: {selectedDispute.id}</p>
@@ -265,7 +265,7 @@ export default function DisputesPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 touch-manipulation">
                                             <button
                                                 onClick={() => setDecision('FAVOR_CREATOR')}
                                                 className={`p-3 rounded-lg border text-center transition-colors ${

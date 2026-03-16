@@ -88,7 +88,7 @@ export default function BrandDealsPage() {
         <AnimatedSection animation="animate-fade-in" className="mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Deals</h1>
-            <p className="text-gray-500">Track and manage your creator collaborations. Deals are created when you and a creator agree terms via chat on your posts.</p>
+            <p className="text-gray-500">All your creator collabs in one place. Deals get created when you and a creator agree on terms.</p>
           </div>
         </AnimatedSection>
 
@@ -128,8 +128,8 @@ export default function BrandDealsPage() {
                     <CardContent className="pt-6">
                       <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-semibold text-gray-900">{deal.title}</h3>
+                          <div className="flex flex-wrap items-center gap-3 mb-2">
+                            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">{deal.title}</h3>
                             <Badge
                               variant={getDealStatusBadgeVariant(deal.status)}
                               className="gap-1"
@@ -143,7 +143,7 @@ export default function BrandDealsPage() {
                             <p className="text-gray-500 mb-4">{deal.description}</p>
                           )}
 
-                          <div className="grid md:grid-cols-3 gap-4 mb-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                             <div>
                               <div className="text-sm text-gray-500">Creator</div>
                               <div className="font-medium text-gray-900">
@@ -170,9 +170,9 @@ export default function BrandDealsPage() {
                           </div>
                         </div>
 
-                        <div className="flex flex-col gap-2 ml-0 sm:ml-4">
+                        <div className="flex flex-col gap-2 ml-0 sm:ml-4 w-full sm:w-auto">
                           <Link href={`/dashboard/brand/deals/${deal.id}`}>
-                            <Button variant="outline" size="sm" className="transition-smooth">View Details</Button>
+                            <Button variant="outline" size="sm" className="w-full sm:w-auto transition-smooth">View Details</Button>
                           </Link>
                         </div>
                       </div>
@@ -186,7 +186,7 @@ export default function BrandDealsPage() {
               <AnimatedSection animation="animate-fade-in">
                 <Card className="shadow-md">
                   <CardContent className="py-12 text-center">
-                    <p className="text-gray-500 mb-4">No {filter !== "all" ? filter : ""} deals found.</p>
+                    <p className="text-gray-500 mb-4">No {filter !== "all" ? filter + " " : ""}deals here yet.</p>
                     <Link href="/dashboard/brand/campaigns">
                       <Button className="bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">Go to Posts</Button>
                     </Link>

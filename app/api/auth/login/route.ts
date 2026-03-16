@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authService } from '@/lib/services/auth.service';
 import { loginSchema } from '@/lib/validations';
 import { authLimiter } from '@/lib/rate-limit';
+import { signCookie } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
     try {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Set session cookie (in production, use proper JWT)
-        response.cookies.set('user_id', result.user!.id, {
+        response.cookies.set('user_id', signCookie(result.user!.id), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',

@@ -123,7 +123,7 @@ export default function ViewBrandProfilePage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-bold">{brand.companyName}</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold">{brand.companyName}</h1>
                   {brand.user?.kycStatus === "VERIFIED" && (
                     <Badge variant="default" className="gap-1">
                       <CheckCircle className="w-3 h-3" />
@@ -140,9 +140,9 @@ export default function ViewBrandProfilePage() {
 
                 <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                   {brand.website && (
-                    <a href={brand.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
-                      <Globe className="w-4 h-4" />
-                      {brand.website.replace(/^https?:\/\//, "")}
+                    <a href={brand.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors min-w-0">
+                      <Globe className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{brand.website.replace(/^https?:\/\//, "")}</span>
                     </a>
                   )}
                   {brand.location && (

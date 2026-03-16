@@ -109,8 +109,8 @@ async function main() {
       description:
         "Create 3 Instagram Reels showcasing our new Summer Glow SPF50 sunscreen. Each reel should be 30-60 seconds, shot in natural lighting, highlighting product texture and application.",
       totalAmount: 50000,
-      platformFee: 2500,
-      creatorPayout: 47500,
+      platformFee: 0,
+      creatorPayout: 50000,
       status: "SCRIPT_PENDING",
       scriptChecklist: [
         { item: "Reel 1: Product unboxing + first impressions", completed: false },

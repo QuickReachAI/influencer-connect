@@ -39,7 +39,7 @@ export default function BrandDiscoverPage() {
       <div className="container mx-auto px-4 py-8">
         <AnimatedSection animation="animate-fade-in" className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Influencers</h1>
-          <p className="text-gray-500">Find the perfect creators for your brand campaigns</p>
+          <p className="text-gray-500">Find creators who match your brand's vibe</p>
         </AnimatedSection>
 
         {/* Search and Filters */}
@@ -91,7 +91,7 @@ export default function BrandDiscoverPage() {
           Showing {filteredInfluencers.length} influencer{filteredInfluencers.length !== 1 ? "s" : ""}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredInfluencers.map((influencer, index) => (
             <AnimatedSection key={influencer.id} animation="animate-slide-up" delay={index * 100}>
               <Card className="shadow-md card-interactive group">
@@ -151,12 +151,12 @@ export default function BrandDiscoverPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Link href={`/dashboard/brand/influencers/${influencer.id}`} className="flex-1">
                       <Button className="w-full bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 transition-smooth">View Profile →</Button>
                     </Link>
-                    <Link href={`/dashboard/brand/deals/new?influencer=${influencer.id}`}>
-                      <Button className="bg-emerald-600 text-white hover:bg-emerald-600/90 transition-smooth">Propose Deal</Button>
+                    <Link href={`/dashboard/brand/deals/new?influencer=${influencer.id}`} className="flex-1 sm:flex-none">
+                      <Button className="w-full sm:w-auto bg-emerald-600 text-white hover:bg-emerald-600/90 transition-smooth">Propose Deal</Button>
                     </Link>
                   </div>
                 </CardContent>
@@ -169,7 +169,7 @@ export default function BrandDiscoverPage() {
           <AnimatedSection animation="animate-fade-in">
             <Card className="shadow-md">
               <CardContent className="py-12 text-center">
-                <p className="text-gray-500">No influencers found matching your criteria.</p>
+                <p className="text-gray-500">No creators matched those filters — try broadening your search.</p>
                 <Button
                   variant="outline"
                   className="mt-4 transition-smooth"

@@ -11,6 +11,7 @@ interface CreateEntityInput {
   engagementRate?: number;
   niche?: string[];
   categories?: string[];
+  isVerified?: boolean;
 }
 
 interface UpdateEntityInput {
@@ -20,6 +21,7 @@ interface UpdateEntityInput {
   categories?: string[];
   audienceDemographics?: any;
   portfolioItems?: any;
+  isVerified?: boolean;
 }
 
 export class SocialEntityService {
@@ -56,6 +58,7 @@ export class SocialEntityService {
         engagementRate: input.engagementRate ?? 0,
         niche: input.niche ?? [],
         categories: input.categories ?? [],
+        isVerified: input.isVerified ?? false,
         isActive: true,
       },
       create: {
@@ -66,6 +69,7 @@ export class SocialEntityService {
         engagementRate: input.engagementRate ?? 0,
         niche: input.niche ?? [],
         categories: input.categories ?? [],
+        isVerified: input.isVerified ?? false,
       },
     });
   }

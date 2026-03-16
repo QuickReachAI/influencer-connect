@@ -120,10 +120,10 @@ export default function FlaggedMessagesPage() {
 
       if (res.ok) {
         setMessages(messages.filter((m) => m.id !== messageId));
-        toast.success(`Action "${action}" applied successfully`);
+        toast.success(`Done — "${action}" applied`);
       } else {
         const data = await res.json();
-        toast.error(data.error || "Action failed");
+        toast.error(data.error || "That didn't work — try again");
       }
     } catch (error) {
       console.error("Error processing action:", error);
@@ -141,13 +141,13 @@ export default function FlaggedMessagesPage() {
         body: JSON.stringify({ messageId, action: "undo-redaction" }),
       });
       if (res.ok) {
-        toast.success("Redaction undone");
+        toast.success("Redaction undone — message restored");
         await fetchData();
       } else {
-        toast.error("Failed to undo redaction");
+        toast.error("Couldn't undo redaction — try again");
       }
     } catch {
-      toast.error("Failed to undo redaction");
+      toast.error("Couldn't undo redaction — try again");
     } finally {
       setProcessingId(null);
     }
@@ -162,17 +162,17 @@ export default function FlaggedMessagesPage() {
         body: JSON.stringify({ warningId, action: "un-shadow-block" }),
       });
       if (res.ok) {
-        toast.success("Shadow block removed");
+        toast.success("Shadow block lifted — user can message freely again");
         setWarnings((prev) =>
           prev.map((w) =>
             w.id === warningId ? { ...w, shadowBlocked: false } : w
           )
         );
       } else {
-        toast.error("Failed to remove shadow block");
+        toast.error("Couldn't remove shadow block — try again");
       }
     } catch {
-      toast.error("Failed to remove shadow block");
+      toast.error("Couldn't remove shadow block — try again");
     } finally {
       setProcessingId(null);
     }
@@ -261,7 +261,7 @@ export default function FlaggedMessagesPage() {
                 <AnimatedSection key={message.id} animation="animate-slide-up" delay={index * 80}>
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover-lift group">
                     <div className="p-4 border-b border-gray-100 bg-gray-900">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="flex items-center gap-3">
                           <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
                             message.sender.role === "CREATOR" ? "bg-amber-500" : "bg-[#0E61FF]"
@@ -279,7 +279,7 @@ export default function FlaggedMessagesPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="text-sm text-white/60">
+                        <div className="text-xs sm:text-sm text-white/60">
                           {new Date(message.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
                         </div>
                       </div>
@@ -313,7 +313,7 @@ export default function FlaggedMessagesPage() {
                         <button
                           onClick={() => handleAction(message.id, "dismiss")}
                           disabled={processingId === message.id}
-                          className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[40px]"
                         >
                           <CheckCircle className="h-4 w-4" />
                           Dismiss
@@ -321,7 +321,7 @@ export default function FlaggedMessagesPage() {
                         <button
                           onClick={() => handleAction(message.id, "warn")}
                           disabled={processingId === message.id}
-                          className="flex items-center gap-1 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[40px]"
                         >
                           <AlertTriangle className="h-4 w-4" />
                           Warn User
@@ -329,7 +329,7 @@ export default function FlaggedMessagesPage() {
                         <button
                           onClick={() => handleAction(message.id, "ban")}
                           disabled={processingId === message.id}
-                          className="flex items-center gap-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+                          className="flex items-center gap-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[40px]"
                         >
                           <Ban className="h-4 w-4" />
                           Ban User
@@ -338,7 +338,7 @@ export default function FlaggedMessagesPage() {
                           <button
                             onClick={() => handleUndoRedaction(message.id)}
                             disabled={processingId === message.id}
-                            className="flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[40px]"
                           >
                             <Undo2 className="h-4 w-4" />
                             Undo Redaction
@@ -346,7 +346,7 @@ export default function FlaggedMessagesPage() {
                         )}
                         <Link
                           href={`/dashboard/admin/disputes/${message.deal.id}`}
-                          className="flex items-center gap-1 px-3 py-2 bg-[#0E61FF] hover:bg-[#0B4FD9] text-white rounded-lg text-sm transition-colors ml-auto"
+                          className="flex items-center gap-1 px-3 py-2 bg-[#0E61FF] hover:bg-[#0B4FD9] text-white rounded-lg text-xs sm:text-sm transition-colors sm:ml-auto min-h-[40px]"
                         >
                           <Eye className="h-4 w-4" />
                           View Deal

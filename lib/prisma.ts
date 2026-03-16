@@ -1,44 +1,36 @@
-import type { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: any;
+  prisma: PrismaClient | undefined;
 };
 
-function createClient(): any {
+function createClient(): PrismaClient {
   if (!process.env.DATABASE_URL) {
-    const { createMockPrisma } = require("./mock-db");
-    return createMockPrisma();
+    throw new Error(
+      "DATABASE_URL environment variable is not set. " +
+        "Please configure your database connection in .env"
+    );
   }
-
-  const { PrismaClient: RealPrismaClient } = require("@prisma/client");
-  const { PrismaPg } = require("@prisma/adapter-pg");
-  const pg = require("pg");
 
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
   const adapter = new PrismaPg(pool);
 
-  return new RealPrismaClient({
+  return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 }
 
-let initialized = false;
+const prisma = globalForPrisma.prisma ?? createClient();
 
-const prisma: PrismaClient = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    if (!globalForPrisma.prisma) {
-      globalForPrisma.prisma = createClient();
-      if (!initialized) {
-        initialized = true;
-        if (!process.env.DATABASE_URL) {
-          console.log("[Mock Mode] Running without database — all data is in-memory");
-        }
-      }
-    }
-    return globalForPrisma.prisma[prop];
-  },
-});
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 
 export { prisma };
 export default prisma;

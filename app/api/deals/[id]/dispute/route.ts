@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { mediationService } from "@/lib/services/mediation.service";
 import { disputeSchema, disputeResolutionSchema } from "@/lib/validations";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 // Raise a dispute
 export async function POST(
@@ -9,7 +10,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -80,7 +81,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {
@@ -154,7 +155,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {

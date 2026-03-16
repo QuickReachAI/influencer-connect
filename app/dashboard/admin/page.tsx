@@ -114,7 +114,7 @@ export default function AdminDashboard() {
                 </AnimatedSection>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <AnimatedSection animation="animate-fade-in" delay={0}>
                         <Link
                             href="/dashboard/admin/disputes"
@@ -158,13 +158,13 @@ export default function AdminDashboard() {
                         <div className="bg-emerald-600 text-white p-4 rounded-lg flex items-center gap-3 hover-lift group">
                             <DollarSign className="h-6 w-6" />
                             <div>
-                                <div className="font-semibold">Revenue (30d)</div>
+                                <div className="font-semibold">Volume (30d)</div>
                                 <div className="text-2xl font-bold">
                                     {new Intl.NumberFormat('en-IN', {
                                         style: 'currency',
                                         currency: 'INR',
                                         maximumFractionDigits: 0
-                                    }).format(stats?.revenue.totalPlatformFee || 0)}
+                                    }).format(stats?.revenue.totalGross || 0)}
                                 </div>
                             </div>
                         </div>
@@ -172,7 +172,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Phase 6 Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                     <AnimatedSection animation="animate-fade-in" delay={400}>
                         <Link
                             href="/dashboard/admin/finance"
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Main Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
                     {/* Users Stats */}
                     <AnimatedSection animation="animate-slide-up" delay={0} className="rounded-lg shadow-md hover-lift overflow-hidden bg-white">
                         <div className="bg-[#0E61FF] p-4 flex items-center gap-3">
@@ -315,11 +315,11 @@ export default function AdminDashboard() {
                             <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
                                 <TrendingUp className="h-5 w-5 text-white" />
                             </div>
-                            <h3 className="text-lg font-semibold text-white">Revenue (30d)</h3>
+                            <h3 className="text-lg font-semibold text-white">Deal Volume (30d)</h3>
                         </div>
                         <div className="bg-white p-6 space-y-2">
                             <div className="flex justify-between">
-                                <span className="text-gray-500">Gross Volume</span>
+                                <span className="text-gray-500">Total Volume</span>
                                 <span className="font-semibold text-gray-900">
                                     {new Intl.NumberFormat('en-IN', {
                                         style: 'currency',
@@ -329,34 +329,12 @@ export default function AdminDashboard() {
                                 </span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-500">Platform Fee (5%)</span>
-                                <span className="font-semibold text-emerald-600">
-                                    {new Intl.NumberFormat('en-IN', {
-                                        style: 'currency',
-                                        currency: 'INR',
-                                        maximumFractionDigits: 0
-                                    }).format(stats?.revenue.totalPlatformFee || 0)}
-                                </span>
+                                <span className="text-gray-500">Total Deals</span>
+                                <span className="font-semibold text-emerald-600">{stats?.revenue.totalDeals || 0}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">GST Collected</span>
-                                <span className="font-semibold text-gray-900">
-                                    {new Intl.NumberFormat('en-IN', {
-                                        style: 'currency',
-                                        currency: 'INR',
-                                        maximumFractionDigits: 0
-                                    }).format(stats?.revenue.totalGST || 0)}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500">TDS Deducted</span>
-                                <span className="font-semibold text-gray-900">
-                                    {new Intl.NumberFormat('en-IN', {
-                                        style: 'currency',
-                                        currency: 'INR',
-                                        maximumFractionDigits: 0
-                                    }).format(stats?.revenue.totalTDS || 0)}
-                                </span>
+                            <div className="flex justify-between pt-2 border-t border-gray-100">
+                                <span className="text-gray-500">Platform Fees</span>
+                                <span className="font-semibold text-emerald-600">Free</span>
                             </div>
                         </div>
                     </AnimatedSection>

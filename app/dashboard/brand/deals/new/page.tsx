@@ -78,8 +78,6 @@ function CreateDealPageContent() {
   }, [fetchCreators]);
 
   const parsedAmount = parseFloat(amount) || 0;
-  const platformFee = parsedAmount * 0.05;
-  const creatorPayout = parsedAmount * 0.95;
 
   const filteredCreators = creators.filter(
     (c) =>
@@ -148,7 +146,7 @@ function CreateDealPageContent() {
 
         <AnimatedSection animation="animate-fade-in">
           <h1 className="text-3xl font-bold mb-2">Create New Deal</h1>
-          <p className="text-gray-500 mb-8">Propose a collaboration with a creator</p>
+          <p className="text-gray-500 mb-8">Set up a collab with a creator you like</p>
         </AnimatedSection>
 
         {error && (
@@ -226,7 +224,7 @@ function CreateDealPageContent() {
                           </button>
                         ))
                       ) : (
-                        <div className="p-3 text-sm text-gray-500 text-center">No creators found</div>
+                        <div className="p-3 text-sm text-gray-500 text-center">No creators matched — try a different search</div>
                       )}
                     </div>
                   )}
@@ -264,7 +262,7 @@ function CreateDealPageContent() {
                   className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0E61FF] min-h-[100px] resize-y"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the campaign goals, requirements, and expectations..."
+                  placeholder="What's the collab about? Share the goals, requirements, and what you expect..."
                 />
               </div>
             </CardContent>
@@ -302,19 +300,12 @@ function CreateDealPageContent() {
               </div>
 
               {parsedAmount > 0 && (
-                <div className="rounded-lg bg-gray-100/50 p-4 space-y-2 text-sm">
+                <div className="rounded-lg bg-emerald-50 p-4 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Total Amount</span>
-                    <span className="font-medium">₹{parsedAmount.toLocaleString()}</span>
+                    <span className="font-medium text-emerald-700">Creator gets the full amount</span>
+                    <span className="font-semibold text-emerald-600">₹{parsedAmount.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Platform Fee (5%)</span>
-                    <span>₹{platformFee.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-gray-200 pt-2">
-                    <span className="font-medium">Creator Payout</span>
-                    <span className="font-semibold text-emerald-600">₹{creatorPayout.toLocaleString()}</span>
-                  </div>
+                  <p className="text-xs text-emerald-600/70 mt-1">No platform fees — QuickConnects is free to use</p>
                 </div>
               )}
             </CardContent>
@@ -361,11 +352,11 @@ function CreateDealPageContent() {
           </AnimatedSection>
 
           {/* Submit */}
-          <AnimatedSection animation="animate-fade-in" delay={500} className="flex gap-3 justify-end">
+          <AnimatedSection animation="animate-fade-in" delay={500} className="flex flex-col sm:flex-row gap-3 justify-end">
             <Link href="/dashboard/brand/deals">
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
             </Link>
-            <Button type="submit" disabled={submitting || !selectedCreator || !title.trim() || parsedAmount <= 0} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 btn-premium">
+            <Button type="submit" disabled={submitting || !selectedCreator || !title.trim() || parsedAmount <= 0} className="w-full sm:w-auto gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 btn-premium">
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />

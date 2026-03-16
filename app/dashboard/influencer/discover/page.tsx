@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 import {
@@ -86,8 +86,6 @@ export default function InfluencerDiscoverPage() {
   // Filters
   const [selectedNiches, setSelectedNiches] = useState<Set<string>>(new Set());
   const [nicheDropdownOpen, setNicheDropdownOpen] = useState(false);
-  const [minBudget, setMinBudget] = useState("");
-  const [maxBudget, setMaxBudget] = useState("");
 
   // Proposal
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
@@ -108,7 +106,7 @@ export default function InfluencerDiscoverPage() {
         const res = await fetch("/api/social-entities");
         if (res.ok) {
           const data = await res.json();
-          const ents = Array.isArray(data) ? data : [];
+          const ents = data.entities ?? (Array.isArray(data) ? data : []);
           setEntities(ents);
           if (ents.length > 0) setSelectedEntityId(ents[0].id);
         }
@@ -135,26 +133,24 @@ export default function InfluencerDiscoverPage() {
 
         const params = new URLSearchParams({ entityId, page: String(page), pageSize: "20" });
         selectedNiches.forEach(n => params.append("niche", n));
-        if (minBudget) params.set("minBudget", minBudget);
-        if (maxBudget) params.set("maxBudget", maxBudget);
 
         const res = await fetch(`/api/campaigns?${params}`);
         if (res.ok) {
           const data = await res.json();
-          setCampaigns(data.campaigns || []);
-          setTotal(data.total || 0);
+          setCampaigns(data.data || data.campaigns || []);
+          setTotal(data.total || (data.data || data.campaigns || []).length);
         }
       } catch {
-        toast.error("Failed to load campaigns");
+        toast.error("Couldn't load posts right now — try refreshing");
       } finally {
         setLoading(false);
       }
     }
 
     fetchCampaigns();
-  }, [user, entities, selectedEntityId, selectedNiches, minBudget, maxBudget, page]);
+  }, [user, entities, selectedEntityId, selectedNiches, page]);
 
-  const hasActiveFilters = selectedNiches.size > 0 || minBudget !== "" || maxBudget !== "";
+  const hasActiveFilters = selectedNiches.size > 0;
 
   function toggleNiche(niche: string) {
     setSelectedNiches(prev => {
@@ -167,8 +163,6 @@ export default function InfluencerDiscoverPage() {
 
   function clearAllFilters() {
     setSelectedNiches(new Set());
-    setMinBudget("");
-    setMaxBudget("");
     setPage(1);
   }
 
@@ -189,15 +183,15 @@ export default function InfluencerDiscoverPage() {
 
   async function submitProposal(campaignId: string) {
     if (!selectedEntityId) {
-      toast.error("Please select an account to apply with.");
+      toast.error("Pick which account you want to apply with first");
       return;
     }
     if (!proposedRate || parseInt(proposedRate, 10) <= 0) {
-      toast.error("Please enter a valid proposed rate.");
+      toast.error("Drop in your rate — how much are you charging for this?");
       return;
     }
     if (pitchMessage.trim().length < 50) {
-      toast.error("Pitch message must be at least 50 characters.");
+      toast.error("Your pitch needs a bit more — at least 50 characters to stand out");
       return;
     }
 
@@ -226,7 +220,7 @@ export default function InfluencerDiscoverPage() {
       setExpandedPostId(null);
       setProposedRate("");
       setPitchMessage("");
-      toast.success("Proposal submitted successfully!");
+      toast.success("Proposal sent! Fingers crossed — the brand will review it soon");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit proposal");
     } finally {
@@ -251,10 +245,10 @@ export default function InfluencerDiscoverPage() {
           <Card className="shadow-sm bg-white rounded-xl max-w-lg mx-auto">
             <CardContent className="py-16 text-center">
               <LinkIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect a Social Account</h3>
-              <p className="text-gray-500 mb-6">You need at least one connected social account to discover posts.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Link your socials first</h3>
+              <p className="text-gray-500 mb-6">Connect at least one social account so we can match you with the right brand collabs.</p>
               <Button className="bg-[#0E61FF] text-white hover:bg-[#0B4FD9]" onClick={() => router.push("/dashboard/influencer/profile")}>
-                Go to Profile
+                Set up profile
               </Button>
             </CardContent>
           </Card>
@@ -271,9 +265,9 @@ export default function InfluencerDiscoverPage() {
         {/* Header */}
         <AnimatedSection animation="animate-fade-in">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Discover Posts</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Discover Posts</h1>
             <p className="text-gray-500 mt-1">
-              Browse brand opportunities that match your profile
+              Brand collabs that match your vibe — pick one and pitch
             </p>
           </div>
         </AnimatedSection>
@@ -322,8 +316,8 @@ export default function InfluencerDiscoverPage() {
 
                   {nicheDropdownOpen && (
                     <>
-                      <div className="fixed inset-0 z-10" onClick={() => setNicheDropdownOpen(false)} />
-                      <div className="absolute top-full left-0 mt-1 z-20 w-56 rounded-xl border border-gray-200 bg-white shadow-lg py-2 max-h-48 overflow-y-auto">
+                      <div className="fixed inset-0 z-40" onClick={() => setNicheDropdownOpen(false)} />
+                      <div className="absolute top-full left-0 mt-1 z-50 w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 bg-white shadow-xl py-2 max-h-48 overflow-y-auto">
                         {ALL_NICHES.map(niche => (
                           <label key={niche} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
                             <input
@@ -348,33 +342,6 @@ export default function InfluencerDiscoverPage() {
                       ))}
                     </div>
                   )}
-                </div>
-
-                {/* Budget range */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">Min ₹</span>
-                    <Input
-                      type="number"
-                      value={minBudget}
-                      onChange={e => { setMinBudget(e.target.value); setPage(1); }}
-                      className="pl-14 w-full sm:w-40 rounded-xl"
-                      placeholder="0"
-                      min="0"
-                    />
-                  </div>
-                  <span className="text-gray-300 hidden sm:inline">—</span>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">Max ₹</span>
-                    <Input
-                      type="number"
-                      value={maxBudget}
-                      onChange={e => { setMaxBudget(e.target.value); setPage(1); }}
-                      className="pl-14 w-full sm:w-40 rounded-xl"
-                      placeholder="∞"
-                      min="0"
-                    />
-                  </div>
                 </div>
 
                 {hasActiveFilters && (
@@ -490,7 +457,7 @@ export default function InfluencerDiscoverPage() {
                                 <select
                                   value={selectedEntityId}
                                   onChange={e => setSelectedEntityId(e.target.value)}
-                                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0E61FF]/20 focus:border-[#0E61FF]"
+                                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0E61FF]/20 focus:border-[#0E61FF]"
                                 >
                                   {entities.map(ent => (
                                     <option key={ent.id} value={ent.id}>
@@ -512,7 +479,7 @@ export default function InfluencerDiscoverPage() {
                                   value={proposedRate}
                                   onChange={e => setProposedRate(e.target.value)}
                                   placeholder="Enter your rate"
-                                  className="pl-8 rounded-xl"
+                                  className="pl-8 rounded-xl text-base sm:text-sm"
                                   min="0"
                                 />
                               </div>
@@ -526,8 +493,8 @@ export default function InfluencerDiscoverPage() {
                               <textarea
                                 value={pitchMessage}
                                 onChange={e => setPitchMessage(e.target.value)}
-                                placeholder="Tell the brand why you're a great fit for this post..."
-                                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E61FF]/20 focus:border-[#0E61FF] min-h-[80px] resize-y"
+                                placeholder="Why you? Tell the brand what makes you the perfect fit..."
+                                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0E61FF]/20 focus:border-[#0E61FF] min-h-[80px] resize-y"
                               />
                               <p className="text-[11px] text-gray-400 mt-1">
                                 {pitchMessage.trim().length}/50 characters
@@ -578,9 +545,9 @@ export default function InfluencerDiscoverPage() {
             <Card className="shadow-sm bg-white rounded-xl">
               <CardContent className="py-16 text-center">
                 <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium mb-1">No posts available</p>
+                <p className="text-gray-500 text-lg font-medium mb-1">Nothing here yet</p>
                 <p className="text-gray-400 text-sm mb-4">
-                  {hasActiveFilters ? "Try adjusting your filters to see more opportunities" : "Check back later for new brand opportunities"}
+                  {hasActiveFilters ? "Try tweaking your filters — there might be something just outside your range" : "New brand posts drop all the time — check back soon"}
                 </p>
                 {hasActiveFilters && (
                   <Button variant="outline" className="rounded-xl gap-1.5" onClick={clearAllFilters}>

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { oauthService } from '@/lib/services/oauth.service';
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.cookies.get('user_id')?.value;
+    const userId = getAuthUserId(request);
     if (!userId) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }

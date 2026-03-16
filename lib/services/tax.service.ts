@@ -25,28 +25,20 @@ interface Invoice {
 }
 
 export class TaxService {
-    private readonly PLATFORM_FEE_RATE = 0.05; // 5%
-    private readonly GST_RATE = 0.18; // 18% GST on platform services
-    private readonly TDS_RATE = 0.10; // 10% TDS for professional services (Section 194J)
+    private readonly PLATFORM_FEE_RATE = 0; // Free platform — no fees
+    private readonly GST_RATE = 0;
+    private readonly TDS_RATE = 0;
 
     /**
-     * Calculate all taxes for a deal
+     * Calculate taxes for a deal (currently no fees — free platform)
      */
     calculateTaxes(grossAmount: number): TaxCalculation {
-        // Platform fee (5% of gross amount)
-        const platformFee = grossAmount * this.PLATFORM_FEE_RATE;
-
-        // GST on platform fee (18%)
-        const gstOnPlatformFee = platformFee * this.GST_RATE;
-
-        // Creator's gross payout (95% of deal amount)
-        const creatorGross = grossAmount - platformFee;
-
-        // TDS deduction (10% of creator's gross)
-        const tds = creatorGross * this.TDS_RATE;
-
-        // Net payout to creator after TDS
-        const netCreatorPayout = creatorGross - tds;
+        // No platform fees for now
+        const platformFee = 0;
+        const gstOnPlatformFee = 0;
+        const creatorGross = grossAmount;
+        const tds = 0;
+        const netCreatorPayout = creatorGross;
 
         // Total brand pays (deal amount)
         const totalBrandPays = grossAmount;

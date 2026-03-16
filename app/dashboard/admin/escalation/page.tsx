@@ -95,34 +95,34 @@ export default function EscalationQueuePage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500">
                   <tr>
-                    <th className="px-4 py-3 text-left">Name</th>
-                    <th className="px-4 py-3 text-left">Email</th>
-                    <th className="px-4 py-3 text-left">Phone</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Registered</th>
-                    <th className="px-4 py-3 text-left">Actions</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Name</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden sm:table-cell">Email</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden md:table-cell">Phone</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Status</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden sm:table-cell">Registered</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {data?.pendingKYC.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium">{user.creatorProfile?.name || 'N/A'}</td>
-                      <td className="px-4 py-3">{user.email}</td>
-                      <td className="px-4 py-3">{user.phone}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-3 font-medium">{user.creatorProfile?.name || 'N/A'}</td>
+                      <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">{user.email}</td>
+                      <td className="px-3 sm:px-4 py-3 hidden md:table-cell">{user.phone}</td>
+                      <td className="px-3 sm:px-4 py-3">
                         <span className="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
                           {user.kycStatus}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500">
+                      <td className="px-3 sm:px-4 py-3 text-gray-500 hidden sm:table-cell">
                         {new Date(user.createdAt).toLocaleDateString('en-IN')}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button className="px-3 py-1 bg-emerald-600 text-white rounded text-xs hover:bg-emerald-700 transition-colors">
+                      <td className="px-3 sm:px-4 py-3">
+                        <div className="flex gap-1 sm:gap-2">
+                          <button className="px-2 sm:px-3 py-1 bg-emerald-600 text-white rounded text-xs hover:bg-emerald-700 transition-colors">
                             Approve
                           </button>
-                          <button className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors">
+                          <button className="px-2 sm:px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors">
                             Reject
                           </button>
                         </div>
@@ -153,21 +153,21 @@ export default function EscalationQueuePage() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500">
                   <tr>
-                    <th className="px-4 py-3 text-left">Company</th>
-                    <th className="px-4 py-3 text-left">Email</th>
-                    <th className="px-4 py-3 text-left">GSTIN</th>
-                    <th className="px-4 py-3 text-left">Filing Status</th>
-                    <th className="px-4 py-3 text-left">Registered</th>
-                    <th className="px-4 py-3 text-left">Actions</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Company</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden sm:table-cell">Email</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden md:table-cell">GSTIN</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Filing Status</th>
+                    <th className="px-3 sm:px-4 py-3 text-left hidden sm:table-cell">Registered</th>
+                    <th className="px-3 sm:px-4 py-3 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {data?.pendingKYB.map((brand) => (
                     <tr key={brand.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium">{brand.companyName}</td>
-                      <td className="px-4 py-3">{brand.user?.email}</td>
-                      <td className="px-4 py-3 font-mono text-xs">{brand.gstin || 'Not provided'}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-3 font-medium">{brand.companyName}</td>
+                      <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">{brand.user?.email}</td>
+                      <td className="px-3 sm:px-4 py-3 font-mono text-xs hidden md:table-cell">{brand.gstin || 'Not provided'}</td>
+                      <td className="px-3 sm:px-4 py-3">
                         <span className={`px-2 py-0.5 rounded text-xs ${
                           brand.gstinVerified
                             ? 'bg-emerald-100 text-emerald-700'
@@ -176,15 +176,15 @@ export default function EscalationQueuePage() {
                           {brand.filingStatus || (brand.gstin ? 'Unverified' : 'Missing GSTIN')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-500">
+                      <td className="px-3 sm:px-4 py-3 text-gray-500 hidden sm:table-cell">
                         {new Date(brand.user?.createdAt).toLocaleDateString('en-IN')}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button className="px-3 py-1 bg-[#0E61FF] text-white rounded text-xs hover:bg-[#0B4FD9] transition-colors">
+                      <td className="px-3 sm:px-4 py-3">
+                        <div className="flex gap-1 sm:gap-2">
+                          <button className="px-2 sm:px-3 py-1 bg-[#0E61FF] text-white rounded text-xs hover:bg-[#0B4FD9] transition-colors">
                             Verify
                           </button>
-                          <button className="px-3 py-1 bg-gray-200 text-gray-600 rounded text-xs hover:bg-gray-300 transition-colors">
+                          <button className="px-2 sm:px-3 py-1 bg-gray-200 text-gray-600 rounded text-xs hover:bg-gray-300 transition-colors">
                             Request Info
                           </button>
                         </div>

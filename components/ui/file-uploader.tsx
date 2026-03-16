@@ -238,15 +238,15 @@ export function FileUploader({
       onDragLeave={handleDragLeave}
       onClick={() => inputRef.current?.click()}
       className={cn(
-        "flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-6 py-10 transition-colors",
+        "flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-6 sm:px-6 sm:py-10 transition-colors",
         isDragOver
           ? "border-[#0E61FF] bg-blue-50"
           : "border-gray-300 bg-white hover:border-[#0E61FF]/50 hover:bg-gray-50",
         className,
       )}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-        <Upload className="h-5 w-5 text-gray-500" />
+      <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-gray-100">
+        <Upload className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
       </div>
       <div className="text-center">
         <p className="font-medium text-gray-900">

@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { chatService } from "@/lib/services/chat.service";
 import { scriptApprovalSchema } from "@/lib/validations";
+import { getAuthUserId } from '@/lib/auth-helpers';
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const userId = request.cookies.get('user_id')?.value;
+        const userId = getAuthUserId(request);
         const { id: dealId } = await params;
 
         if (!userId) {

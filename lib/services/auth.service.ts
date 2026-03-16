@@ -229,25 +229,30 @@ export class AuthService {
         }
 
         if (user.role === 'CREATOR') {
+            // Only include fields that are actually present in data
+            const updateData: Record<string, unknown> = {};
+            if (data.name !== undefined) updateData.name = data.name;
+            if (data.bio !== undefined) updateData.bio = data.bio;
+            if (data.avatar !== undefined) updateData.avatar = data.avatar;
+            if (data.niche !== undefined) updateData.niche = data.niche;
+            if (data.socialPlatforms !== undefined) updateData.socialPlatforms = data.socialPlatforms;
+
             return await prisma.creatorProfile.update({
                 where: { userId },
-                data: {
-                    name: data.name,
-                    bio: data.bio,
-                    avatar: data.avatar,
-                    socialPlatforms: data.socialPlatforms
-                }
+                data: updateData,
             });
         } else if (user.role === 'BRAND') {
+            const updateData: Record<string, unknown> = {};
+            if (data.companyName !== undefined) updateData.companyName = data.companyName;
+            if (data.industry !== undefined) updateData.industry = data.industry;
+            if (data.description !== undefined) updateData.description = data.description;
+            if (data.website !== undefined) updateData.website = data.website;
+            if (data.logo !== undefined) updateData.logo = data.logo;
+            if (data.niches !== undefined) updateData.niches = data.niches;
+
             return await prisma.brandProfile.update({
                 where: { userId },
-                data: {
-                    companyName: data.companyName,
-                    industry: data.industry,
-                    description: data.description,
-                    website: data.website,
-                    logo: data.logo
-                }
+                data: updateData,
             });
         }
     }
