@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
 import { apiLimiter } from "@/lib/rate-limit";
 
 const querySchema = z.object({
@@ -36,7 +35,7 @@ export async function GET(request: NextRequest) {
 
         const { industry, search, page, limit } = parsed.data;
 
-        const where: Prisma.BrandProfileWhereInput = {
+        const where: NonNullable<Parameters<typeof prisma.brandProfile.findMany>[0]>["where"] = {
             user: {
                 kycStatus: "VERIFIED",
                 isBanned: false,

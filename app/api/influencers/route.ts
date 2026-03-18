@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
 import { apiLimiter } from "@/lib/rate-limit";
 
 const querySchema = z.object({
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
         const { niche, platform, search, minFollowers, maxFollowers, page, limit } = parsed.data;
 
         // Use SocialEntity table for discovery instead of CreatorProfile JSON
-        const entityWhere: Prisma.SocialEntityWhereInput = {
+        const entityWhere: NonNullable<Parameters<typeof prisma.socialEntity.findMany>[0]>["where"] = {
             isActive: true,
             master: {
                 kycStatus: "VERIFIED",
