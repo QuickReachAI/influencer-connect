@@ -81,9 +81,12 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
   useEffect(() => {
     if (role !== "brand" && role !== "influencer") return;
 
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
+    const computeScore = async () => {
+      try {
+        const meRes = await fetch("/api/auth/me");
+        if (!meRes.ok) return;
+        const data = await meRes.json();
+
         if (role === "brand") {
           const bp = data.user?.brandProfile;
           if (!bp) { setProfileCompletion(0); return; }
@@ -93,12 +96,9 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
           if (bp.description && bp.description.length >= 20) score += 15;
           if (bp.website && bp.website.includes(".")) score += 10;
           if (bp.logo) score += 5;
-          // Use niches from API with localStorage fallback
-          const niches = (bp.niches && bp.niches.length > 0) ? bp.niches : (() => { try { return JSON.parse(localStorage.getItem("brandNiches") || "[]"); } catch { return []; } })();
-          if (niches.length > 0) score += 15;
+          if (bp.niches && bp.niches.length > 0) score += 15;
           if (data.user?.kycStatus === "VERIFIED") score += 10;
           if (bp.gstinVerified || bp.gstin) score += 20;
-          localStorage.setItem("brandProfileComplete", score >= 100 ? "true" : "false");
           setProfileCompletion(score);
         } else {
           const cp = data.user?.creatorProfile;
@@ -106,21 +106,28 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
           let score = 0;
           if (cp.name && cp.name.length >= 2) score += 15;
           if (cp.bio && cp.bio.length >= 20) score += 15;
-          // Parse niches from API (comma-separated string) with localStorage fallback
-          const nicheStr = cp.niche || "";
-          const niches = nicheStr ? nicheStr.split(",").map((s: string) => s.trim()).filter(Boolean) : (() => { try { return JSON.parse(localStorage.getItem("infNiches") || "[]"); } catch { return []; } })();
+          // Niches from API (comma-separated string)
+          const niches = cp.niche ? cp.niche.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
           if (niches.length > 0) score += 15;
-          // Social entities: check connected status, not just existence
-          const entities = (() => { try { return JSON.parse(localStorage.getItem("infEntities") || "[]"); } catch { return []; } })();
-          if (entities.some((e: any) => e.connected && e.handle?.trim().length > 0)) score += 30;
+          // Fetch social entities from API
+          try {
+            const entRes = await fetch("/api/social-entities");
+            if (entRes.ok) {
+              const entData = await entRes.json();
+              const entities = entData.entities ?? [];
+              if (entities.some((e: any) => e.isVerified && e.handle?.trim().length > 0)) score += 30;
+            }
+          } catch { /* ignore */ }
           if (data.user?.kycStatus === "VERIFIED") score += 15;
+          // Privacy consent from localStorage (no API field for this)
           const privacyConsent = localStorage.getItem("infPrivacyConsent") === "true";
           if (privacyConsent) score += 10;
-          localStorage.setItem("infProfileComplete", score >= 100 ? "true" : "false");
           setProfileCompletion(score);
         }
-      })
-      .catch(() => {});
+      } catch { /* ignore */ }
+    };
+
+    computeScore();
   }, [role, pathname]);
 
   const brandNavItems: NavItem[] = [
