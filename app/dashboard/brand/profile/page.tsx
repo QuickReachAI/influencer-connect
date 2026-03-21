@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
@@ -92,6 +92,9 @@ function BrandProfileInner() {
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [privacyConsentLocked, setPrivacyConsentLocked] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const initialLoadRef = useRef(true);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -121,8 +124,10 @@ function BrandProfileInner() {
         }
         const fetchedNiches = user.brandProfile.niches || [];
         if (fetchedNiches.length > 0) setNichesRaw(fetchedNiches);
-        if (user.brandProfile.gstin) setGstin(user.brandProfile.gstin);
-        if (user.brandProfile.gstinVerified) setKybStatus("VERIFIED");
+        if (user.brandProfile.gstin) {
+          setGstin(user.brandProfile.gstin);
+          setKybStatus(user.brandProfile.gstinVerified ? "VERIFIED" : "PENDING");
+        }
       }
 
       // Load privacy consent from localStorage (lock if previously saved)
@@ -135,6 +140,8 @@ function BrandProfileInner() {
       } catch { /* ignore */ }
 
       setIsDirty(false);
+      // Allow auto-save after initial load completes
+      setTimeout(() => { initialLoadRef.current = false; }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -200,6 +207,52 @@ function BrandProfileInner() {
   };
 
   const effectiveLogo = useCustomLogo ? logo : (autoLogoStatus === "found" && autoLogoUrl ? autoLogoUrl : logo);
+
+  // ── Auto-save with 1.5s debounce ──────────────────────────
+  useEffect(() => {
+    if (initialLoadRef.current) return;
+    if (!isDirty) return;
+    if (!companyName.trim() || !privacyConsent) return;
+
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      try {
+        const body: Record<string, unknown> = {};
+        if (companyName.trim()) body.companyName = companyName.trim();
+        if (industry.trim()) body.industry = industry.trim();
+        if (description.trim()) body.description = description.trim();
+        const w = website.trim();
+        body.website = (w && w.includes(".") && !w.startsWith("http")) ? `https://${w}` : w;
+        if (effectiveLogo) body.logo = effectiveLogo;
+        if (niches.length > 0) body.niches = niches;
+
+        const res = await fetch("/api/auth/me", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) throw new Error("Auto-save failed");
+
+        localStorage.setItem("brandNiches", JSON.stringify(niches));
+        localStorage.setItem("brandPrivacyConsent", privacyConsent ? "true" : "false");
+
+        setIsDirty(false);
+        setAutoSaveStatus("saved");
+        setTimeout(() => setAutoSaveStatus("idle"), 2000);
+      } catch {
+        setAutoSaveStatus("error");
+        setTimeout(() => setAutoSaveStatus("idle"), 3000);
+      }
+    }, 1500);
+
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companyName, industry, description, website, effectiveLogo, niches, isDirty, privacyConsent]);
 
   // ── Completion score ──────────────────────────────────────
   // Clear success banner when user starts editing again
@@ -437,7 +490,7 @@ function BrandProfileInner() {
                 {kybStatus === "VERIFIED" ? (
                   <Badge variant="success" className="gap-1"><ShieldCheck className="w-3 h-3" />Verified Brand</Badge>
                 ) : kybStatus === "PENDING" ? (
-                  <Badge variant="warning" className="gap-1"><Clock className="w-3 h-3" />Pending</Badge>
+                  <Badge variant="warning" className="gap-1"><Clock className="w-3 h-3" />Under Verification</Badge>
                 ) : (
                   <Badge variant="secondary">Not Started</Badge>
                 )}
@@ -462,13 +515,20 @@ function BrandProfileInner() {
                     className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
                     onClick={async () => {
                       setKybSubmitting(true);
+                      setError(null);
                       try {
-                        await new Promise(r => setTimeout(r, 800));
+                        const res = await fetch("/api/auth/kyb", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ gstin }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || "Verification failed");
                         setKybStatus("PENDING");
                         setKybToast(true);
                         setTimeout(() => setKybToast(false), 4000);
-                      } catch {
-                        setError("Verification failed");
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "GSTIN verification failed");
                       } finally {
                         setKybSubmitting(false);
                       }
@@ -493,7 +553,7 @@ function BrandProfileInner() {
             <Card className="border-emerald-200 bg-emerald-50 shadow-lg">
               <CardContent className="py-3 px-4 flex items-center gap-2 text-emerald-700">
                 <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm font-medium">GSTIN verification submitted! We&apos;ll verify within 24 hours.</span>
+                <span className="text-sm font-medium">GSTIN submitted for verification! Status: Under Verification.</span>
               </CardContent>
             </Card>
           </div>
@@ -694,13 +754,26 @@ function BrandProfileInner() {
           </AnimatedSection>
 
           {/* Submit */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 pb-8">
-            <Link href="/dashboard/brand">
-              <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
-            </Link>
-            <Button type="submit" disabled={saving || !companyName.trim() || !privacyConsent || !isDirty} className="w-full sm:w-auto gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90">
-              {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : <><Save className="w-4 h-4" />Save Changes</>}
-            </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-8">
+            <div className="text-sm flex items-center gap-1.5">
+              {autoSaveStatus === "saving" && (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" /><span className="text-gray-400">Saving...</span></>
+              )}
+              {autoSaveStatus === "saved" && (
+                <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Saved</span></>
+              )}
+              {autoSaveStatus === "error" && (
+                <><AlertTriangle className="w-3.5 h-3.5 text-red-400" /><span className="text-red-500">Auto-save failed</span></>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Link href="/dashboard/brand">
+                <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
+              </Link>
+              <Button type="submit" variant="outline" disabled={saving || !companyName.trim() || !privacyConsent || !isDirty} className="w-full sm:w-auto gap-2">
+                {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : <><Save className="w-4 h-4" />Save Changes</>}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

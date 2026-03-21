@@ -93,7 +93,8 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
           if (bp.description && bp.description.length >= 20) score += 15;
           if (bp.website && bp.website.includes(".")) score += 10;
           if (bp.logo) score += 5;
-          const niches = (() => { try { return JSON.parse(localStorage.getItem("brandNiches") || "[]"); } catch { return []; } })();
+          // Use niches from API with localStorage fallback
+          const niches = (bp.niches && bp.niches.length > 0) ? bp.niches : (() => { try { return JSON.parse(localStorage.getItem("brandNiches") || "[]"); } catch { return []; } })();
           if (niches.length > 0) score += 15;
           if (data.user?.kycStatus === "VERIFIED") score += 10;
           if (bp.gstinVerified || bp.gstin) score += 20;
@@ -105,12 +106,14 @@ export function DashboardNav({ role }: { role: "brand" | "influencer" | "admin" 
           let score = 0;
           if (cp.name && cp.name.length >= 2) score += 15;
           if (cp.bio && cp.bio.length >= 20) score += 15;
-          if (cp.avatar) score += 5;
-          const niches = (() => { try { return JSON.parse(localStorage.getItem("infNiches") || "[]"); } catch { return []; } })();
+          // Parse niches from API (comma-separated string) with localStorage fallback
+          const nicheStr = cp.niche || "";
+          const niches = nicheStr ? nicheStr.split(",").map((s: string) => s.trim()).filter(Boolean) : (() => { try { return JSON.parse(localStorage.getItem("infNiches") || "[]"); } catch { return []; } })();
           if (niches.length > 0) score += 15;
+          // Social entities: check connected status, not just existence
           const entities = (() => { try { return JSON.parse(localStorage.getItem("infEntities") || "[]"); } catch { return []; } })();
-          if (entities.length > 0) score += 30;
-          if (data.user?.kycStatus === "VERIFIED") score += 10;
+          if (entities.some((e: any) => e.connected && e.handle?.trim().length > 0)) score += 30;
+          if (data.user?.kycStatus === "VERIFIED") score += 15;
           const privacyConsent = localStorage.getItem("infPrivacyConsent") === "true";
           if (privacyConsent) score += 10;
           localStorage.setItem("infProfileComplete", score >= 100 ? "true" : "false");

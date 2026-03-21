@@ -20,27 +20,41 @@ export class KYBService {
     brandProfileId: string,
     gstin: string
   ): Promise<GSTINVerificationResult> {
+    // If external GSTIN API is not configured, save GSTIN as pending verification
+    if (!process.env.GSTIN_API_URL || !process.env.GSTIN_API_KEY) {
+      await prisma.brandProfile.update({
+        where: { id: brandProfileId },
+        data: {
+          gstin,
+          gstinVerified: false,
+          gstStatusLastChecked: new Date(),
+        },
+      });
+
+      return { valid: true, filingStatus: 'PENDING' };
+    }
+
     // Call GSTIN verification API with outage handling
     let response: Response;
     let data: any;
 
     try {
-      response = await fetch(process.env.GSTIN_API_URL!, {
+      response = await fetch(process.env.GSTIN_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.GSTIN_API_KEY!}`,
+          Authorization: `Bearer ${process.env.GSTIN_API_KEY}`,
         },
         body: JSON.stringify({ gstin }),
       });
       data = await response.json();
     } catch (networkError) {
-      // API outage: set brand to PENDING_VERIFICATION, schedule retry
+      // API outage: save GSTIN as pending, schedule retry
       console.error(`GSTIN API outage for brand ${brandProfileId}:`, networkError);
 
       await prisma.brandProfile.update({
         where: { id: brandProfileId },
-        data: { gstinVerified: false },
+        data: { gstin, gstinVerified: false },
       });
 
       await inngest.send({
@@ -48,7 +62,7 @@ export class KYBService {
         data: { brandProfileId, gstin, attempt: 1 },
       });
 
-      return { valid: false, error: 'GSTIN verification temporarily unavailable' };
+      return { valid: true, filingStatus: 'PENDING' };
     }
 
     // Log the verification attempt

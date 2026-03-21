@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
@@ -148,6 +148,9 @@ function InfluencerProfileInner() {
 
   const [privacyConsentLocked, setPrivacyConsentLocked] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const initialLoadRef = useRef(true);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const [entities, setEntities] = useState<SocialEntity[]>([
     { platform: "Instagram", handle: "", followers: 0, engagementRate: 0, connected: false },
@@ -240,6 +243,7 @@ function InfluencerProfileInner() {
       }
 
       setIsDirty(false);
+      setTimeout(() => { initialLoadRef.current = false; }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -267,6 +271,48 @@ function InfluencerProfileInner() {
 
   const completionScore = completionItems.reduce((sum, item) => sum + (item.done ? item.weight : 0), 0);
 
+  // ── Auto-save with 1.5s debounce ──────────────────────────
+  useEffect(() => {
+    if (initialLoadRef.current) return;
+    if (!isDirty) return;
+    if (!name.trim() || !privacyConsent) return;
+
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      try {
+        const body: Record<string, unknown> = {};
+        if (name.trim()) body.name = name.trim();
+        if (bio.trim()) body.bio = bio.trim();
+        if (avatar.trim()) body.avatar = avatar.trim();
+        if (niches.length > 0) body.niche = niches.join(", ");
+
+        const res = await fetch("/api/auth/me", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) throw new Error("Auto-save failed");
+
+        localStorage.setItem("infNiches", JSON.stringify(niches));
+        localStorage.setItem("infPrivacyConsent", privacyConsent ? "true" : "false");
+
+        setIsDirty(false);
+        setAutoSaveStatus("saved");
+        setTimeout(() => setAutoSaveStatus("idle"), 2000);
+      } catch {
+        setAutoSaveStatus("error");
+        setTimeout(() => setAutoSaveStatus("idle"), 3000);
+      }
+    }, 1500);
+
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, bio, avatar, niches, isDirty, privacyConsent]);
 
   const addEntity = () => {
     setEntities(prev => [
@@ -407,7 +453,75 @@ function InfluencerProfileInner() {
     }
 
     if (entity.platform === "YouTube") {
-      window.location.href = `/api/oauth/youtube/initiate`;
+      updateEntity(idx, "connecting", true);
+      try {
+        const res = await fetch("/api/youtube/lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ handle: entity.handle.trim() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to look up YouTube channel");
+
+        const ytChannel = data.channel;
+
+        // Save entity to DB
+        const entityPayload = {
+          platform: "YOUTUBE" as const,
+          handle: ytChannel.handle,
+          followerCount: ytChannel.subscriberCount,
+          engagementRate: 0,
+          isVerified: true,
+        };
+
+        let savedEntityId = entity.id;
+        try {
+          if (entity.id) {
+            await fetch(`/api/social-entities/${entity.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(entityPayload),
+            });
+          } else {
+            const saveRes = await fetch("/api/social-entities", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(entityPayload),
+            });
+            if (saveRes.ok) {
+              const saved = await saveRes.json();
+              savedEntityId = saved.id;
+            }
+          }
+        } catch { /* non-fatal */ }
+
+        setEntities(prev => {
+          const updated = [...prev];
+          updated[idx] = {
+            ...updated[idx],
+            id: savedEntityId,
+            handle: ytChannel.handle,
+            followers: ytChannel.subscriberCount,
+            connected: true,
+            connecting: false,
+          };
+          return updated;
+        });
+        setIsDirty(false);
+
+        setOauthToast({
+          type: "success",
+          message: `${ytChannel.channelName}: ${ytChannel.subscriberCount.toLocaleString()} subscribers`,
+        });
+        setTimeout(() => setOauthToast(null), 6000);
+      } catch (err) {
+        updateEntity(idx, "connecting", false);
+        setOauthToast({
+          type: "error",
+          message: err instanceof Error ? err.message : "YouTube lookup failed",
+        });
+        setTimeout(() => setOauthToast(null), 6000);
+      }
       return;
     }
 
@@ -457,42 +571,35 @@ function InfluencerProfileInner() {
       return;
     }
 
-    // YouTube / others — use OAuth disconnect
-    if (!entity.id) {
-      updateEntity(idx, "disconnecting", false);
+    // YouTube (Apify-based), reset locally and persist to DB
+    if (entity.platform === "YouTube") {
+      if (entity.id) {
+        try {
+          await fetch(`/api/social-entities/${entity.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isVerified: false, followerCount: 0 }),
+          });
+        } catch { /* non-fatal */ }
+      }
+      setEntities(prev => {
+        const updated = [...prev];
+        updated[idx] = {
+          ...updated[idx],
+          connected: false,
+          disconnecting: false,
+          followers: 0,
+        };
+        return updated;
+      });
+      setIsDirty(false);
+      setOauthToast({ type: "success", message: "YouTube account disconnected" });
+      setTimeout(() => setOauthToast(null), 4000);
       return;
     }
 
-    const platformMap: Record<string, string> = {
-      YouTube: "youtube",
-    };
-
-    const platformKey = platformMap[entity.platform] || "instagram";
-
-    try {
-      const res = await fetch(`/api/oauth/${platformKey}/disconnect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ entityId: entity.id }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Disconnect failed");
-      }
-
-      setEntities(prev => {
-        const updated = [...prev];
-        updated[idx] = { ...updated[idx], connected: false, disconnecting: false };
-        return updated;
-      });
-
-      setOauthToast({ type: "success", message: `${entity.platform} account disconnected` });
-      setTimeout(() => setOauthToast(null), 4000);
-    } catch (err) {
-      updateEntity(idx, "disconnecting", false);
-      setError(err instanceof Error ? err.message : "Disconnect failed");
-    }
+    // Others — generic disconnect
+    updateEntity(idx, "disconnecting", false);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -900,7 +1007,7 @@ function InfluencerProfileInner() {
                               {entity.connected && (
                                 <Badge variant="success" className="text-[10px] gap-0.5">
                                   <CheckCircle className="w-2.5 h-2.5" />
-                                  {entity.platform === "Instagram" ? "Followers loaded" : "Connected"}
+                                  {entity.platform === "Instagram" ? "Followers loaded" : entity.platform === "YouTube" ? "Subscribers loaded" : "Connected"}
                                 </Badge>
                               )}
                             </div>
@@ -957,7 +1064,7 @@ function InfluencerProfileInner() {
                                   }
                                 }
                               }}
-                              placeholder="@yourhandle"
+                              placeholder={entity.platform === "YouTube" ? "@channel or URL" : "@yourhandle"}
                               className="rounded-xl text-base sm:text-sm"
                               disabled={entity.connected && isVerifiablePlatform}
                             />
@@ -973,15 +1080,15 @@ function InfluencerProfileInner() {
                                 className="w-full gap-1.5 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90"
                               >
                                 {entity.connecting ? (
-                                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />{entity.platform === "Instagram" ? "Fetching..." : "Connecting..."}</>
+                                  <><Loader2 className="w-3.5 h-3.5 animate-spin" />{entity.platform === "Instagram" ? "Fetching..." : entity.platform === "YouTube" ? "Fetching..." : "Connecting..."}</>
                                 ) : (
-                                  <><Zap className="w-3.5 h-3.5" />{entity.platform === "Instagram" ? "Get Followers" : "Connect via OAuth"}</>
+                                  <><Zap className="w-3.5 h-3.5" />{entity.platform === "Instagram" ? "Get Followers" : entity.platform === "YouTube" ? "Get Subscribers" : "Connect"}</>
                                 )}
                               </Button>
                             ) : (
                               <div className="w-full flex items-center justify-center gap-1.5 py-2 text-sm text-emerald-600 font-medium">
                                 <CheckCircle className="w-3.5 h-3.5" />
-                                {entity.platform === "Instagram" ? "Followers loaded" : "Verified via OAuth"}
+                                {entity.platform === "Instagram" ? "Followers loaded" : entity.platform === "YouTube" ? "Subscribers loaded" : "Verified"}
                               </div>
                             )}
                           </div>
@@ -1100,17 +1207,30 @@ function InfluencerProfileInner() {
           </AnimatedSection>
 
           {/* ── Submit ── */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pb-8">
-            <Link href="/dashboard/influencer" className="w-full sm:w-auto">
-              <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
-            </Link>
-            <Button type="submit" disabled={saving || !privacyConsent || !isDirty} className="gap-2 bg-[#0E61FF] text-white hover:bg-[#0E61FF]/90 w-full sm:w-auto">
-              {saving ? (
-                <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
-              ) : (
-                <><Save className="w-4 h-4" />Save Changes</>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-8">
+            <div className="text-sm flex items-center gap-1.5">
+              {autoSaveStatus === "saving" && (
+                <><Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" /><span className="text-gray-400">Saving...</span></>
               )}
-            </Button>
+              {autoSaveStatus === "saved" && (
+                <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /><span className="text-emerald-600">Saved</span></>
+              )}
+              {autoSaveStatus === "error" && (
+                <><AlertTriangle className="w-3.5 h-3.5 text-red-400" /><span className="text-red-500">Auto-save failed</span></>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Link href="/dashboard/influencer" className="w-full sm:w-auto">
+                <Button type="button" variant="outline" className="w-full sm:w-auto">Cancel</Button>
+              </Link>
+              <Button type="submit" variant="outline" disabled={saving || !privacyConsent || !isDirty} className="gap-2 w-full sm:w-auto">
+                {saving ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
+                ) : (
+                  <><Save className="w-4 h-4" />Save Changes</>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

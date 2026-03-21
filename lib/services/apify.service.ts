@@ -50,6 +50,102 @@ function sanitizeHandle(raw: string): string {
   return handle;
 }
 
+// ── YouTube Channel Lookup ──────────────────────────────────────────────
+
+export interface YouTubeLookupResult {
+  channelName: string;
+  handle: string;
+  subscriberCount: number;
+  videoCount: number;
+  totalViews: number;
+}
+
+const APIFY_YOUTUBE_ACTOR_ID = 'grow_media~youtube-channel-scraper';
+const APIFY_YOUTUBE_BASE_URL = `https://api.apify.com/v2/acts/${APIFY_YOUTUBE_ACTOR_ID}/run-sync-get-dataset-items`;
+
+function sanitizeYouTubeInput(raw: string): { channelUrl: string; handle: string } {
+  let input = raw.trim();
+
+  // Already a full YouTube URL
+  if (input.includes('youtube.com/') || input.includes('youtu.be/')) {
+    const match = input.match(/youtube\.com\/(?:channel\/|c\/|@)([^/?#]+)/);
+    if (match) {
+      const handle = match[1];
+      return { channelUrl: `https://www.youtube.com/@${handle}`, handle };
+    }
+    throw new Error('Invalid YouTube URL format');
+  }
+
+  // Strip @ prefix
+  if (input.startsWith('@')) input = input.slice(1);
+  input = input.replace(/[^a-zA-Z0-9._-]/g, '');
+  if (!input || input.length < 2) {
+    throw new Error('Invalid YouTube channel handle');
+  }
+
+  return { channelUrl: `https://www.youtube.com/@${input}`, handle: input };
+}
+
+export async function lookupYouTubeChannel(rawInput: string): Promise<YouTubeLookupResult> {
+  const { channelUrl, handle } = sanitizeYouTubeInput(rawInput);
+  const token = getApifyToken();
+
+  const res = await fetch(`${APIFY_YOUTUBE_BASE_URL}?token=${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ channelUrls: [channelUrl] }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    console.error('Apify YouTube API error:', res.status, text);
+    throw new Error('Failed to fetch YouTube channel. Please try again later.');
+  }
+
+  const data = await res.json();
+
+  if (!data || data.length === 0) {
+    throw new Error('YouTube channel not found. Check the handle and try again.');
+  }
+
+  const item = data[0];
+
+  // Debug: log raw response to confirm field names
+  console.log('Apify YouTube raw response:', JSON.stringify(item, null, 2));
+
+  // Handle both flat dot-keys and nested object formats
+  const subscribers =
+    item['aboutChannelInfo.numberOfSubscribers']
+    ?? item.aboutChannelInfo?.numberOfSubscribers
+    ?? item.numberOfSubscribers
+    ?? item.subscriberCount
+    ?? item.subscribersCount
+    ?? 0;
+
+  const videos =
+    item['aboutChannelInfo.channelTotalVideos']
+    ?? item.aboutChannelInfo?.channelTotalVideos
+    ?? item.numberOfVideos
+    ?? item.videoCount
+    ?? 0;
+
+  const views =
+    item['aboutChannelInfo.channelTotalViews']
+    ?? item.aboutChannelInfo?.channelTotalViews
+    ?? item.totalViews
+    ?? 0;
+
+  return {
+    channelName: item.channelName || item.name || handle,
+    handle,
+    subscriberCount: typeof subscribers === 'string' ? parseInt(subscribers, 10) || 0 : subscribers,
+    videoCount: typeof videos === 'string' ? parseInt(videos, 10) || 0 : videos,
+    totalViews: typeof views === 'string' ? parseInt(views, 10) || 0 : views,
+  };
+}
+
+// ── Instagram Profile Lookup ────────────────────────────────────────────
+
 export async function lookupInstagramProfile(rawHandle: string): Promise<InstagramLookupResult> {
   const handle = sanitizeHandle(rawHandle);
   const token = getApifyToken();
